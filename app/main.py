@@ -2,6 +2,23 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi import HTTPException, Depends, Cookie, Response
+from fastapi import HTTPException
+from typing import Optional
+from fastapi import (
+    FastAPI,
+    Request,
+    Form,
+    status,
+    Depends,
+    HTTPException,
+    Cookie,
+    Query,
+)
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session, joinedload
 
 
 app = FastAPI()
@@ -13,4 +30,4 @@ templates = Jinja2Templates(directory="public/templates")
 
 @app.get("/", response_class=HTMLResponse, tags=["root"])
 async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": Request})
+    return templates.TemplateResponse("index.html", {"request": request})
