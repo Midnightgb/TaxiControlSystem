@@ -1,0 +1,5 @@
+fastapi
+jinja2
+python-jose
+sqlalchemy
+uvicorn
