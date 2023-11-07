@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Registro Usuario</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS v5.2.1 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+
+</head>
+
+<body>
+    
+    <div class="container">
+        <h1>Registro de Usuario</h1>
+        <form action="/CreateUser" method="POST">
+            <label for="cedula">CEDULA:</label>
+            <input type="number" name="cedula" id="cedula" required><br>
+    
+            <label for="nombre">NOMBRES:</label>
+            <input type="text" name="nombre" id="nombre" required><br>
+    
+            <label for="apellido">APELLIDOS:</label>
+            <input type="text" name="apellido" id="apellido" required><br>
+    
+            <label for="correo">Correo Electrónico:</label>
+            <input type="email" name="correo" id="correo" required><br>
+    
+            <label for="contrasena">Contrasena:</label>
+            <input type="password" name="contrasena" id="contrasena" required><br>
+    
+            <label for="rol">Tipo de Usuario:</label>
+            <select name="rol" id="rol" required>
+                <option value="" disabled selected>Seleccione rol</option>
+                <option value="Administrador">Administrador</option>
+                <option value="Conductor">Conductor</option>
+            </select><br>      
+    
+            <button type="submit">Registrar Usuario</button>
+        </form>
+    </div>
+    
+    
+
+
+    <!-- Bootstrap JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
+        integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
+    </script>
+</body>
+
+</html>
