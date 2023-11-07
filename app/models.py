@@ -31,6 +31,9 @@ class Usuario(Base):
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
 
+    taxis = relationship("Taxi", back_populates="conductor")
+    pagos = relationship("Pago", back_populates="conductor")
+
 
 class Taxi(Base):
     __tablename__ = "taxis"
@@ -46,6 +49,7 @@ class Taxi(Base):
                         onupdate=func.now(), nullable=False)
 
     conductor = relationship("Usuario", back_populates="taxis")
+    mantenimientos = relationship("Mantenimiento", back_populates="taxi")
 
 
 class Mantenimiento(Base):
@@ -81,7 +85,6 @@ class Reporte(Base):
     __tablename__ = "reportes"
 
     id_reporte = Column(Integer, primary_key=True, autoincrement=True)
-    id_conductor = Column(Integer, ForeignKey("usuarios.id_usuario"))
     fecha = Column(Date, nullable=False)
     ingresos = Column(Integer, nullable=False)
     gastos = Column(Integer, nullable=False)
@@ -89,4 +92,3 @@ class Reporte(Base):
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
 
-    conductor = relationship("Usuario", back_populates="reportes")
