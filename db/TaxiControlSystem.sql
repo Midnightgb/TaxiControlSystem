@@ -53,12 +53,10 @@ CREATE TABLE `pagos` (
 
 CREATE TABLE `reportes` (
   `id_reporte` INT NOT NULL AUTO_INCREMENT,
-  `id_conductor` INT NOT NULL,
   `fecha` DATE NOT NULL,
   `ingresos` INT NOT NULL,
   `gastos` INT NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_reporte`),
-  FOREIGN KEY (`id_conductor`) REFERENCES `usuarios`(`id_usuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
