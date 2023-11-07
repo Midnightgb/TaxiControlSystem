@@ -25,7 +25,7 @@ CREATE TABLE `usuarios` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_usuario`),
-  FOREIGN KEY (`empresa`) REFERENCES `empresa`(`id_empresa`)
+  FOREIGN KEY (`empresa`) REFERENCES `empresas`(`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `taxis` (
@@ -40,7 +40,7 @@ CREATE TABLE `taxis` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_taxi`),
-  FOREIGN KEY (`empresa`) REFERENCES `empresa`(`id_empresa`)
+  FOREIGN KEY (`empresa`) REFERENCES `empresas`(`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `conductor_actual` (
@@ -87,7 +87,7 @@ CREATE TABLE `reportes` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_reporte`),
-  FOREIGN KEY (`empresa`) REFERENCES `empresa`(`id_empresa`)
+  FOREIGN KEY (`empresa`) REFERENCES `empresas`(`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `reporte_taxis` (
@@ -113,7 +113,7 @@ CREATE TABLE `configuracion_plan` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_configuracion_plan`),
-  FOREIGN KEY (`empresa`) REFERENCES `empresa`(`id_empresa`)
+  FOREIGN KEY (`empresa`) REFERENCES `empresas`(`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `configuracion_app` (
@@ -125,5 +125,5 @@ CREATE TABLE `configuracion_app` (
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_configuracion`),
   FOREIGN KEY (`configuracion_plan`) REFERENCES `configuracion_plan`(`id_configuracion_plan`),
-  FOREIGN KEY (`empresa`) REFERENCES `empresa`(`id_empresa`)
+  FOREIGN KEY (`empresa`) REFERENCES `empresas`(`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
