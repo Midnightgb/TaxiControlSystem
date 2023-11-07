@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS `taxicontrolsystem`;
 USE `taxicontrolsystem`;
 
-CREATE TABLE `empresa` (
+CREATE TABLE `empresas` (
   `id_empresa` INT NOT NULL AUTO_INCREMENT,
   `nombre` VARCHAR(45) NOT NULL,
   `direccion` VARCHAR(45) NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE `pagos` (
   `id_conductor` INT NOT NULL,
   `fecha` DATE NOT NULL,
   `valor` INT NOT NULL,
-  `estado` BOOLEAN DEFAULT true
+  `estado` BOOLEAN DEFAULT true,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_pago`),
@@ -90,7 +90,7 @@ CREATE TABLE `reportes` (
   FOREIGN KEY (`empresa`) REFERENCES `empresa`(`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `reporte_taxi` (
+CREATE TABLE `reporte_taxis` (
   `id_reporte_taxi` INT NOT NULL AUTO_INCREMENT,
   `id_taxi` INT NOT NULL,
   `descripcion` TEXT NOT NULL,
@@ -98,18 +98,6 @@ CREATE TABLE `reporte_taxi` (
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_reporte_taxi`),
   FOREIGN KEY (`id_taxi`) REFERENCES `taxis`(`id_taxi`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-CREATE TABLE `configuracion_app` (
-  `id_configuracion` INT NOT NULL AUTO_INCREMENT,
-  `plan` enum('Basico','Premium', 'Personalizado') NOT NULL DEFAULT 'Basico',
-  `configuracion_plan` INT NOT NULL,
-  `empresa` INT NOT NULL,
-  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_configuracion`),
-  FOREIGN KEY (`configuracion_plan`) REFERENCES `configuracion_plan`(`id_configuracion_plan`),
-  FOREIGN KEY (`empresa`) REFERENCES `empresa`(`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `configuracion_plan` (
@@ -125,5 +113,17 @@ CREATE TABLE `configuracion_plan` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_configuracion_plan`),
+  FOREIGN KEY (`empresa`) REFERENCES `empresa`(`id_empresa`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `configuracion_app` (
+  `id_configuracion` INT NOT NULL AUTO_INCREMENT,
+  `plan` enum('Basico','Premium', 'Personalizado') NOT NULL DEFAULT 'Basico',
+  `configuracion_plan` INT NOT NULL,
+  `empresa` INT NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_configuracion`),
+  FOREIGN KEY (`configuracion_plan`) REFERENCES `configuracion_plan`(`id_configuracion_plan`),
   FOREIGN KEY (`empresa`) REFERENCES `empresa`(`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
