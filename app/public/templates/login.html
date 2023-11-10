@@ -1,31 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <title>Taxi Control - Inicia sesión</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="login.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Taxi Control - Inicia sesión</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="login.css">
 </head>
+<style>
+</style>
+
 <body>
   <div class="cursor"></div>
+  <div class="container">
+
     <div class="background">
-        <div class="shape"></div>
-        <div class="shape"></div>
+      <div class="shape"></div>
+      <div class="shape"></div>
     </div>
-    <form>
-        <h3>Inicio de sesion</h3>
+    <form action="#" method="POST">
+      <h3>Inicio de sesion</h3>
 
-        <label for="username">Usuario</label>
-        <input type="text" placeholder="Cedula o Email" id="username" autocomplete="username">
+      <label for="username">Usuario</label>
+      <input type="text" placeholder="Cedula o Email" id="username" autocomplete="username">
 
-        <label for="password">Contraseña</label>
-        <input type="password" placeholder="Contraseña" id="password" autocomplete="current-password">
+      <label for="password">Contraseña</label>
+      <input type="password" placeholder="Contraseña" id="password" autocomplete="current-password">
 
-        <button>Iniciar</button>
-        <div class="forgot-pass">
-          <a href="#" target="_blank">¿Olvidaste tu contraseña?</a>
-        </div>
+      <button class="submit" type="submit">Iniciar sesion</button>
+      <div class="forgot-pass">
+        <a href="#" target="_blank">¿Olvidaste tu contraseña?</a>
+      </div>
     </form>
+  </div>
+  <script src="app.js"></script>
 </body>
+
 </html>
