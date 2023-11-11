@@ -25,17 +25,25 @@ app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 
 templates = Jinja2Templates(directory="public/templates")
 
-@app.get("/", response_class=HTMLResponse, tags=["root"])
+
+@app.get("/", response_class=HTMLResponse, tags=["login"])
 async def root(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
+@app.get("/login/recover", response_class=HTMLResponse, tags=["login"])
+async def recover(request: Request):
+    return templates.TemplateResponse("recover.html", {"request": request})
 # -- PATH TO REDIRECT TO USER CREATION -- #
+
+
 @app.get("/PathCreateUser", response_class=HTMLResponse, tags=["create"])
 async def create(request: Request):
     return templates.TemplateResponse("CreateUser.html", {"request": request})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW USER -- #
+
+
 @app.post("/CreateUser", response_class=HTMLResponse)
 async def CreateUser(
     request: Request,
@@ -47,23 +55,22 @@ async def CreateUser(
     rol: str = Form(...),
     db: Session = Depends(get_database)
 ):
-    cedula_existente = db.query(Usuario).filter(Usuario.cedula == cedula).first()
+    cedula_existente = db.query(Usuario).filter(
+        Usuario.cedula == cedula).first()
     if cedula_existente:
-        raise HTTPException(status_code=400, detail="La cédula ya está en uso.")
+        raise HTTPException(
+            status_code=400, detail="La cédula ya está en uso.")
 
-    correo_existente = db.query(Usuario).filter(Usuario.correo == correo).first()
+    correo_existente = db.query(Usuario).filter(
+        Usuario.correo == correo).first()
     if correo_existente:
-        raise HTTPException(status_code=400, detail="El correo ya está en uso.")
+        raise HTTPException(
+            status_code=400, detail="El correo ya está en uso.")
 
-    nuevo_usuario = Usuario(cedula=cedula, nombre=nombre, apellido=apellido, correo=correo, contrasena=contrasena, rol=rol,estado='Activo')
+    nuevo_usuario = Usuario(cedula=cedula, nombre=nombre, apellido=apellido,
+                            correo=correo, contrasena=contrasena, rol=rol, estado='Activo')
     db.add(nuevo_usuario)
     db.commit()
     db.refresh(nuevo_usuario)
 
     return templates.TemplateResponse("index.html", {"request": request})
-    
-    
-
-
-
-
