@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <link rel="stylesheet" href="../dist/css/login.css">
+  <link rel="stylesheet" href="../../dist/css/login.css">
   <link href="{{ url_for('static', path='css/login.css')}}" rel="stylesheet">
 </head>
 
@@ -23,11 +23,11 @@
     <form action="#" method="POST">
       <h3>Recupera tu cuenta</h3>
       <hr class="border border-light">
-      <label for="username" class="mt-0 mb-4">Ingresa tu correo electrónico o número de cedula para buscar tu cuenta.</label>
-      <input type="text" placeholder="Cedula o Email" id="username" autocomplete="username">
+      <label for="search-user" class="mt-0 mb-4">Ingresa tu correo electrónico o número de cedula para buscar tu cuenta.</label>
+      <input type="text" placeholder="Cedula o Email" id="search-user" autocomplete="username">
       <div>
-          <a href="/" target="_self" class="btn btn-outline-light col-4 p-3 me-5 ms-3 ms-sm-0">Cancelar</a>
-          <button class="submit col-5 ms-3 ms-sm-4" type="submit">Buscar</button>
+          <a href="/" target="_self" class="btn btn-outline-light col-5 p-3 mx-2 me-sm-4 ms-sm-0">Cancelar</a>
+          <button class="submit col-5 ms-2 ms-sm-4" type="submit">Buscar</button>
       </div>
     </form>
   </div>

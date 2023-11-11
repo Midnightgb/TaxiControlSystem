@@ -35,7 +35,6 @@ body {
             #23f685);
     left: -80px;
     top: -80px;
-    animation: colors 15s infinite;
 }
 
 .shape:last-child {
@@ -44,7 +43,6 @@ body {
             rgb(25, 208, 240));
     right: -30px;
     bottom: -80px;
-    animation: colors 25s infinite;
 }
 
 form {
@@ -137,6 +135,10 @@ button:hover {
     background-color: rgba(255, 255, 255, 0.47);
 }
 
+.error{
+    height: 650px;
+}
+
 @media (min-width: 1px) and (max-width: 600px) {
     .background {
         width: 100%;
@@ -172,3 +174,4 @@ button:hover {
         bottom: -100px;
     }
 }
+
