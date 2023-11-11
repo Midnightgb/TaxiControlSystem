@@ -27,7 +27,7 @@ templates = Jinja2Templates(directory="public/templates")
 
 @app.get("/", response_class=HTMLResponse, tags=["root"])
 async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse("login.html", {"request": request})
 
 # -- PATH TO REDIRECT TO USER CREATION -- #
 @app.get("/PathCreateUser", response_class=HTMLResponse, tags=["create"])
