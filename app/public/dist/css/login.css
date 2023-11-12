@@ -46,7 +46,7 @@ body {
 }
 
 form {
-    height: 520px;
+    height: 550px;
     width: 400px;
     background-color: rgba(255, 255, 255, 0.13);
     position: absolute;
@@ -135,8 +135,10 @@ button:hover {
     background-color: rgba(255, 255, 255, 0.47);
 }
 
-.error{
-    height: 650px;
+.showing-alert{
+    font-size: small;
+    font-weight: bold;
+    color: rgb(255, 47, 47);
 }
 
 @media (min-width: 1px) and (max-width: 600px) {

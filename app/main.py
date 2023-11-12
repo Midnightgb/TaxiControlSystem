@@ -15,15 +15,22 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 import bcrypt
+import os
+from dotenv import load_dotenv
 
+from functions import tokenConstructor, serverStatus
 from models import Usuario
 from database import get_database
+from starlette.middleware.sessions import SessionMiddleware
 
+
+load_dotenv()
+MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
 
 app = FastAPI()
 
+app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
-
 templates = Jinja2Templates(directory="public/templates")
 
 
@@ -33,9 +40,8 @@ async def root():
 
 
 @app.get("/login", response_class=HTMLResponse, tags=["routes"])
-async def login(request: Request, alert: str = None):
-    print("alerta")
-    print(alert)
+async def login(request: Request):
+    alert = request.session.pop("alert", None)
     return templates.TemplateResponse("./auth/login.html", {"request": request, "alert": alert})
 
 
@@ -43,47 +49,62 @@ async def login(request: Request, alert: str = None):
 async def recover(request: Request):
     return templates.TemplateResponse("./auth/recover.html", {"request": request})
 
-@app.post("/login", response_class=HTMLResponse, tags=["auth"])
+
+@app.post("/login", tags=["auth"])
 async def login_post(
     request: Request,
-    user: Optional[str] = Form(None),
-    contrasena: Optional[str] = Form(None),
-    db: Session = Depends(get_database)
+    user: Optional[str] = Form(""),
+    password: Optional[str] = Form(""),
+    db: Session = Depends(get_database),
 ):
-    if not all([user, contrasena]):
-        alert = {"tipo": "danger", "mensaje": "Todos los campos son requeridos", "class" : "error"}
-        return RedirectResponse(url=f"/login?alert={alert}", status_code=status.HTTP_303_SEE_OTHER)
     
-    if not user:
-        alert = {"tipo": "danger", "mensaje": "El usuario es requerido", "class" : "error"}
-        return RedirectResponse(url=f"/login?alert={alert}", status_code=status.HTTP_303_SEE_OTHER)
-    if not contrasena:
-        alert = {"tipo": "danger", "mensaje": "La contraseña es requerida", "class" : "error"}
-        return RedirectResponse(url=f"/login?alert={alert}", status_code=status.HTTP_303_SEE_OTHER)
-    
+    if not serverStatus(db):
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    if not user and not password:
+        alert = {"type": "user",
+                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
     if '@' in user:
         usuario = db.query(Usuario).filter(Usuario.correo == user).first()
     else:
         usuario = db.query(Usuario).filter(Usuario.cedula == user).first()
 
     if not usuario:
-        alert = {"tipo": "danger", "mensaje": "Usuario incorrecto", "class" : "error"}
-        return RedirectResponse(url=f"/login?alert={alert}", status_code=status.HTTP_303_SEE_OTHER)
-    
-    if not bcrypt.checkpw(contrasena.encode('utf-8'), usuario.contrasena.encode('utf-8')):
-        alert = {"tipo": "danger", "mensaje": "Contraseña incorrecta", "class" : "error"}
-        return RedirectResponse(url=f"/login?alert={alert}", status_code=status.HTTP_303_SEE_OTHER)
+        alert = {"type": "user",
+                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-    if usuario.estado != 'Activo':
-        alert = {"tipo": "danger", "mensaje": "Usuario inactivo", "class" : "error"}
-        return RedirectResponse(url=f"/login?alert={alert}", status_code=status.HTTP_303_SEE_OTHER)
-    
-    #response = RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
+    if not bcrypt.checkpw(password.encode('utf-8'), usuario.contrasena.encode('utf-8')):
+        alert = {"type": "pass",
+                 "message": "La contraseña que ingresaste es incorrecta.", "link": "/login/recover"}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    if usuario.estado == 'Inactivo':
+        alert = {"type": "general",
+                 "message": "El usuario se encuentra inactivo, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    response = RedirectResponse(
+        url="/home", status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(
+        key="c_user", value=tokenConstructor(usuario.id_usuario))
+    return response
+
 
 @app.get("/home", response_class=HTMLResponse, tags=["routes"])
 async def home(request: Request):
     return templates.TemplateResponse("./index.html", {"request": request})
 # -- PATH TO REDIRECT TO USER CREATION -- #
+
 
 @app.get("/PathCreateUser", response_class=HTMLResponse, tags=["create"])
 async def create(request: Request):
@@ -123,36 +144,3 @@ async def CreateUser(
     db.refresh(nuevo_usuario)
 
     return templates.TemplateResponse("index.html", {"request": request})
-
-
-# -- PATH TO  PAYMENSTS -- #
-
-@app.get("/PathPayments", response_class=HTMLResponse, tags=["payments"])
-def payments(request: Request,
-            db: Session = Depends(get_database)
-            ):
-    
-    usuarios = db.query(Usuario).filter(Usuario.rol=="Conductor").all()
-
-    return templatesReports.TemplateResponse("CreatePayments.html", {"request": request,"usuarios":usuarios})
-
-
-@app.post("/CreatePayments", )
-def CreatePyments(conductor: int = Form(...),
-    valor: int = Form(...),
-    fecha: str = Form(...),
-    db: Session = Depends(get_database)
-    ):
-
-    try:
-        report= Pago(conductor=conductor,valor=valor,fecha=fecha)
-        db.add(report)
-        db.commit()
-        db.refresh(report)
-        return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
-        
-    except:
-        raise HTTPException(status_code=400, detail="Error al crear el pago.")
-
-    Response
-# -- END OF THE ROUTE -- #

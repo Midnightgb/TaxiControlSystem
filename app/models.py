@@ -186,7 +186,7 @@ class Empresa(Base):
         nombre = Column(String(100), nullable=False)
         direccion = Column(String(100), nullable=False)
         telefono = Column(String(15), nullable=False)
-        email = Column(String(100), nullable=False)
+        correo = Column(String(100), nullable=False)
         created_at = Column(String, server_default=func.now(), nullable=False)
         updated_at = Column(String, server_default=func.now(),
                             onupdate=func.now(), nullable=False)
