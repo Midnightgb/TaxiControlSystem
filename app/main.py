@@ -18,10 +18,11 @@ import bcrypt
 import os
 from dotenv import load_dotenv
 
-from functions import tokenConstructor
+from functions import tokenConstructor, serverStatus
 from models import Usuario
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
+
 
 load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
@@ -56,9 +57,16 @@ async def login_post(
     password: Optional[str] = Form(""),
     db: Session = Depends(get_database),
 ):
+    
+    if not serverStatus(db):
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
     if not user and not password:
         alert = {"type": "user",
-                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario"}
+                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -69,7 +77,7 @@ async def login_post(
 
     if not usuario:
         alert = {"type": "user",
-                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario"}
+                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -81,7 +89,7 @@ async def login_post(
 
     if usuario.estado == 'Inactivo':
         alert = {"type": "general",
-                 "message": "El usuario se encuentra inactivo, contacte al proveedor del servicio"}
+                 "message": "El usuario se encuentra inactivo, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
