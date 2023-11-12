@@ -20,8 +20,6 @@ def tokenConstructor(userId: str):
 def serverStatus(db):
     try:
         db.execute(text('SELECT 1'))
-        alert = {"type": "general",
-            "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
-        return alert
+        return True
     except OperationalError:
         return False
