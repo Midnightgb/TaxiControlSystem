@@ -58,7 +58,7 @@ async def login_post(
 ):
     if not user and not password:
         alert = {"type": "user",
-                 "message": "El correo o la cédula ingresada no coincide con ningún usuario"}
+                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario"}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
