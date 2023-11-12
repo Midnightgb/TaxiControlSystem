@@ -18,7 +18,7 @@ CREATE TABLE `usuarios` (
   `nombre` VARCHAR(45) NOT NULL,
   `apellido` VARCHAR(45) NOT NULL,
   `correo` VARCHAR(45),
-  `contrasena` VARCHAR(45),
+  `contrasena` VARCHAR(250),
   `rol` enum('Administrador','Conductor','Secretaria') NOT NULL,
   `estado` enum('Activo','Inactivo') DEFAULT 'Activo' NOT NULL,
   `empresa_id` INT NOT NULL,
