@@ -124,3 +124,35 @@ async def CreateUser(
 
     return templates.TemplateResponse("index.html", {"request": request})
 
+
+# -- PATH TO  PAYMENSTS -- #
+
+@app.get("/PathPayments", response_class=HTMLResponse, tags=["payments"])
+def payments(request: Request,
+            db: Session = Depends(get_database)
+            ):
+    
+    usuarios = db.query(Usuario).filter(Usuario.rol=="Conductor").all()
+
+    return templatesReports.TemplateResponse("CreatePayments.html", {"request": request,"usuarios":usuarios})
+
+
+@app.post("/CreatePayments", )
+def CreatePyments(conductor: int = Form(...),
+    valor: int = Form(...),
+    fecha: str = Form(...),
+    db: Session = Depends(get_database)
+    ):
+
+    try:
+        report= Pago(conductor=conductor,valor=valor,fecha=fecha)
+        db.add(report)
+        db.commit()
+        db.refresh(report)
+        return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+        
+    except:
+        raise HTTPException(status_code=400, detail="Error al crear el pago.")
+
+    Response
+# -- END OF THE ROUTE -- #
