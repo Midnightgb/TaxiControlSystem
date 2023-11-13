@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.sql import text
 from fastapi.security import OAuth2PasswordBearer
+
 import os
 from fastapi import status
 from fastapi.responses import RedirectResponse
@@ -28,7 +29,6 @@ def serverStatus(db):
         return False
     
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 def tokenDecoder(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -39,4 +39,3 @@ def tokenDecoder(token: str = Depends(oauth2_scheme)):
         return False
     except jwt.JWTError:
         raise False
-

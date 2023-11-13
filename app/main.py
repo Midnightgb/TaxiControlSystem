@@ -14,15 +14,16 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from cryptography.fernet import Fernet 
 import bcrypt
 import os 
 from dotenv import load_dotenv
+
 
 from functions import tokenConstructor, serverStatus, tokenDecoder
 from models import Usuario, Empresa, Taxi
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
+
 
 load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
@@ -63,12 +64,14 @@ async def login_post(
 ):
     
     if not serverStatus(db):
-        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     if not user and not password:
-        alert = {"type": "user","message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
+        alert = {"type": "user",
+                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -78,7 +81,8 @@ async def login_post(
         usuario = db.query(Usuario).filter(Usuario.cedula == user).first()
 
     if not usuario:
-        alert = {"type": "user","message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
+        alert = {"type": "user",
+                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -88,7 +92,8 @@ async def login_post(
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     if usuario.estado == 'Inactivo':
-        alert = {"type": "general","message": "El usuario se encuentra inactivo, contacte al proveedor del servicio."}
+        alert = {"type": "general",
+                 "message": "El usuario se encuentra inactivo, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 

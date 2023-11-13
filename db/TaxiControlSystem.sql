@@ -18,7 +18,7 @@ CREATE TABLE `usuarios` (
   `nombre` VARCHAR(45) NOT NULL,
   `apellido` VARCHAR(45) NOT NULL,
   `correo` VARCHAR(45),
-  `contrasena` VARCHAR(45),
+  `contrasena` VARCHAR(250),
   `rol` enum('Administrador','Conductor','Secretaria') NOT NULL,
   `estado` enum('Activo','Inactivo') DEFAULT 'Activo' NOT NULL,
   `empresa_id` INT NOT NULL,
@@ -127,3 +127,8 @@ CREATE TABLE `configuracion_app` (
   FOREIGN KEY (`configuracion_plan_id`) REFERENCES `configuracion_plan`(`id_configuracion_plan`),
   FOREIGN KEY (`empresa`) REFERENCES `empresas`(`id_empresa`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+
+/* password to test: $2y$10$.LoHrb62oXUyoTUp8HXj/eGZA7GG0kk5tFQi08kFA0/l5l20LMNai */
+/* 777 */
