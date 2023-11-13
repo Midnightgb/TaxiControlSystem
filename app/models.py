@@ -37,7 +37,7 @@ class Usuario(Base):
     nombre = Column(String(45), nullable=False)
     apellido = Column(String(45), nullable=False)
     correo = Column(String(45))
-    contrasena = Column(String(45))
+    contrasena = Column(String(250))
     rol = Column(Enum(Rol), nullable=False)
     estado = Column(Enum(Estado), nullable=False)
     created_at = Column(String, server_default=func.now(), nullable=False)
