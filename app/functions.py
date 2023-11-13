@@ -7,6 +7,10 @@ from sqlalchemy.sql import text
 from fastapi.security import OAuth2PasswordBearer
 
 import os
+
+from database import SessionLocal
+from models import ConductorActual
+
 from fastapi import status
 from fastapi.responses import RedirectResponse
 
@@ -28,6 +32,33 @@ def serverStatus(db):
     except OperationalError:
         return False
     
+
+def get_datos_conductor(id_conductor, db: SessionLocal):
+    if id_conductor:
+        conductor_actual = db.query(ConductorActual).filter_by(
+            id_conductor=id_conductor
+        ).first()
+
+        if conductor_actual:
+            # relación 'taxi' para obtener el taxi
+            taxi = conductor_actual.taxi
+
+            if taxi:
+                datos_conductor = {
+                    "id_conductor": id_conductor,
+                    "nombre": conductor_actual.conductor.nombre,
+                    "apellido": conductor_actual.conductor.apellido,
+                    "correo": conductor_actual.conductor.correo,
+                    "cuota_diaria_taxi": taxi.cuota_diaria,
+                }
+                return datos_conductor
+            else:
+                return None
+        else:
+            return None
+    else:
+        return None
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 def tokenDecoder(token: str = Depends(oauth2_scheme)):
     try:
