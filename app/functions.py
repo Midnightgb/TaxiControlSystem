@@ -20,7 +20,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 def tokenConstructor(userId: str):
     print("##########$$$$$$$$$$$$########## tokenConstructor ##########$$$$$$$$$$$$##########")
-    expiration = datetime.utcnow() + timedelta(hours=1)
+    expiration = datetime.now() + timedelta(hours=1)
     payload = {"sub": str(userId), "exp": expiration}
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     return token
@@ -70,3 +70,24 @@ def tokenDecoder(token: str = Depends(oauth2_scheme)):
         return False
     except jwt.JWTError:
         raise False
+
+def userStatus(c_user, request):
+    try:
+        token_payload = tokenDecoder(c_user)
+        print(token_payload)
+        return True
+    except:
+        print("paso 5")
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+"""     print("##########$$$$$$$$$$$$########## userStatus ##########$$$$$$$$$$$$##########")
+    print("token_payload:", token_payload)
+    if not token_payload:
+        alert = {"type": "general","message": "Su sesionsssss ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        return True """
+    

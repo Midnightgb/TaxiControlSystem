@@ -17,13 +17,12 @@ from sqlalchemy.orm import Session
 import bcrypt
 import os 
 from dotenv import load_dotenv
-from datetime import date 
+from datetime import date
 
 from functions import *
 from models import Usuario, Empresa, Taxi, Pago
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
-
 
 load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
@@ -89,16 +88,29 @@ async def login_post(
                  "message": "El usuario se encuentra inactivo, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-
+    
     response = RedirectResponse(
-        url="/home", status_code=status.HTTP_303_SEE_OTHER)
+        url="/home", 
+        status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(
-        key="c_user", value=tokenConstructor(usuario.id_usuario))
+        key="c_user", 
+        value=tokenConstructor(usuario.id_usuario))
+
     return response
 
 @app.get("/home", response_class=HTMLResponse, tags=["routes"])
-async def home(request: Request):
-    return templates.TemplateResponse("./index.html", {"request": request})
+async def home(request: Request, c_user: str = Cookie(None)):
+    if not c_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    checkTokenStatus = userStatus(c_user, request)
+    print("##########$$$$$$$$$$$$########## home ##########$$$$$$$$$$$$##########")
+    print("checkTokenStatus:", checkTokenStatus)
+    if not checkTokenStatus:
+        return checkTokenStatus
+
+    alert = request.session.pop("alert", None)
+    return templates.TemplateResponse("./index.html", {"request": request, "alert": alert})
 
 @app.get("/logout", tags=["auth"])
 async def logout(): 
