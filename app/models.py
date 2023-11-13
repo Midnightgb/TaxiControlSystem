@@ -33,7 +33,7 @@ class Usuario(Base):
     __tablename__ = "usuarios"
 
     id_usuario = Column(Integer, primary_key=True, autoincrement=True)
-    cedula = Column(Integer, nullable=False, unique=True)
+    cedula = Column(String(150), nullable=False)
     nombre = Column(String(45), nullable=False)
     apellido = Column(String(45), nullable=False)
     correo = Column(String(45))
@@ -60,7 +60,7 @@ class Taxi(Base):
     marca = Column(String(45), nullable=False)
     tipo_combustible = Column(Enum(TipoCombustible), nullable=False)
     cuota_diaria = Column(Integer, nullable=False)
-    fecha_adquisicion = Column(Date)
+    fecha_adquisicion = Column(String, server_default=func.now(), nullable=False)
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
@@ -186,7 +186,7 @@ class Empresa(Base):
         nombre = Column(String(100), nullable=False)
         direccion = Column(String(100), nullable=False)
         telefono = Column(String(15), nullable=False)
-        email = Column(String(100), nullable=False)
+        correo = Column(String(100), nullable=False)
         created_at = Column(String, server_default=func.now(), nullable=False)
         updated_at = Column(String, server_default=func.now(),
                             onupdate=func.now(), nullable=False)
