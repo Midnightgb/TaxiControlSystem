@@ -154,7 +154,7 @@ async def registro_diario_view(request: Request, db: Session = Depends(get_datab
     # Recuperar la alerta de la sesión
     alert = request.session.pop("alert", None)
     conductores = db.query(Usuario).filter(Usuario.rol == "Conductor").all()
-    return templates.TemplateResponse("/register_daily.html", {"request": request, "alert": alert, "conductores": conductores})
+    return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores})
 
 @app.post("/register/daily", response_class=HTMLResponse)
 async def registro_diario(
