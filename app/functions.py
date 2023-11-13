@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordBearer
 import os
 
 from database import SessionLocal, get_database
-from models import ConductorActual, Usuario
+from models import ConductorActual, Usuario, Taxi
 
 from fastapi import status
 from fastapi.responses import RedirectResponse
@@ -34,24 +34,24 @@ def serverStatus(db):
         return False
     
 
-def get_datos_conductor(id_conductor, empresa_id, db: SessionLocal):
+def getDriverData(id_conductor, db: SessionLocal):
     if id_conductor:
-        conductor_actual = db.query(ConductorActual).filter_by(
-            id_conductor=id_conductor,
-            empresa_id=empresa_id  # Agregar el filtro por empresa
+        conductor_actual = db.query(ConductorActual).filter(
+            ConductorActual.id_conductor==id_conductor
         ).first()
-
+        print("conductor actual:", conductor_actual.id_taxi)
         if conductor_actual:
-            taxi = conductor_actual.taxi
-            if taxi:
-                datos_conductor = {
-                    "id_conductor": id_conductor,
-                    "nombre": conductor_actual.conductor.nombre,
-                    "apellido": conductor_actual.conductor.apellido,
-                    "correo": conductor_actual.conductor.correo,
-                    "cuota_diaria_taxi": taxi.cuota_diaria,
-                }
-                return datos_conductor
+            taxi = conductor_actual.id_taxi
+            taxi = db.query(Taxi).filter(
+                Taxi.id_taxi==taxi
+            ).first()
+            
+            data = {
+                "id_conductor": conductor_actual.id_conductor,
+                "nombre": conductor_actual.conductor.nombre,
+                "cuota_diaria_taxi": taxi.cuota_diaria,
+            }
+            return data
     return None
      
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

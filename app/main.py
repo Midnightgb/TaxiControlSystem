@@ -325,8 +325,6 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
             raise HTTPException(status_code=401, detail="No se proporcionó un token de usuario.")
         
         token_payload = tokenDecoder(c_user)
-        print("##########$$$$$$$$$$$$########## token ##########$$$$$$$$$$$$########## in /register/daily")
-        print("Token decodificado:", token_payload)
         
         if not token_payload:
             alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
@@ -335,18 +333,15 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         
         user_id = int(token_payload["sub"])
         usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
-        
         if not usuario:
             raise HTTPException(status_code=401, detail="Usuario no encontrado.")
         
         empresas = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
-
         if not empresas:
             raise HTTPException(status_code=500, detail="Error al obtener información de la empresa.")
         
         # Filtrar conductores por la empresa del usuario
         conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
-        
         # Recuperar la alerta de la sesión
         alert = request.session.pop("alert", None)
         return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores})
@@ -360,21 +355,19 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     
-@app.post("/register/daily", response_class=HTMLResponse, tags=["payments"])
+@app.post("/register/daily", tags=["payments"])
 async def registro_diario(
     request: Request,
     id_conductor: int = Form(...),
     valor: int = Form(...),
     db: Session = Depends(get_database),
-    token_payload: dict = Depends(tokenDecoder)  # Obtener directamente el payload del token
 ):  
     if not serverStatus(db):
         alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     
-    empresa_id = token_payload.get("empresa_id")  # Asegúrate de ajustar esto según la estructura de tu token
-    datos_conductor = get_datos_conductor(id_conductor, empresa_id, db)
+    datos_conductor = getDriverData(id_conductor, db)
 
     if not datos_conductor:
         alert = {"type": "conductor_not_found", "message": "El conductor no existe."}
@@ -385,13 +378,11 @@ async def registro_diario(
     cuota_diaria_taxi = datos_conductor["cuota_diaria_taxi"]
 
     fecha_actual = date.today()
-
     pago_existente = db.query(Pago).filter(
         Pago.id_conductor == id_conductor,
         Pago.fecha == fecha_actual,
         Pago.cuota_diaria_registrada == True
     ).first()
-
     if pago_existente:
         alert = {"type": "payment_already_registered", "message": "Ya se registró el pago de la cuota diaria para este conductor."}
         # Almacena la alerta en la sesión
@@ -411,7 +402,6 @@ async def registro_diario(
         db.add(nuevo_pago)
         db.commit()
         db.refresh(nuevo_pago)
-
         alert = {"type": "success", "message": "Pago registrado exitosamente."}
         # Almacena la alerta en la sesión
         request.session["alert"] = alert
