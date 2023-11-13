@@ -19,10 +19,11 @@ import os
 from dotenv import load_dotenv
 
 from functions import tokenConstructor, serverStatus
-from models import Usuario
+from models import *
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
-
+from datetime import datetime
+from sqlalchemy import DateTime
 
 load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
@@ -32,6 +33,7 @@ app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 templates = Jinja2Templates(directory="public/templates")
+templatesReports = Jinja2Templates(directory="public/templates/Reports")
 
 
 @app.get("/", tags=["routes"])
@@ -144,3 +146,50 @@ async def CreateUser(
     db.refresh(nuevo_usuario)
 
     return templates.TemplateResponse("index.html", {"request": request})
+
+# -- PATH TO  PAYMENSTS -- #
+
+@app.get("/PathPayments", response_class=HTMLResponse, tags=["payments"])
+async def payments(request: Request,
+            db: Session = Depends(get_database)
+            ):
+    
+    usuarios = db.query(Usuario).filter(Usuario.rol=="Conductor").all()
+    if not usuarios:
+        usuarios=None
+    else:
+        usuarios=usuarios
+
+    return templatesReports.TemplateResponse("CreatePayments.html", {"request": request,"usuarios":usuarios})
+
+
+@app.post("/CreatePayments", response_class=HTMLResponse)
+async def CreatePyments(request: Request,
+    conductor: str = Form(...),
+    valor: int = Form(...),
+    db: Session = Depends(get_database)
+    ):
+    
+    id_conductor= int(conductor)
+    
+    try:
+        idempresa= db.query(Usuario).filter(Usuario.id_usuario==id_conductor).first().id_empresa
+        empresa= db.query(Empresa).filter(Empresa.id_empresa==idempresa).first()
+        if not empresa:
+            raise HTTPException(
+            status_code=400, detail="El conductor no tiene una empresa asignada.")
+        
+        
+
+        fecha_actual = datetime.now()
+        report= Pago(id_conductor=id_conductor,valor=valor,fecha=fecha_actual)
+        db.add(report)
+        db.commit()
+        db.refresh(report)
+        return templates.TemplateResponse("index.html", {"request": request})
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=400, detail="Error al crear el pago.")
+    
+# -- END OF THE ROUTE -- #

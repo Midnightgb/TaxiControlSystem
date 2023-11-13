@@ -17,22 +17,22 @@
     <header>
         <!-- place navbar here -->
     </header>
-    <main>
+    <main class="container">
         <h1>Reporte Diario</h1>
-        <form action="CreatePayments" method="POST">
-            <select name="id_conductor" id="id_conductor">
-                {{foreach $usuarios as $usuario}}
-                    <option value="{{$usuario->id}}">{{$usuario->nombre}}</option>]
-                {{/foreach}}
-            </select>
+        <form action="/CreatePayments" method="POST" >
+            <label for="conductor">Conductor</label>
+                {%if usuarios is not None%}
+                    <select name="conductor" id="conductor" required>
+                        <option value="" disabled selected>Seleccione Conductor</option>
+                        {% for usuario in usuarios %}
+                            <option value="{{usuario.id_usuario }}">{{ usuario.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
 
             <label for="valor">Valor</label>
-            <input type="number" name="valor" id="valor">
+            <input type="number" name="valor" id="valor" required>
 
-            <label for="fecha">Fecha</label>
-            <input type="date" name="fecha" id="fecha">
-
-            <button type="button">cancelar</button>
             <button type="submit">Guardar</button>
         </form>
     </main>
