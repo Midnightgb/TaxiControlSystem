@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, joinedload
 import bcrypt
 import os
 from dotenv import load_dotenv
-from functions import tokenConstructor, serverStatus
+from functions import get_datos_conductor, tokenConstructor, serverStatus
 from models import Usuario
 from datetime import date 
 from models import Usuario, Pago, Taxi
@@ -150,20 +150,31 @@ async def CreateUser(
 # -- MODULO 2-- #
 
 @app.get("/register/daily/view", response_class=HTMLResponse, tags=["routes"])
-async def registro_diario_view(request: Request):
-    return templates.TemplateResponse("registrer_dialy.html", {"request": request})
+async def registro_diario_view(request: Request, db: Session = Depends(get_database)):
+    # Recuperar la alerta de la sesión
+    alert = request.session.pop("alert", None)
+    conductores = db.query(Usuario).filter(Usuario.rol == "Conductor").all()
+    return templates.TemplateResponse("register_dialy.html", {"request": request, "alert": alert, "conductores": conductores})
 
 @app.post("/register/daily", response_class=HTMLResponse)
 async def registro_diario(
     request: Request,
     id_conductor: int = Form(...),
     valor: int = Form(...),
-    estado: bool = Form(...),
     db: Session = Depends(get_database)
 ):
-   
-    fecha_actual = date.today()  # fecha actual
-   
+    datos_conductor = get_datos_conductor(id_conductor, db)
+
+    if not datos_conductor:
+        alert = {"type": "conductor_not_found", "message": "El conductor no existe."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/daily/view", status_code=303)
+
+    cuota_diaria_taxi = datos_conductor["cuota_diaria_taxi"]
+
+    fecha_actual = date.today()
+
     pago_existente = db.query(Pago).filter(
         Pago.id_conductor == id_conductor,
         Pago.fecha == fecha_actual,
@@ -171,32 +182,30 @@ async def registro_diario(
     ).first()
 
     if pago_existente:
-        raise HTTPException(status_code=400, detail="La cuota diaria ya ha sido registrada para este conductor hoy.")
+        alert = {"type": "payment_already_registered", "message": "Ya se registró el pago de la cuota diaria para este conductor."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/daily/view", status_code=303)
+    else:
+        estado = valor >= cuota_diaria_taxi
 
-    cuota_diaria_taxi = db.query(Taxi.cuota_diaria).filter(
-        Taxi.id_conductor == id_conductor
-    ).scalar()
+        nuevo_pago = Pago(
+            id_conductor=id_conductor,
+            fecha=fecha_actual,
+            valor=valor,
+            estado=estado,
+            cuota_diaria_registrada=True
+        )
 
-   
-    if valor < cuota_diaria_taxi:
-        estado = False
-        
-    nuevo_pago = Pago(
-        id_conductor=id_conductor,
-        fecha=fecha_actual,
-        valor=valor,
-        estado=estado,
-        cuota_diaria_registrada=True  
-    )
+        db.add(nuevo_pago)
+        db.commit()
+        db.refresh(nuevo_pago)
 
-    db.add(nuevo_pago)
-    db.commit()
-    db.refresh(nuevo_pago)
+        alert = {"type": "success", "message": "Pago registrado exitosamente."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
 
-    return templates.TemplateResponse("index.html", {"request": request})
-    
+    # Redirige a la vista de registro diario
+    return RedirectResponse(url="/register/daily/view", status_code=303)
+
 # -- FIN MODULO 2-- #
-
-
-
-
