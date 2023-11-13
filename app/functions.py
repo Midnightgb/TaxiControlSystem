@@ -72,22 +72,14 @@ def tokenDecoder(token: str = Depends(oauth2_scheme)):
         raise False
 
 def userStatus(c_user, request):
-    try:
-        token_payload = tokenDecoder(c_user)
-        print(token_payload)
-        return True
-    except:
-        print("paso 5")
-        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
-        request.session["alert"] = alert
-        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-    
-"""     print("##########$$$$$$$$$$$$########## userStatus ##########$$$$$$$$$$$$##########")
+    token_payload = tokenDecoder(c_user)
+    print(token_payload)
+    print("##########$$$$$$$$$$$$########## userStatus ##########$$$$$$$$$$$$##########")
     print("token_payload:", token_payload)
     if not token_payload:
         alert = {"type": "general","message": "Su sesionsssss ha expirado, por favor inicie sesión nuevamente."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     else:
-        return True """
+        return True
     
