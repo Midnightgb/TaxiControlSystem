@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from datetime import date 
 
 from functions import *
-from models import Usuario, Empresa, Taxi, Pago
+from models import Usuario, Empresa, Taxi, Pago, ConductorActual   
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -109,11 +109,6 @@ async def home(request: Request):
 async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
 
-    if not serverStatus(db):
-        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
-        request.session["alert"] = alert
-        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-    
     if not c_user:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -132,12 +127,12 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
     if not usuario:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-    empresas = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+    empresa = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
 
-    if not empresas:
+    if not empresa:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-    return templates.TemplateResponse("CreateUser.html", {"request": request, "empresas": empresas, "usuario": usuario})
+    return templates.TemplateResponse("CreateUser.html", {"request": request, "empresa": empresa, "usuario": usuario})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW USER -- #
@@ -148,22 +143,29 @@ async def CreateUser(
     nombre: str = Form(...),
     apellido: str = Form(...),
     correo: str = Form(...),
-    contrasena: str = Form(...),
+    contrasena: Optional[str] = Form(""),
     rol: str = Form(...),
     empresa_id: int = Form(...),
     db: Session = Depends(get_database)
 ):
     try:
+        print("paso 1")
         cedula_existente = db.query(Usuario).filter(Usuario.cedula == cedula).first()
         if cedula_existente:
+            print("paso 2")
             raise HTTPException(status_code=400, detail="La cédula ya está en uso.")
 
         correo_existente = db.query(Usuario).filter(Usuario.correo == correo).first()
         if correo_existente:
+            print("paso 3")
             raise HTTPException(status_code=400, detail="El correo ya está en uso.")
 
-        # Encriptar la contraseña antes de almacenarla
-        hashed_password = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
+       # Encriptar la contraseña solo si se proporciona una
+        hashed_password = None
+        if contrasena and rol != "Conductor":
+            print("paso 4")
+            hashed_password = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
+
 
         # Crear el nuevo usuario
         nuevo_usuario = Usuario(
@@ -176,14 +178,16 @@ async def CreateUser(
             estado='Activo',
             empresa_id=empresa_id
         )
+        print("paso 5")
         db.add(nuevo_usuario)
         db.commit()
         db.refresh(nuevo_usuario)
-
+        print("paso 6")
         return templates.TemplateResponse("index.html", {"request": request})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al crear usuario: {str(e)}")
 # -- END OF THE ROUTE -- #
+
 
 # ========================================== END OF USERBLOCK ============================================ #
 
@@ -262,6 +266,50 @@ async def create_taxi(
         # Capturamos otras excepciones y mostramos un mensaje genérico de error
         return templates.TemplateResponse("index.html", {"request": request, "error_message": "Error al procesar la solicitud."})
 # -- END OF THE ROUTE -- #
+
+# ========================================== END OF TAXIBLOCK ============================================ #
+
+# ========================================== ALLOCATIONBLOCK ============================================ #
+
+# -- PATH TO REDIRECT TO ALLOCATION CREATION -- #
+@app.get("/register/allocation", response_class=HTMLResponse, tags=["create"])
+async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    user_id = None
+    print("ENTRO A PASO 1", c_user)
+    if not c_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    token_payload = tokenDecoder(c_user)
+
+    user_id = int(token_payload["sub"])
+
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+
+    if not usuario:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    taxis = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).all()
+
+    if not taxis:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    #consulta para traer los conductores que no están asignados a un taxi y están en la misma empresa
+    conductores_no_asignados = db.query(Usuario).filter(Usuario.rol == "conductor", Usuario.empresa_id == usuario.empresa_id).all()
+
+    print("Usuario:", usuario)
+    print("Roles del usuario:", usuario.rol)
+    print("Token Payload:", token_payload)
+    print("Taxis:", taxis)
+    print("Conductores no asignados:", conductores_no_asignados)
+    
+    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados})
+
+# -- END OF THE ROUTE -- #
+
+
+
+
+
 
 # -- MODULO 2-- #
 
