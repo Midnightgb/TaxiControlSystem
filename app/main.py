@@ -19,11 +19,10 @@ import os
 from dotenv import load_dotenv
 
 from functions import tokenConstructor, serverStatus
-from models import *
+from models import Usuario
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
-from datetime import datetime
-from sqlalchemy import DateTime
+
 
 load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
@@ -148,57 +147,6 @@ async def CreateUser(
     return templates.TemplateResponse("index.html", {"request": request})
 
 # -- PATH TO  PAYMENSTS -- #
-
-@app.get("/register/payments", response_class=HTMLResponse, tags=["routes"])
-async def payments(request: Request,
-            db: Session = Depends(get_database)
-            ):
     
-    usuarios = db.query(Usuario).filter(Usuario.rol=="Conductor").all()
-    if not usuarios:
-        usuarios=None
-    else:
-        usuarios=usuarios
 
-    return templatesReports.TemplateResponse("CreatePayments.html", {"request": request,"usuarios":usuarios})
-
-
-@app.post("/register/payments", tags=["payments"])
-async def RegisterPayments(request: Request,
-    conductor: str = Form(...),
-    valor: int = Form(...),
-    db: Session = Depends(get_database)
-    ):
-    
-    id_conductor= int(conductor)
-    
-    try:
-        fecha_actual = datetime.now()
-        idempresa= db.query(Usuario).filter(Usuario.id_usuario==id_conductor).first().id_empresa
-        empresa= db.query(Empresa).filter(Empresa.id_empresa==idempresa).first()
-        if not empresa:
-            alert = {"type": "general",
-                "message": "El conductor no tiene una empresa asignada."}
-            request.session["type"] = alert
-            return RedirectResponse(url="/register/payments", status_code=status.HTTP_303_SEE_OTHER)
-        
-        id_taxi= db.query(ConductorActual).filter(ConductorActual.id_conductor==id_conductor ).first().id_taxi
-
-        
-        
-
-        
-        report= Pago(id_conductor=id_conductor,valor=valor,fecha=fecha_actual)
-        db.add(report)
-        db.commit()
-        db.refresh(report)
-        alert = {"type": "general",
-                "message": "El pago se ha realizado con éxito."}
-        request.session["type"] = alert
-        return RedirectResponse(url="/register/payments", status_code=status.HTTP_303_SEE_OTHER)
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=400, detail="Error al crear el pago.")
-    
 # -- END OF THE ROUTE -- #
