@@ -149,12 +149,12 @@ async def CreateUser(
 
 # -- MODULO 2-- #
 
-@app.get("/register/daily/view", response_class=HTMLResponse, tags=["routes"])
+@app.get("/register/daily", response_class=HTMLResponse, tags=["routes"])
 async def registro_diario_view(request: Request, db: Session = Depends(get_database)):
     # Recuperar la alerta de la sesión
     alert = request.session.pop("alert", None)
     conductores = db.query(Usuario).filter(Usuario.rol == "Conductor").all()
-    return templates.TemplateResponse("register_dialy.html", {"request": request, "alert": alert, "conductores": conductores})
+    return templates.TemplateResponse("/register_daily.html", {"request": request, "alert": alert, "conductores": conductores})
 
 @app.post("/register/daily", response_class=HTMLResponse)
 async def registro_diario(
@@ -169,7 +169,7 @@ async def registro_diario(
         alert = {"type": "conductor_not_found", "message": "El conductor no existe."}
         # Almacena la alerta en la sesión
         request.session["alert"] = alert
-        return RedirectResponse(url="/register/daily/view", status_code=303)
+        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
 
     cuota_diaria_taxi = datos_conductor["cuota_diaria_taxi"]
 
@@ -185,7 +185,7 @@ async def registro_diario(
         alert = {"type": "payment_already_registered", "message": "Ya se registró el pago de la cuota diaria para este conductor."}
         # Almacena la alerta en la sesión
         request.session["alert"] = alert
-        return RedirectResponse(url="/register/daily/view", status_code=303)
+        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
     else:
         estado = valor >= cuota_diaria_taxi
 
@@ -206,6 +206,6 @@ async def registro_diario(
         request.session["alert"] = alert
 
     # Redirige a la vista de registro diario
-    return RedirectResponse(url="/register/daily/view", status_code=303)
+    return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
 
 # -- FIN MODULO 2-- #
