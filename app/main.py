@@ -149,7 +149,7 @@ async def CreateUser(
 
 # -- PATH TO  PAYMENSTS -- #
 
-@app.get("/PathPayments", response_class=HTMLResponse, tags=["payments"])
+@app.get("/register/payments", response_class=HTMLResponse, tags=["routes"])
 async def payments(request: Request,
             db: Session = Depends(get_database)
             ):
@@ -163,8 +163,8 @@ async def payments(request: Request,
     return templatesReports.TemplateResponse("CreatePayments.html", {"request": request,"usuarios":usuarios})
 
 
-@app.post("/CreatePayments", response_class=HTMLResponse)
-async def CreatePyments(request: Request,
+@app.post("/register/payments", tags=["payments"])
+async def RegisterPayments(request: Request,
     conductor: str = Form(...),
     valor: int = Form(...),
     db: Session = Depends(get_database)
@@ -173,20 +173,29 @@ async def CreatePyments(request: Request,
     id_conductor= int(conductor)
     
     try:
+        fecha_actual = datetime.now()
         idempresa= db.query(Usuario).filter(Usuario.id_usuario==id_conductor).first().id_empresa
         empresa= db.query(Empresa).filter(Empresa.id_empresa==idempresa).first()
         if not empresa:
-            raise HTTPException(
-            status_code=400, detail="El conductor no tiene una empresa asignada.")
+            alert = {"type": "general",
+                "message": "El conductor no tiene una empresa asignada."}
+            request.session["type"] = alert
+            return RedirectResponse(url="/register/payments", status_code=status.HTTP_303_SEE_OTHER)
+        
+        id_taxi= db.query(ConductorActual).filter(ConductorActual.id_conductor==id_conductor ).first().id_taxi
+
         
         
 
-        fecha_actual = datetime.now()
+        
         report= Pago(id_conductor=id_conductor,valor=valor,fecha=fecha_actual)
         db.add(report)
         db.commit()
         db.refresh(report)
-        return templates.TemplateResponse("index.html", {"request": request})
+        alert = {"type": "general",
+                "message": "El pago se ha realizado con éxito."}
+        request.session["type"] = alert
+        return RedirectResponse(url="/register/payments", status_code=status.HTTP_303_SEE_OTHER)
         
     except Exception as e:
         raise HTTPException(
