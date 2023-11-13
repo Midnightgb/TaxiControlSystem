@@ -20,20 +20,13 @@ from dotenv import load_dotenv
 from datetime import date 
 
 from functions import *
-from models import Usuario, Empresa, Taxi
+from models import Usuario, Empresa, Taxi, Pago
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
 
 load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
-
-
-# ============================ CRYPTOGRAPHY ============================ #
-# Generar una clave para Fernet y crear el objeto Fernet
-cipher_key = Fernet.generate_key()
-cipher_suite = Fernet(cipher_key)
-# ============================ ENDCRYPTOGRAPHY ============================ #
 
 app = FastAPI()
 
