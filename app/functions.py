@@ -3,13 +3,14 @@ from fastapi import HTTPException, Depends
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import joinedload, Session
 from sqlalchemy.sql import text
 from fastapi.security import OAuth2PasswordBearer
 
 import os
 
-from database import SessionLocal
-from models import ConductorActual
+from database import SessionLocal, get_database
+from models import ConductorActual, Usuario
 
 from fastapi import status
 from fastapi.responses import RedirectResponse
@@ -33,16 +34,15 @@ def serverStatus(db):
         return False
     
 
-def get_datos_conductor(id_conductor, db: SessionLocal):
+def get_datos_conductor(id_conductor, empresa_id, db: SessionLocal):
     if id_conductor:
         conductor_actual = db.query(ConductorActual).filter_by(
-            id_conductor=id_conductor
+            id_conductor=id_conductor,
+            empresa_id=empresa_id  # Agregar el filtro por empresa
         ).first()
 
         if conductor_actual:
-            # relación 'taxi' para obtener el taxi
             taxi = conductor_actual.taxi
-
             if taxi:
                 datos_conductor = {
                     "id_conductor": id_conductor,
@@ -52,13 +52,8 @@ def get_datos_conductor(id_conductor, db: SessionLocal):
                     "cuota_diaria_taxi": taxi.cuota_diaria,
                 }
                 return datos_conductor
-            else:
-                return None
-        else:
-            return None
-    else:
-        return None
-
+    return None
+     
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 def tokenDecoder(token: str = Depends(oauth2_scheme)):
     try:
