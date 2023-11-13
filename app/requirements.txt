@@ -5,6 +5,3 @@ sqlalchemy
 uvicorn
 pymysql
 python-multipart
-bcrypt
-python-dotenv
-itsdangerous
