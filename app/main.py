@@ -100,7 +100,11 @@ async def login_post(
 async def home(request: Request):
     return templates.TemplateResponse("./index.html", {"request": request})
 
-
+@app.get("/logout", tags=["auth"])
+async def logout(): 
+    response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    response.delete_cookie(key="c_user")
+    return response
 
 # ========================================== USERBLOCK ============================================ #
 

@@ -17,6 +17,16 @@ function closeDropdownMenu() {
 
 function toggleHamburger() {
   navMenu.classList.toggle("show");
+  // change hamburger to close icon
+  if (navMenu.classList.contains("show")) {
+    hamburgerBtn.innerHTML = `<i class="bx bx-x" aria-hidden="true"></i>`;
+    // hide overflow when the hamburger menu is open
+    document.documentElement.style.overflow = "hidden";
+  } else {
+    hamburgerBtn.innerHTML = `<i class="bx bx-menu" aria-hidden="true"></i>`;
+    // show overflow when the hamburger menu is closed
+    document.documentElement.style.overflow = "visible";
+  }
 }
 
 dropdownBtn.forEach((btn) => {
