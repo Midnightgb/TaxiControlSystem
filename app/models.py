@@ -17,25 +17,16 @@ class Estado(PyEnum):
     Inactivo = "Inactivo"
 
 
-class Empresa(Base):
-    __tablename__ = "empresas"
+class TipoCombustible(PyEnum):
+    Gasolina = "Gasolina"
+    Ambos = "Ambos"
+    Gas = "Gas"
 
-    id_empresa = Column(Integer, primary_key=True, autoincrement=True)
-    nombre = Column(String(45), nullable=False)
-    direccion = Column(String(45), nullable=False)
-    telefono = Column(String(45), nullable=False)
-    correo = Column(String(45), nullable=False)
-    created_at = Column(String, server_default=func.now(), nullable=False)
-    updated_at = Column(String, server_default=func.now(),
-                        onupdate=func.now(), nullable=False)
 
-    usuarios = relationship("Usuario", back_populates="empresa")
-    taxis = relationship("Taxi", back_populates="empresa")
-    reportes = relationship("Reporte", back_populates="empresa")
-    configuracion_plan = relationship(
-        "ConfiguracionPlan", back_populates="empresa")
-    configuracion_app = relationship(
-        "ConfiguracionApp", back_populates="empresa")
+class Plan(PyEnum):
+    Basico = "Basico"
+    Premium = "Premium"
+    Personalizado = "Personalizado"
 
 
 class Usuario(Base):
@@ -49,13 +40,13 @@ class Usuario(Base):
     contrasena = Column(String(45))
     rol = Column(Enum(Rol), nullable=False)
     estado = Column(Enum(Estado), nullable=False)
-    empresa = Column(Integer, ForeignKey("empresas.id_empresa"))
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
+    empresa_id  = Column(Integer, ForeignKey("empresas.id_empresa"))
 
     empresa = relationship("Empresa", back_populates="usuarios")
-    taxis = relationship("Taxi", back_populates="conductor")
+    taxis = relationship("ConductorActual", back_populates="conductor")
     pagos = relationship("Pago", back_populates="conductor")
 
 
@@ -63,12 +54,11 @@ class Taxi(Base):
     __tablename__ = "taxis"
 
     id_taxi = Column(Integer, primary_key=True, autoincrement=True)
-    empresa = Column(Integer, ForeignKey("empresas.id_empresa"))
-    id_conductor = Column(Integer, ForeignKey("usuarios.id_usuario"))
+    empresa_id = Column(Integer, ForeignKey("empresas.id_empresa"))
     placa = Column(String(6), nullable=False, unique=True)
     modelo = Column(String(45), nullable=False)
     marca = Column(String(45), nullable=False)
-    tipo_combustible = Column(Enum("Gasolina", "Ambos", "Gas"), nullable=False)
+    tipo_combustible = Column(Enum(TipoCombustible), nullable=False)
     cuota_diaria = Column(Integer, nullable=False)
     fecha_adquisicion = Column(Date)
     created_at = Column(String, server_default=func.now(), nullable=False)
@@ -76,10 +66,10 @@ class Taxi(Base):
                         onupdate=func.now(), nullable=False)
 
     empresa = relationship("Empresa", back_populates="taxis")
-    conductor = relationship("Usuario", back_populates="taxis")
     mantenimientos = relationship("Mantenimiento", back_populates="taxi")
-
-
+    conductor_actual = relationship("ConductorActual", back_populates="taxi")  # Add this line
+    reporte_taxi = relationship("reporteTaxi", back_populates="taxi")
+    
 class ConductorActual(Base):
     __tablename__ = "conductor_actual"
 
@@ -117,7 +107,7 @@ class Pago(Base):
     id_conductor = Column(Integer, ForeignKey("usuarios.id_usuario"))
     fecha = Column(Date, nullable=False)
     valor = Column(Integer, nullable=False)
-    estado = Column(Boolean, default=True)
+    estado = Column(Enum(Estado), nullable=False)
     cuota_diaria_registrada = Column(Boolean, default=False)
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
@@ -130,10 +120,9 @@ class Reporte(Base):
     __tablename__ = "reportes"
 
     id_reporte = Column(Integer, primary_key=True, autoincrement=True)
-    fecha = Column(Date, nullable=False)
     ingresos = Column(Integer, nullable=False)
     gastos = Column(Integer, nullable=False)
-    empresa = Column(Integer, ForeignKey("empresas.id_empresa"))
+    empresa_id = Column(Integer, ForeignKey("empresas.id_empresa"))
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
@@ -142,7 +131,7 @@ class Reporte(Base):
 
 
 class reporteTaxi(Base):
-    __tablename__ = "reporte_taxi"
+    __tablename__ = "reporte_taxis"
 
     id_reporte_taxi = Column(Integer, primary_key=True, autoincrement=True)
     id_taxi = Column(Integer, ForeignKey("taxis.id_taxi"))
@@ -153,6 +142,22 @@ class reporteTaxi(Base):
 
     taxi = relationship("Taxi", back_populates="reporte_taxi")
 
+class ConfiguracionApp(Base):
+    __tablename__ = "configuracion_app"
+
+    id_configuracion = Column(Integer, primary_key=True, autoincrement=True)
+    plan = Column(Enum(Plan),
+                  nullable=False, default="Basico")
+    configuracion_plan_id = Column(Integer, ForeignKey(
+        "configuracion_plan.id_configuracion_plan"))
+    empresa_id = Column(Integer, ForeignKey("empresas.id_empresa"))
+    created_at = Column(String, server_default=func.now(), nullable=False)
+    updated_at = Column(String, server_default=func.now(),
+                        onupdate=func.now(), nullable=False)
+
+    configuracion_plan = relationship(
+        "ConfiguracionPlan", back_populates="configuracion_app")
+    empresa = relationship("Empresa", back_populates="configuracion_app")
 
 class ConfiguracionPlan(Base):
     __tablename__ = "configuracion_plan"
@@ -166,7 +171,7 @@ class ConfiguracionPlan(Base):
     fecha_inicio = Column(Date, nullable=False, server_default=func.now())
     fecha_fin = Column(Date, nullable=False)
     estado = Column(Boolean, default=True)
-    empresa = Column(Integer, ForeignKey("empresas.id_empresa"))
+    empresa_id = Column(Integer, ForeignKey("empresas.id_empresa"))
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
@@ -175,20 +180,22 @@ class ConfiguracionPlan(Base):
     configuracion_app = relationship(
         "ConfiguracionApp", back_populates="configuracion_plan")
 
+class Empresa(Base):
+        __tablename__ = "empresas"
 
-class configuracionApp(Base):
-    __tablename__ = "configuracion_app"
+        id_empresa = Column(Integer, primary_key=True, autoincrement=True)
+        nombre = Column(String(100), nullable=False)
+        direccion = Column(String(100), nullable=False)
+        telefono = Column(String(15), nullable=False)
+        correo = Column(String(100), nullable=False)
+        created_at = Column(String, server_default=func.now(), nullable=False)
+        updated_at = Column(String, server_default=func.now(),
+                            onupdate=func.now(), nullable=False)
 
-    id_configuracion = Column(Integer, primary_key=True, autoincrement=True)
-    plan = Column(Enum("Basico", "Premium", "Personalizado"),
-                  nullable=False, default="Basico")
-    configuracion_plan = Column(Integer, ForeignKey(
-        "configuracion_plan.id_configuracion_plan"))
-    empresa = Column(Integer, ForeignKey("empresas.id_empresa"))
-    created_at = Column(String, server_default=func.now(), nullable=False)
-    updated_at = Column(String, server_default=func.now(),
-                        onupdate=func.now(), nullable=False)
-
-    configuracion_plan = relationship(
-        "ConfiguracionPlan", back_populates="configuracion_app")
-    empresa = relationship("Empresa", back_populates="configuracion_app")
+        taxis = relationship("Taxi", back_populates="empresa")
+        reportes = relationship("Reporte", back_populates="empresa")
+        configuracion_plan = relationship(
+            "ConfiguracionPlan", back_populates="empresa")
+        configuracion_app = relationship(
+            "ConfiguracionApp", back_populates="empresa")
+        usuarios = relationship("Usuario", back_populates="empresa")
