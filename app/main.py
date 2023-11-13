@@ -156,7 +156,7 @@ async def registro_diario_view(request: Request, db: Session = Depends(get_datab
     conductores = db.query(Usuario).filter(Usuario.rol == "Conductor").all()
     return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores})
 
-@app.post("/register/daily", response_class=HTMLResponse)
+@app.post("/register/daily", response_class=HTMLResponse, tags=["payments"])
 async def registro_diario(
     request: Request,
     id_conductor: int = Form(...),
