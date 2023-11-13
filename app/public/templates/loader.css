@@ -5,12 +5,13 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
-body {
+.loader {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   background: #ededed;
+  overflow-x: hidden;
 }
 
 .road {
