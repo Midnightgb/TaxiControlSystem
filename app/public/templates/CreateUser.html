@@ -17,7 +17,7 @@
     
     <div class="container">
         <h1>Registro de Usuario</h1>
-        <form action="/CreateUser" method="POST">
+        <form action="/register/user" method="POST">
             <label for="cedula">CEDULA:</label>
             <input type="number" name="cedula" id="cedula" required><br>
     
@@ -36,16 +36,24 @@
             <label for="rol">Tipo de Usuario:</label>
             <select name="rol" id="rol" required>
                 <option value="" disabled selected>Seleccione rol</option>
-                <option value="Administrador">Administrador</option>
+                
+                {% if usuario.rol.value == "Administrador" %}
+                    <option value="Secretaria">Secretaria</option>
+                {% endif %}
+                
                 <option value="Conductor">Conductor</option>
-            </select><br>      
+            </select><br>
+            
+
+            <label for="empresa_id">Empresa:</label>
+            <select name="empresa_id" id="empresa_id" required>
+                    <option disabled selected value="{{ empresa.id_empresa }}">{{ empresa.nombre }}</option>
+            </select><br>
+
     
             <button type="submit">Registrar Usuario</button>
         </form>
     </div>
-    
-    
-
 
     <!-- Bootstrap JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
