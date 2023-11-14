@@ -7,6 +7,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- add animate.css library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
 </head>
 
@@ -15,12 +17,13 @@
     {% include 'components/nav.html' %}
     {% endblock %}
     <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
-        <h1>Navigation Bar</h1>
+        {% if alert.name == 'kary' %}
+        <h1>Bienvenida mi amor {{alert.name}}</h1>
+        {% else %}
+        <h1>Bienvenido {{alert.name}}</h1>
+        {% endif %}
         <p>
-            Want to learn how to make this?
-            <a style="text-decoration: underline; color: var(--primary-color)"
-                href="https://www.freecodecamp.org/news/how-to-build-a-responsive-navigation-bar-with-dropdown-menu-using-javascript/"
-                target="_blank">Read the tutorial</a>
+            {{alert.message}}
         </p>
 
     </main>

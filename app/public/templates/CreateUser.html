@@ -12,6 +12,46 @@
         integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
 
     <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+        }
+
+        label {
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
         .hidden-label {
             display: none;
         }
@@ -19,40 +59,60 @@
 </head>
 
 <body>
-    
     <div class="container">
-        <h1>Registro de Usuario</h1>
+        <h1 class="text-center">Registro de Usuario</h1>
+
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
+
         <form action="/register/user" method="POST">
-            <label for="cedula">CEDULA:</label>
-            <input type="number" name="cedula" id="cedula" required><br>
-    
-            <label for="nombre">NOMBRES:</label>
-            <input type="text" name="nombre" id="nombre" required><br>
-    
-            <label for="apellido">APELLIDOS:</label>
-            <input type="text" name="apellido" id="apellido" required><br>
-    
-            <label for="correo">Correo Electrónico:</label>
-            <input type="email" name="correo" id="correo" required><br>
-    
-            <label for="contrasena">Contrasena:</label>
-            <input type="password" name="contrasena" id="contrasena"><br>
-    
-            <label for="rol">Tipo de Usuario:</label>
-            <select name="rol" id="rol" required onchange="updatePasswordField()">
-                <option value="" disabled selected>Seleccione rol</option>
-                {% if usuario.rol.value == "Administrador" %}
-                    <option value="Secretaria">Secretaria</option>
-                {% endif %}
-                <option value="Conductor">Conductor</option>
-            </select><br>
-            
-            <label for="empresa_id">Empresa:</label>
-            <select name="empresa_id" id="empresa_id" required>
-                <option selected value="{{ empresa.id_empresa }}">{{ empresa.nombre }}</option>
-            </select><br>
-    
-            <button type="submit">Registrar Usuario</button>
+            <div class="mb-3">
+                <label for="cedula" class="form-label">CEDULA:</label>
+                <input type="number" class="form-control" name="cedula" id="cedula" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="nombre" class="form-label">NOMBRES:</label>
+                <input type="text" class="form-control" name="nombre" id="nombre" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="apellido" class="form-label">APELLIDOS:</label>
+                <input type="text" class="form-control" name="apellido" id="apellido" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="correo" class="form-label">Correo Electrónico:</label>
+                <input type="email" class="form-control" name="correo" id="correo" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="contrasena" class="form-label">Contrasena:</label>
+                <input type="password" class="form-control" name="contrasena" id="contrasena">
+            </div>
+
+            <div class="mb-3">
+                <label for="rol" class="form-label">Tipo de Usuario:</label>
+                <select class="form-select" name="rol" id="rol" required onchange="updatePasswordField()">
+                    <option value="" disabled selected>Seleccione rol</option>
+                    {% if usuario and usuario.rol.value == "Administrador" %}
+                        <option value="Secretaria">Secretaria</option>
+                    {% endif %}
+                    <option value="Conductor">Conductor</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="empresa_id" class="form-label">Empresa:</label>
+                <select class="form-select" name="empresa_id" id="empresa_id" required>
+                    <option selected value="{{ empresa.id_empresa }}">{{ empresa.nombre }}</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Registrar Usuario</button>
         </form>
     </div>
 
@@ -71,14 +131,12 @@
             var contrasenaInput = document.getElementById("contrasena");
             var contrasenaLabel = document.querySelector('label[for="contrasena"]');
 
-            // Si el rol seleccionado es "Conductor", ocultar el campo de contraseña y su label
             if (rolSelect.value === "Conductor") {
-                contrasenaInput.value = ""; // Puedes establecer el valor como vacío si lo prefieres
+                contrasenaInput.value = "";
                 contrasenaInput.removeAttribute("required");
                 contrasenaInput.style.display = "none";
                 contrasenaLabel.classList.add('hidden-label');
             } else {
-                // Si no es "Conductor", mostrar el campo de contraseña y su label
                 contrasenaInput.setAttribute("required", "required");
                 contrasenaInput.style.display = "block";
                 contrasenaLabel.classList.remove('hidden-label');
