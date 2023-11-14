@@ -290,6 +290,9 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
     if not usuario:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
+    # Recuperar alerta de la sesión
+    alert = request.session.pop("alert", None)
+
     # Subconsulta para obtener los IDs de conductores asignados
     conductores_asignados_subquery = db.query(ConductorActual.id_conductor).distinct()
 
@@ -315,7 +318,7 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
     print("Conductores no asignados:", conductores_no_asignados)
     print("Taxis no asignados:", taxis_no_asignados)
 
-    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados, "taxis": taxis_no_asignados})
+    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados, "taxis": taxis_no_asignados, "alert": alert})
 # -- END OF THE ROUTE -- #
 
 
@@ -343,7 +346,19 @@ async def create_allocation(
             id_conductor=id_conductor,
             id_taxi=id_taxi
         )
-
+        
+        if nueva_asignacion:
+            alert = {"type": "general","message": "Asignación creada con éxito."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/allocation", status_code=status.HTTP_303_SEE_OTHER)
+        
+        
+        if not nueva_asignacion:
+            alert = {"type": "general","message": "Error al crear la asignación."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/allocation", status_code=status.HTTP_303_SEE_OTHER)
+        
+        
         db.add(nueva_asignacion)
         db.commit()
         db.refresh(nueva_asignacion)
