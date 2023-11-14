@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -11,13 +11,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
 
+    <style>
+        .hidden-label {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
     
     <div class="container">
         <h1>Registro de Usuario</h1>
-        <form action="/CreateUser" method="POST">
+        <form action="/register/user" method="POST">
             <label for="cedula">CEDULA:</label>
             <input type="number" name="cedula" id="cedula" required><br>
     
@@ -31,21 +36,25 @@
             <input type="email" name="correo" id="correo" required><br>
     
             <label for="contrasena">Contrasena:</label>
-            <input type="password" name="contrasena" id="contrasena" required><br>
+            <input type="password" name="contrasena" id="contrasena"><br>
     
             <label for="rol">Tipo de Usuario:</label>
-            <select name="rol" id="rol" required>
+            <select name="rol" id="rol" required onchange="updatePasswordField()">
                 <option value="" disabled selected>Seleccione rol</option>
-                <option value="Administrador">Administrador</option>
+                {% if usuario.rol.value == "Administrador" %}
+                    <option value="Secretaria">Secretaria</option>
+                {% endif %}
                 <option value="Conductor">Conductor</option>
-            </select><br>      
+            </select><br>
+            
+            <label for="empresa_id">Empresa:</label>
+            <select name="empresa_id" id="empresa_id" required>
+                <option selected value="{{ empresa.id_empresa }}">{{ empresa.nombre }}</option>
+            </select><br>
     
             <button type="submit">Registrar Usuario</button>
         </form>
     </div>
-    
-    
-
 
     <!-- Bootstrap JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
@@ -54,6 +63,27 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
         integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
+    </script>
+
+    <script>
+        function updatePasswordField() {
+            var rolSelect = document.getElementById("rol");
+            var contrasenaInput = document.getElementById("contrasena");
+            var contrasenaLabel = document.querySelector('label[for="contrasena"]');
+
+            // Si el rol seleccionado es "Conductor", ocultar el campo de contraseña y su label
+            if (rolSelect.value === "Conductor") {
+                contrasenaInput.value = ""; // Puedes establecer el valor como vacío si lo prefieres
+                contrasenaInput.removeAttribute("required");
+                contrasenaInput.style.display = "none";
+                contrasenaLabel.classList.add('hidden-label');
+            } else {
+                // Si no es "Conductor", mostrar el campo de contraseña y su label
+                contrasenaInput.setAttribute("required", "required");
+                contrasenaInput.style.display = "block";
+                contrasenaLabel.classList.remove('hidden-label');
+            }
+        }
     </script>
 </body>
 

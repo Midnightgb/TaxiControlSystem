@@ -33,11 +33,11 @@ class Usuario(Base):
     __tablename__ = "usuarios"
 
     id_usuario = Column(Integer, primary_key=True, autoincrement=True)
-    cedula = Column(Integer, nullable=False, unique=True)
+    cedula = Column(String(150), nullable=False)
     nombre = Column(String(45), nullable=False)
     apellido = Column(String(45), nullable=False)
     correo = Column(String(45))
-    contrasena = Column(String(45))
+    contrasena = Column(String(250))
     rol = Column(Enum(Rol), nullable=False)
     estado = Column(Enum(Estado), nullable=False)
     created_at = Column(String, server_default=func.now(), nullable=False)
@@ -60,7 +60,7 @@ class Taxi(Base):
     marca = Column(String(45), nullable=False)
     tipo_combustible = Column(Enum(TipoCombustible), nullable=False)
     cuota_diaria = Column(Integer, nullable=False)
-    fecha_adquisicion = Column(Date)
+    fecha_adquisicion = Column(String, server_default=func.now(), nullable=False)
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
@@ -76,7 +76,7 @@ class ConductorActual(Base):
     id_conductor_actual = Column(Integer, primary_key=True, autoincrement=True)
     id_conductor = Column(Integer, ForeignKey("usuarios.id_usuario"))
     id_taxi = Column(Integer, ForeignKey("taxis.id_taxi"))
-    fecha = Column(Date, nullable=False)
+    fecha = Column(String, server_default=func.now(), nullable=False)
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
@@ -107,7 +107,8 @@ class Pago(Base):
     id_conductor = Column(Integer, ForeignKey("usuarios.id_usuario"))
     fecha = Column(Date, nullable=False)
     valor = Column(Integer, nullable=False)
-    estado = Column(Enum(Estado), nullable=False)
+    estado = Column(Boolean, nullable=False)
+    cuota_diaria_registrada = Column(Boolean, default=False)
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
