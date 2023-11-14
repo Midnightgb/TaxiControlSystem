@@ -76,7 +76,7 @@ class ConductorActual(Base):
     id_conductor_actual = Column(Integer, primary_key=True, autoincrement=True)
     id_conductor = Column(Integer, ForeignKey("usuarios.id_usuario"))
     id_taxi = Column(Integer, ForeignKey("taxis.id_taxi"))
-    fecha = Column(Date, nullable=False)
+    fecha = Column(String, server_default=func.now(), nullable=False)
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
