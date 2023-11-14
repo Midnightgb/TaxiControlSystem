@@ -17,10 +17,11 @@
     
     <div class="container">
         <h1>Asignacion De Taxis</h1>
-        <form action="/register/user" method="POST">
+        <form action="/register/allocation" method="POST">
 
-            <label for="conductor_id">ELIJA UN CONDUCTOR:</label>
-            <select name="conductor_id" id="conductor_id" required>
+            <label for="id_conductor">ELIJA UN CONDUCTOR:</label>
+            <select name="id_conductor" id="id_conductor" required>
+                <option value="" disabled selected>Seleccione un conductor</option>
                 {% if conductores %}
                     {% for conductor in conductores %}
                         <option value="{{ conductor.id_usuario }}">{{ conductor.nombre }} {{ conductor.apellido }}</option>
@@ -29,6 +30,20 @@
                     <option value="" disabled>No hay conductores disponibles</option>
                 {% endif %}
             </select><br>
+
+            <label for="id_taxi">ELIJA UN TAXI:</label>
+            <select name="id_taxi" id="id_taxi" required>
+                <option value="" disabled selected>Seleccione un taxi</option>
+                {% if taxis %}
+                    {% for taxi in taxis %}
+                        <option value="{{ taxi.id_taxi }}">{{ taxi.placa }} - {{ taxi.modelo }} - {{ taxi.marca }}</option>
+                    {% endfor %}
+                {% else %}
+                    <option value="" disabled>No hay taxis disponibles</option>
+                {% endif %}
+            </select><br>
+
+
 
     
             <button type="submit">Asignar Taxi</button>
