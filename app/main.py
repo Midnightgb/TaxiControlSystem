@@ -100,7 +100,8 @@ async def login_post(
 
 @app.get("/home", response_class=HTMLResponse, tags=["routes"])
 async def home(request: Request):
-    return templates.TemplateResponse("./index.html", {"request": request})
+    alert = request.session.pop("alert", None)
+    return templates.TemplateResponse("./index.html", {"request": request, "alert": alert})
 
 
 
@@ -199,6 +200,7 @@ async def CreateUser(
 @app.get("/register/taxi", response_class=HTMLResponse, tags=["create"])
 async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
+    alert = request.session.pop("alert", None)
     try:
         if not c_user:
             return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
@@ -217,7 +219,7 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
         if not empresas:
             return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-        return templates.TemplateResponse("CreateTaxi.html", {"request": request, "empresas": empresas})
+        return templates.TemplateResponse("CreateTaxi.html", {"request": request, "empresas": empresas, "alert": alert})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al obtener información del usuario y empresa: {str(e)}")
 # -- END OF THE ROUTE -- #
@@ -234,18 +236,35 @@ async def create_taxi(
     cuota_diaria: int = Form(...),
     db: Session = Depends(get_database)
 ):
-    try:
-
+    
         if not serverStatus(db):
-            alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            alert = {"type": "danger","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
             request.session["alert"] = alert
             return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-
+        # Validar que la placa no esté vacía
+        if not placa:
+            alert = {"type":"danger" ,"message": "La placa no puede estar vacía."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
+        
+        #verificar q la placa este bien escrita
+        if len(placa) != 6:
+            alert = {"type":"danger" ,"message": "La placa debe tener 6 caracteres."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
+        
+        if(verificar_formato(placa) == False):
+            alert = {"type":"danger" ,"message": "La placa debe tener el formato AAA000."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
+        
         # Verificar si la placa ya existe en la base de datos
         if db.query(Taxi).filter(Taxi.placa == placa).first():
-            raise HTTPException(status_code=400, detail="La placa ya está registrada.")
-            
+            alert = {"type": "danger","message": "La placa ya está registrada."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
+
         # Si pasa las validaciones, proceder con la creación del nuevo taxi
         nuevo_taxi = Taxi(
             empresa_id=empresa_id,
@@ -259,15 +278,10 @@ async def create_taxi(
         db.add(nuevo_taxi)
         db.commit()
         db.refresh(nuevo_taxi)
+        alert = {"type": "succes","message": "Taxi creado con éxito"}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
 
-        return templates.TemplateResponse("index.html", {"request": request, "message": "Taxi creado con éxito"})
-    except HTTPException as e:
-        # Capturamos las excepciones específicas de FastAPI
-        return templates.TemplateResponse("index.html", {"request": request, "error_message": e.detail})
-    except Exception as e:
-        # Capturamos otras excepciones y mostramos un mensaje genérico de error
-        return templates.TemplateResponse("index.html", {"request": request, "error_message": "Error al procesar la solicitud."})
-# -- END OF THE ROUTE -- #
 
 # ========================================== END OF TAXIBLOCK ============================================ #
 

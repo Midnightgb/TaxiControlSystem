@@ -22,7 +22,13 @@
                 href="https://www.freecodecamp.org/news/how-to-build-a-responsive-navigation-bar-with-dropdown-menu-using-javascript/"
                 target="_blank">Read the tutorial</a>
         </p>
+
     </main>
+    {% if alert %}
+            <div class="alert alert-{{ alert.type }}" role="alert">
+                {{ alert.message }}
+            </div>
+    {% endif %}
 
     <footer>
     </footer>
