@@ -304,24 +304,73 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
     if not usuario:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-    taxis = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).all()
+    # Subconsulta para obtener los IDs de conductores asignados
+    conductores_asignados_subquery = db.query(ConductorActual.id_conductor).distinct()
 
-    if not taxis:
-        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    # Subconsulta para obtener los IDs de taxis asignados
+    taxis_asignados_subquery = db.query(ConductorActual.id_taxi).distinct()
 
-    #consulta para traer los conductores que no están asignados a un taxi y están en la misma empresa
-    conductores_no_asignados = db.query(Usuario).filter(Usuario.rol == "conductor", Usuario.empresa_id == usuario.empresa_id).all()
+    # Consulta para traer los conductores no asignados en la misma empresa
+    conductores_no_asignados = db.query(Usuario).filter(
+        Usuario.rol == "conductor",
+        Usuario.empresa_id == usuario.empresa_id,
+        Usuario.id_usuario.in_(conductores_asignados_subquery),
+    ).all()
+
+    # Consulta para traer los taxis no asignados en la misma empresa
+    taxis_no_asignados = db.query(Taxi).filter(
+        Taxi.empresa_id == usuario.empresa_id,
+        Taxi.id_taxi.in_(taxis_asignados_subquery),
+    ).all()
 
     print("Usuario:", usuario)
     print("Roles del usuario:", usuario.rol)
     print("Token Payload:", token_payload)
-    print("Taxis:", taxis)
     print("Conductores no asignados:", conductores_no_asignados)
-    
-    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados})
+    print("Taxis no asignados:", taxis_no_asignados)
 
+    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados, "taxis": taxis_no_asignados})
 # -- END OF THE ROUTE -- #
 
+
+# -- PATH TO PROCEED TO THE CREATION OF A NEW ALLOCATION -- #
+@app.post("/register/allocation", response_class=HTMLResponse)
+async def create_allocation(
+    request: Request,
+    id_conductor: int = Form(...),
+    id_taxi: int = Form(...),
+    db: Session = Depends(get_database)
+):
+    try:
+        if not serverStatus(db):
+            alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+        # Verificar si el conductor ya está asignado a un taxi
+        if db.query(ConductorActual).filter(ConductorActual.id_conductor == id_conductor).first():
+            raise HTTPException(status_code=400, detail="El conductor ya está asignado a un taxi.")
+
+        # Si pasa las validaciones, proceder con la creación de la asignación
+        nueva_asignacion = ConductorActual(
+            id_conductor=id_conductor,
+            id_taxi=id_taxi
+        )
+
+        db.add(nueva_asignacion)
+        db.commit()
+        db.refresh(nueva_asignacion)
+
+        return templates.TemplateResponse("index.html", {"request": request, "message": "Asignación creada con éxito"})
+    except HTTPException as e:
+        # Capturamos las excepciones específicas de FastAPI
+        return templates.TemplateResponse("index.html", {"request": request, "error_message": e.detail})
+    except Exception as e:
+        # Capturamos otras excepciones y mostramos un mensaje genérico de error
+        return templates.TemplateResponse("index.html", {"request": request, "error_message": "Error al procesar la solicitud."})
+# -- END OF THE ROUTE -- #
+
+# ========================================== END OF ALLOCATIONBLOCK ============================================ #
 
 
 
