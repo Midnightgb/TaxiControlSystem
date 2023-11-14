@@ -104,10 +104,8 @@ async def home(request: Request, c_user: str = Cookie(None)):
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     
     checkTokenStatus = userStatus(c_user, request)
-    print("##########$$$$$$$$$$$$########## home ##########$$$$$$$$$$$$##########")
-    print("checkTokenStatus:", checkTokenStatus)
-    if not checkTokenStatus:
-        return checkTokenStatus
+    if not checkTokenStatus["status"]:
+        return checkTokenStatus["redirect"]
 
     alert = request.session.pop("alert", None)
     return templates.TemplateResponse("./index.html", {"request": request, "alert": alert})

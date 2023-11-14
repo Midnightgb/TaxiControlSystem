@@ -17,10 +17,9 @@ from fastapi.responses import RedirectResponse
 
 load_dotenv()
 SECRET_KEY = os.environ.get("SECRET_KEY")
-
 def tokenConstructor(userId: str):
     print("##########$$$$$$$$$$$$########## tokenConstructor ##########$$$$$$$$$$$$##########")
-    expiration = datetime.now() + timedelta(hours=1)
+    expiration = datetime.utcnow() + timedelta(seconds=20)
     payload = {"sub": str(userId), "exp": expiration}
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     return token
@@ -73,13 +72,17 @@ def tokenDecoder(token: str = Depends(oauth2_scheme)):
 
 def userStatus(c_user, request):
     token_payload = tokenDecoder(c_user)
-    print(token_payload)
-    print("##########$$$$$$$$$$$$########## userStatus ##########$$$$$$$$$$$$##########")
-    print("token_payload:", token_payload)
     if not token_payload:
-        alert = {"type": "general","message": "Su sesionsssss ha expirado, por favor inicie sesión nuevamente."}
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+        redirect_response = RedirectResponse(url='/login', status_code=status.HTTP_303_SEE_OTHER)
+        redirect_response.delete_cookie("c_user")
+        validation = {
+            "status": False,
+            "redirect": redirect_response
+        }
+        return validation
     else:
-        return True
+        validation = {"status": True}
+        return validation
     
