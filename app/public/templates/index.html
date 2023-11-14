@@ -17,21 +17,14 @@
     {% include 'components/nav.html' %}
     {% endblock %}
     <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
-        {% if alert.name == 'kary' %}
-        <h1>Bienvenida mi amor {{alert.name}}</h1>
-        {% else %}
-        <h1>Bienvenido {{alert.name}}</h1>
-        {% endif %}
-        <p>
-            {{alert.message}}
-        </p>
+        <h1>Bienvenido {{welcome.name}}</h1>
 
+        {% if alert %}
+                <div class="alert alert-{{ alert.type }}" role="alert">
+                    {{ alert.message }}
+                </div>
+        {% endif %}
     </main>
-    {% if alert %}
-            <div class="alert alert-{{ alert.type }}" role="alert">
-                {{ alert.message }}
-            </div>
-    {% endif %}
 
     <footer>
     </footer>

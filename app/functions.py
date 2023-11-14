@@ -81,7 +81,7 @@ def userStatus(c_user, request):
     if not token_payload:
         alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
         request.session["alert"] = alert
-        redirect_response = RedirectResponse(url='/login', status_code=status.HTTP_303_SEE_OTHER)
+        redirect_response = RedirectResponse(url='/logout', status_code=status.HTTP_303_SEE_OTHER)
         redirect_response.delete_cookie("c_user")
         validation = {
             "status": False,
@@ -89,7 +89,7 @@ def userStatus(c_user, request):
         }
         return validation
     else:
-        validation = {"status": True}
+        validation = {"status": True, "userid": token_payload["sub"]}
         return validation
 
 def obtener_fechas_conductor(id_conductor, db: Session):
