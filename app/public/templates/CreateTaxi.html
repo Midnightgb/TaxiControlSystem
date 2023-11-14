@@ -10,17 +10,14 @@
     <!-- Bootstrap CSS v5.2.1 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
 
     <div class="container">
-        <h1>Registro De Taxi</h1>
-        {% if alert %}
-            <div class="alert alert-{{ alert.type }}" role="alert">
-                {{ alert.message }}
-            </div>
-        {% endif %}
+        <a href="/home" class="btn btn-outline-primary">⬅️</a>
+        <h1>Registro de Taxi</h1>
         <form action="/register/taxi" method="POST">
 
             <div class="mb-3">
@@ -74,7 +71,33 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
         integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
     </script>
-
+{% if alert %}
+    <p id="alert-type" style="display: none;">{{ alert.type }}</p>
+    <p id="alert-message" style="display: none;">{{ alert.message }}</p>
+    <script>
+        let alertType = document.getElementById("alert-type").innerText;
+        let alertMessage = document.getElementById("alert-message").innerText;
+        let backgroundColor = alertType == "success" ? "#1f1f1f" : "#ff0028";
+        let textColor = "#fff"
+        const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        background : backgroundColor,
+        color: textColor,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+        });
+        Toast.fire({
+        icon: alertType,
+        title: alertMessage
+        });
+    </script>
+{% endif %}
 </body>
 
 </html>

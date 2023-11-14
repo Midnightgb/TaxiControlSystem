@@ -310,26 +310,26 @@ async def create_taxi(
 
     # Validar que la placa no esté vacía
     if not placa:
-        alert = {"type": "danger", "message": "La placa no puede estar vacía."}
+        alert = {"type": "error", "message": "La placa no puede estar vacía."}
         request.session["alert"] = alert
         return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
     # verificar q la placa este bien escrita
     if len(placa) != 6:
-        alert = {"type": "danger",
+        alert = {"type": "error",
                  "message": "La placa debe tener 6 caracteres."}
         request.session["alert"] = alert
         return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
     if (verificar_formato(placa) == False):
-        alert = {"type": "danger",
+        alert = {"type": "error",
                  "message": "La placa debe tener el formato AAA000."}
         request.session["alert"] = alert
         return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar si la placa ya existe en la base de datos
     if db.query(Taxi).filter(Taxi.placa == placa).first():
-        alert = {"type": "danger", "message": "La placa ya está registrada."}
+        alert = {"type": "error", "message": "La placa ya está registrada."}
         request.session["alert"] = alert
         return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -346,9 +346,9 @@ async def create_taxi(
     db.add(nuevo_taxi)
     db.commit()
     db.refresh(nuevo_taxi)
-    alert = {"type": "succes", "message": "Taxi creado con éxito"}
+    alert = {"type": "success", "message": "Taxi registrado exitosamente."}
     request.session["alert"] = alert
-    return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
 
 # ========================================== END OF TAXIBLOCK ============================================ #
@@ -359,8 +359,9 @@ async def create_taxi(
 @app.get("/register/allocation", response_class=HTMLResponse, tags=["create"])
 async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
+    print("ENTRO A PASO 1", c_user)
     if not c_user:
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     token_payload = tokenDecoder(c_user)
 
@@ -369,14 +370,10 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
     usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
 
     if not usuario:
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-
-    # Recuperar alerta de la sesión
-    alert = request.session.pop("alert", None)
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     # Subconsulta para obtener los IDs de conductores asignados
-    conductores_asignados_subquery = db.query(
-        ConductorActual.id_conductor).distinct()
+    conductores_asignados_subquery = db.query(ConductorActual.id_conductor).distinct()
 
     # Subconsulta para obtener los IDs de taxis asignados
     taxis_asignados_subquery = db.query(ConductorActual.id_taxi).distinct()
@@ -394,7 +391,13 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
         Taxi.id_taxi.in_(taxis_asignados_subquery),
     ).all()
 
-    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados, "taxis": taxis_no_asignados, "alert": alert})
+    print("Usuario:", usuario)
+    print("Roles del usuario:", usuario.rol)
+    print("Token Payload:", token_payload)
+    print("Conductores no asignados:", conductores_no_asignados)
+    print("Taxis no asignados:", taxis_no_asignados)
+
+    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados, "taxis": taxis_no_asignados})
 # -- END OF THE ROUTE -- #
 
 
@@ -406,36 +409,21 @@ async def create_allocation(
     id_taxi: int = Form(...),
     db: Session = Depends(get_database)
 ):
-
     try:
         if not serverStatus(db):
-            alert = {"type": "general",
-                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
             request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
         # Verificar si el conductor ya está asignado a un taxi
         if db.query(ConductorActual).filter(ConductorActual.id_conductor == id_conductor).first():
-            raise HTTPException(
-                status_code=400, detail="El conductor ya está asignado a un taxi.")
+            raise HTTPException(status_code=400, detail="El conductor ya está asignado a un taxi.")
 
         # Si pasa las validaciones, proceder con la creación de la asignación
         nueva_asignacion = ConductorActual(
             id_conductor=id_conductor,
             id_taxi=id_taxi
         )
-
-        if nueva_asignacion:
-            alert = {"type": "general",
-                     "message": "Asignación creada con éxito."}
-            request.session["alert"] = alert
-            return RedirectResponse(url="/register/allocation", status_code=status.HTTP_303_SEE_OTHER)
-
-        if not nueva_asignacion:
-            alert = {"type": "general",
-                     "message": "Error al crear la asignación."}
-            request.session["alert"] = alert
-            return RedirectResponse(url="/register/allocation", status_code=status.HTTP_303_SEE_OTHER)
 
         db.add(nueva_asignacion)
         db.commit()
@@ -451,6 +439,8 @@ async def create_allocation(
 # -- END OF THE ROUTE -- #
 
 # ========================================== END OF ALLOCATIONBLOCK ============================================ #
+
+
 
 
 # -- MODULO 2-- #
