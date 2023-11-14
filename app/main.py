@@ -167,8 +167,8 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 
     if not empresa:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-
-    return templates.TemplateResponse("CreateUser.html", {"request": request, "empresa": empresa, "usuario": usuario})
+    alert = request.session.pop("alert", None)
+    return templates.TemplateResponse("CreateUser.html", {"request": request, "empresa": empresa, "usuario": usuario, "alert": alert})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW USER -- #
@@ -213,7 +213,7 @@ async def CreateUser(
 
     empresa = db.query(Empresa).filter(
         Empresa.id_empresa == usuario.empresa_id).first()
-
+    error_message = None
     cedula_existente = db.query(Usuario).filter(
         Usuario.cedula == cedula).first()
     if cedula_existente:
@@ -247,7 +247,9 @@ async def CreateUser(
     db.add(nuevo_usuario)
     db.commit()
     db.refresh(nuevo_usuario)
-    return templates.TemplateResponse("index.html", {"request": request})
+    alert = {"type": "success", "message": "Usuario registrado exitosamente."} 
+    request.session["alert"] = alert
+    return RedirectResponse(url="/register/user", status_code=status.HTTP_303_SEE_OTHER)
 
 # -- END OF THE ROUTE -- #
 
@@ -374,10 +376,10 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 
     # Subconsulta para obtener los IDs de conductores asignados
     conductores_asignados_subquery = db.query(ConductorActual.id_conductor).distinct()
-
+    print("conductores_asignados_subquery", conductores_asignados_subquery)
     # Subconsulta para obtener los IDs de taxis asignados
     taxis_asignados_subquery = db.query(ConductorActual.id_taxi).distinct()
-
+    print("taxis_asignados_subquery", taxis_asignados_subquery)
     # Consulta para traer los conductores no asignados en la misma empresa
     conductores_no_asignados = db.query(Usuario).filter(
         Usuario.rol == "conductor",
