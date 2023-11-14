@@ -306,11 +306,6 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 
 # -- END OF THE ROUTE -- #
 
-
-
-
-
-
 # -- MODULO 2-- #
 
 @app.get("/register/daily", response_class=HTMLResponse, tags=["routes"])
@@ -354,7 +349,8 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         alert = {"type": "general", "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-    
+   
+# -- MODULO 2 actualizar registro diario-- #    
 @app.post("/register/daily", tags=["payments"])
 async def registro_diario(
     request: Request,
@@ -409,4 +405,131 @@ async def registro_diario(
     # Redirige a la vista de registro diario
     return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
 
+@app.get("/update/driver", response_class=HTMLResponse, tags=["routes"])
+async def update_driver_value_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    user_id = None
+    
+    try:
+        print("paso 1 get")
+        if not serverStatus(db):
+            print("paso 2 get")
+            raise HTTPException(status_code=500, detail="Error en conexión al servidor, contacte al proveedor del servicio.")
+        print("paso 3 get")
+        if not c_user:
+            print("paso 4 get")
+            raise HTTPException(status_code=401, detail="No se proporcionó un token de usuario.")
+        
+        print("paso 5 get")
+        token_payload = tokenDecoder(c_user)
+        
+        print("paso 6 get")
+        if not token_payload:
+            print("paso 7 get")
+            alert = {"type": "general","message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+        
+        print("paso 8 get")
+        user_id = int(token_payload["sub"])
+        usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+        print("paso 9 get")
+        if not usuario:
+            print("paso 10 get")
+            raise HTTPException(status_code=401, detail="Usuario no encontrado.")
+        
+        empresas = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+        print("paso 11 get")
+        if not empresas:
+            print("paso 12 get")
+            raise HTTPException(status_code=500, detail="Error al obtener información de la empresa.")
+        
+        # Filtrar conductores por la empresa del usuario
+        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+
+        # Consultar fechas del conductor
+        fechas_conductor = db.query(Pago.fecha).filter(Pago.id_conductor == user_id).all()
+
+        # Recuperar la alerta de la sesión
+        alert = request.session.pop("alert", None)
+        print("paso 13 get")
+        return templates.TemplateResponse("registerDailyUpdate.html", {
+            "request": request,
+            "alert": alert,
+            "conductores": conductores,
+            "fechas_conductor": fechas_conductor  # Agregar las fechas del conductor
+        })
+        print("paso 14 get")
+
+    except HTTPException as e:
+        alert = {"type": "general", "message": str(e.detail)}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    except Exception as e:
+        alert = {"type": "general", "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        request.session["alert"] = alert
+        print("Error paso 15:", str(e))
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.post("/update/driver", tags=["payments"])
+async def update_driver_value(
+    request: Request,
+    id_conductor: int = Form(...),
+    valor: int = Form(...),
+    fecha_seleccionada: date = Form(...),
+    db: Session = Depends(get_database),
+    
+):  
+    print("paso 1 post")
+    if not serverStatus(db):
+        print("paso 2 post")
+        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    datos_conductor = getDriverData(id_conductor, db)
+
+    print("paso 3 post")
+    if not datos_conductor:
+        print("paso 4 post")
+        alert = {"type": "conductor_not_found", "message": "El conductor no existe."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
+        return RedirectResponse(url="/update/driver", status_code=status.HTTP_303_SEE_OTHER)
+
+    print("paso 5 post")
+    # Verificar si ya existe un registro para la fecha seleccionada
+    pago_existente = db.query(Pago).filter(
+        Pago.id_conductor == id_conductor,
+        Pago.fecha == fecha_seleccionada
+    ).first()
+
+    print("paso 6 post")
+    if pago_existente:
+        print("paso 7 post")
+        # Si existe, actualizar el valor
+        pago_existente.valor = valor
+        pago_existente.estado = valor >= datos_conductor["cuota_diaria_taxi"]
+    else:
+        print("paso 8 post")
+        # Si no existe, crear un nuevo registro
+        estado = valor >= datos_conductor["cuota_diaria_taxi"]
+        nuevo_pago = Pago(
+            id_conductor=id_conductor,
+            fecha=fecha_seleccionada,
+            valor=valor,
+            estado=estado,
+            cuota_diaria_registrada=True
+        )
+        db.add(nuevo_pago)
+
+    db.commit()
+    print("paso 9 post")
+    alert = {"type": "success", "message": "Valor del conductor actualizado exitosamente."}
+    # Almacena la alerta en la sesión
+    request.session["alert"] = alert
+
+    # Redirige a la vista de actualización de valor del conductor
+    return RedirectResponse(url="/update/driver", status_code=status.HTTP_303_SEE_OTHER)
 # -- FIN MODULO 2-- #

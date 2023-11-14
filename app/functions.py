@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordBearer
 import os
 
 from database import SessionLocal, get_database
-from models import ConductorActual, Usuario, Taxi
+from models import ConductorActual, Usuario, Taxi, Pago
 
 from fastapi import status
 from fastapi.responses import RedirectResponse
@@ -65,3 +65,17 @@ def tokenDecoder(token: str = Depends(oauth2_scheme)):
         return False
     except jwt.JWTError:
         raise False
+
+def obtener_fechas_conductor(id_conductor, db: Session):
+    if id_conductor:
+        # Obtener las fechas asociadas al conductor desde la base de datos
+        fechas_conductor = db.query(Pago.fecha).filter(
+            Pago.id_conductor == id_conductor
+        ).order_by(Pago.fecha.desc()).limit(7).all()
+
+        # Desempaquetar las fechas de la lista de tuplas
+        fechas_conductor = [fecha[0] for fecha in fechas_conductor]
+
+        return fechas_conductor
+    else:
+        return []
