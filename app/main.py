@@ -19,7 +19,7 @@ import os
 from dotenv import load_dotenv
 
 from functions import tokenConstructor, serverStatus
-from models import Usuario
+from models import *
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -146,7 +146,22 @@ async def CreateUser(
 
     return templates.TemplateResponse("index.html", {"request": request})
 
-# -- PATH TO  PAYMENSTS -- #
-    
 
-# -- END OF THE ROUTE -- #
+# -- PATH TO  REPORTS -- #
+@app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
+async def drivers(request: Request,
+                    db: Session = Depends(get_database)
+                ):
+    conductores=db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
+
+    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
+
+@app.post("/reports", response_class=HTMLResponse, tags=["routes"])
+async def reports(request: Request,
+                    id_usuario: int = Form(...),
+                    db: Session = Depends(get_database)
+                ):
+    reports= db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
+
+    return templatesReports.TemplateResponse("./dailyreports.html", {"request": request, "reports": reports})
+
