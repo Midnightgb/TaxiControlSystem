@@ -14,6 +14,7 @@ from models import ConductorActual, Usuario, Taxi, Pago
 
 from fastapi import status
 from fastapi.responses import RedirectResponse
+import re
 
 
 load_dotenv()
@@ -64,6 +65,16 @@ def tokenDecoder(token: str = Depends(oauth2_scheme)):
         return False
     except jwt.JWTError:
         raise False
+        
+def verificar_formato(cadena):
+    # El patrón es: tres letras seguidas de tres números
+    patron = re.compile(r'^[a-zA-Z]{3}\d{3}$')
+
+    # Verificar si la cadena coincide con el patrón
+    if patron.match(cadena):
+        return True
+    else:
+        return False
 
 def userStatus(c_user, request):
     token_payload = tokenDecoder(c_user)
@@ -94,4 +105,3 @@ def obtener_fechas_conductor(id_conductor, db: Session):
         return fechas_conductor
     else:
         return []
-

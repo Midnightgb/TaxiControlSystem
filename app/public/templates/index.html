@@ -25,7 +25,13 @@
         <p>
             {{alert.message}}
         </p>
+
     </main>
+    {% if alert %}
+            <div class="alert alert-{{ alert.type }}" role="alert">
+                {{ alert.message }}
+            </div>
+    {% endif %}
 
     <footer>
     </footer>

@@ -16,36 +16,53 @@
 
     <div class="container">
         <h1>Registro De Taxi</h1>
+        {% if alert %}
+            <div class="alert alert-{{ alert.type }}" role="alert">
+                {{ alert.message }}
+            </div>
+        {% endif %}
         <form action="/register/taxi" method="POST">
 
-            <label for="empresa_id">Empresa:</label>
-            <select name="empresa_id" id="empresa_id" required>
-                {% for empresa in empresas %}
-                <option value="{{ empresa.id_empresa }}">{{ empresa.nombre }}</option>
-                {% endfor %}
-            </select><br>
+            <div class="mb-3">
+                <label for="empresa_id" class="form-label">Empresa:</label>
+                <select class="form-select" name="empresa_id" id="empresa_id" required>
+                    {% for empresa in empresas %}
+                        <option value="{{ empresa.id_empresa }}">{{ empresa.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-            <label for="placa">PLACA:</label>
-            <input type="text" name="placa" id="placa" required><br>
+            <div class="mb-3">
+                <label for="placa" class="form-label">PLACA:</label>
+                <input type="text" class="form-control" name="placa" id="placa" required>
+            </div>
 
-            <label for="modelo">MODELO:</label>
-            <input type="text" name="modelo" id="modelo" required><br>
+            <div class="mb-3">
+                <label for="modelo" class="form-label">MODELO:</label>
+                <input type="text" class="form-control" name="modelo" id="modelo" required>
+            </div>
 
-            <label for="marca">MARCA:</label>
-            <input type="text" name="marca" id="marca" required><br>
+            <div class="mb-3">
+                <label for="marca" class="form-label">MARCA:</label>
+                <input type="text" class="form-control" name="marca" id="marca" required>
+            </div>
 
-            <label for="tipo_combustible">TIPO DE COMBUSTIBLE:</label>
-            <select name="tipo_combustible" id="tipo_combustible">
-                <option value="" disabled selected>Seleccione tipo de combustible</option>
-                <option value="Gasolina">Gasolina</option>
-                <option value="Gas">Gas</option>
-                <option value="Ambos">GASOLINA Y GAS</option>
-            </select><br>
+            <div class="mb-3">
+                <label for="tipo_combustible" class="form-label">TIPO DE COMBUSTIBLE:</label>
+                <select class="form-select" name="tipo_combustible" id="tipo_combustible">
+                    <option value="" disabled selected>Seleccione tipo de combustible</option>
+                    <option value="Gasolina">Gasolina</option>
+                    <option value="Gas">Gas</option>
+                    <option value="Ambos">GASOLINA Y GAS</option>
+                </select>
+            </div>
 
-            <label for="cuota_diaria">CUOTA DIARIA:</label>
-            <input type="number" name="cuota_diaria" id="cuota_diaria"  required><br>
+            <div class="mb-3">
+                <label for="cuota_diaria" class="form-label">CUOTA DIARIA:</label>
+                <input type="number" class="form-control" name="cuota_diaria" id="cuota_diaria" required>
+            </div>
 
-            <button type="submit">Registrar Taxi</button>
+            <button type="submit" class="btn btn-primary">Registrar Taxi</button>
         </form>
     </div>
 
