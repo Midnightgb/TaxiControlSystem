@@ -18,7 +18,6 @@ from fastapi.responses import RedirectResponse
 
 load_dotenv()
 SECRET_KEY = os.environ.get("SECRET_KEY")
-
 def tokenConstructor(userId: str):
     print("##########$$$$$$$$$$$$########## tokenConstructor ##########$$$$$$$$$$$$##########")
     expiration = datetime.utcnow() + timedelta(hours=1)
@@ -66,6 +65,22 @@ def tokenDecoder(token: str = Depends(oauth2_scheme)):
     except jwt.JWTError:
         raise False
 
+def userStatus(c_user, request):
+    token_payload = tokenDecoder(c_user)
+    if not token_payload:
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        redirect_response = RedirectResponse(url='/login', status_code=status.HTTP_303_SEE_OTHER)
+        redirect_response.delete_cookie("c_user")
+        validation = {
+            "status": False,
+            "redirect": redirect_response
+        }
+        return validation
+    else:
+        validation = {"status": True}
+        return validation
+
 def obtener_fechas_conductor(id_conductor, db: Session):
     if id_conductor:
         # Obtener las fechas asociadas al conductor desde la base de datos
@@ -79,3 +94,4 @@ def obtener_fechas_conductor(id_conductor, db: Session):
         return fechas_conductor
     else:
         return []
+

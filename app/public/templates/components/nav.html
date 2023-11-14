@@ -1,8 +1,8 @@
 <header id="nav-menu" aria-label="navigation bar">
   <div class="container">
     <div class="nav-start">
-      <a class="logo" href="/">
-        <img src="https://github.com/Evavic44/responsive-navbar-with-dropdown/blob/main/assets/images/logo.png?raw=true" width="35" height="35" alt="Inc Logo" />
+      <a class="logo" href="#">
+        <img src="{{ url_for('static', path='assets/imgs/logo250.png')}}" width="80" height="80" alt="Inc Logo" />
       </a>
       <nav class="menu">
         <ul class="menu-bar">
@@ -118,6 +118,7 @@
               </ul>
             </div>
           </li>
+          <li><a class="nav-link" href="/logout">Cerrar sesión</a></li>
           <li><a class="nav-link" href="/">Jobs</a></li>
           <li><a class="nav-link" href="/">Livestream</a></li>
           <li><a class="nav-link" href="/register/daily">Registro Cuota</a></li>
