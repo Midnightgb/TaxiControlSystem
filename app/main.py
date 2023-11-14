@@ -21,6 +21,7 @@ from datetime import date
 
 from functions import *
 from models import Usuario, Empresa, Taxi, Pago, ConductorActual   
+
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -33,6 +34,7 @@ app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 templates = Jinja2Templates(directory="public/templates")
+templatesReports = Jinja2Templates(directory="public/templates/Reports")
 
 
 @app.get("/", tags=["routes"])
@@ -325,6 +327,7 @@ async def create_allocation(
     id_taxi: int = Form(...),
     db: Session = Depends(get_database)
 ):
+
     try:
         if not serverStatus(db):
             alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
@@ -422,3 +425,43 @@ async def registro_diario(
     return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
 
 # -- FIN MODULO 2-- #
+
+    cedula_existente = db.query(Usuario).filter(
+        Usuario.cedula == cedula).first()
+    if cedula_existente:
+        raise HTTPException(
+            status_code=400, detail="La cédula ya está en uso.")
+
+    correo_existente = db.query(Usuario).filter(
+        Usuario.correo == correo).first()
+    if correo_existente:
+        raise HTTPException(
+            status_code=400, detail="El correo ya está en uso.")
+
+    nuevo_usuario = Usuario(cedula=cedula, nombre=nombre, apellido=apellido,
+                            correo=correo, contrasena=contrasena, rol=rol, estado='Activo')
+    db.add(nuevo_usuario)
+    db.commit()
+    db.refresh(nuevo_usuario)
+
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+# -- PATH TO  REPORTS -- #
+@app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
+async def drivers(request: Request,
+                    db: Session = Depends(get_database)
+                ):
+    conductores=db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
+
+    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
+
+@app.post("/reports", response_class=HTMLResponse, tags=["routes"])
+async def reports(request: Request,
+                    id_usuario: int = Form(...),
+                    db: Session = Depends(get_database)
+                ):
+    reports= db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
+
+    return templatesReports.TemplateResponse("./dailyreports.html", {"request": request, "reports": reports})
+
