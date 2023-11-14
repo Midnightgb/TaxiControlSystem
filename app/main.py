@@ -148,46 +148,71 @@ async def CreateUser(
     contrasena: Optional[str] = Form(""),
     rol: str = Form(...),
     empresa_id: int = Form(...),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_database),
+    c_user: str = Cookie(None)
 ):
-    try:
-        print("paso 1")
-        cedula_existente = db.query(Usuario).filter(Usuario.cedula == cedula).first()
-        if cedula_existente:
-            print("paso 2")
-            raise HTTPException(status_code=400, detail="La cédula ya está en uso.")
+    
+    if not serverStatus(db):
+            alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-        correo_existente = db.query(Usuario).filter(Usuario.correo == correo).first()
-        if correo_existente:
-            print("paso 3")
-            raise HTTPException(status_code=400, detail="El correo ya está en uso.")
+    if not c_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-       # Encriptar la contraseña solo si se proporciona una
-        hashed_password = None
-        if contrasena and rol != "Conductor":
-            print("paso 4")
-            hashed_password = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
+    token_payload = tokenDecoder(c_user)
+    print("##########$$$$$$$$$$$$########## token ##########$$$$$$$$$$$$##########")
+    print("Token decodificado:", token_payload)
 
+    if not token_payload:
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-        # Crear el nuevo usuario
-        nuevo_usuario = Usuario(
-            cedula=cedula,
-            nombre=nombre,
-            apellido=apellido,
-            correo=correo,
-            contrasena=hashed_password,
-            rol=rol,
-            estado='Activo',
-            empresa_id=empresa_id
-        )
-        print("paso 5")
-        db.add(nuevo_usuario)
-        db.commit()
-        db.refresh(nuevo_usuario)
-        print("paso 6")
-        return templates.TemplateResponse("index.html", {"request": request})
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al crear usuario: {str(e)}")
+    user_id = int(token_payload["sub"])
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+
+    if not usuario:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    empresa = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+
+    cedula_existente = db.query(Usuario).filter(Usuario.cedula == cedula).first()
+    if cedula_existente:
+        error_message = "La cédula ya está en uso."
+
+    correo_existente = db.query(Usuario).filter(Usuario.correo == correo).first()
+    if correo_existente:
+        print("paso 3")
+        error_message = "El correo ya está en uso."
+
+    if error_message:
+        return templates.TemplateResponse("CreateUser.html", {"request": request, "error_message": error_message,"empresa":empresa, "usuario": usuario})
+
+    # Encriptar la contraseña solo si se proporciona una
+    hashed_password = None
+    if contrasena and rol != "Conductor":
+        print("paso 4")
+        hashed_password = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
+
+    # Crear el nuevo usuario
+    nuevo_usuario = Usuario(
+        cedula=cedula,
+        nombre=nombre,
+        apellido=apellido,
+        correo=correo,
+        contrasena=hashed_password,
+        rol=rol,
+        estado='Activo',
+        empresa_id=empresa_id
+    )
+    print("paso 5")
+    db.add(nuevo_usuario)
+    db.commit()
+    db.refresh(nuevo_usuario)
+    print("paso 6")
+    return templates.TemplateResponse("index.html", {"request": request})
+
 # -- END OF THE ROUTE -- #
 
 
