@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Actualizar Valor del Conductor</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Actualizar Valor del Conductor</h1>
+        <form action="/update/driver" method="POST" id="updateForm">
+            <div class="mb-3">
+                <label for="id_conductor" class="form-label">Seleccione Conductor</label>
+                <select class="form-select" name="id_conductor" id="id_conductor" required>
+                    {% for conductor in conductores %}
+                    <option value="{{ conductor.id_usuario }}">{{ conductor.nombre }} {{ conductor.apellido }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="fecha_seleccionada" class="form-label">Seleccione Fecha</label>
+                <select name="fecha_seleccionada" id="fecha_seleccionada" required>
+                    {% for fecha in fechas_conductor %}
+                    <option value="{{ fecha }}">{{ fecha }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="valor" class="form-label">Valor Asociado</label>
+                <input type="text" class="form-control" name="valor" id="valor" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="nuevo_valor" class="form-label">Nuevo Valor</label>
+                <input type="number" class="form-control" name="nuevo_valor" id="nuevo_valor" required>
+            </div>
+            {% if alert %}
+            <div class="alert alert-{{ alert.type }} alert-dismissible fade show" role="alert">
+                {{ alert.message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+            <button type="button" class="btn btn-primary" onclick="actualizarValor()">Actualizar Valor</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
+        integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
+    </script>
+
+</body>
+
+</html>

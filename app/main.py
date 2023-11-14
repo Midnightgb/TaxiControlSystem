@@ -21,6 +21,7 @@ from datetime import date
 
 from functions import *
 from models import Usuario, Empresa, Taxi, Pago, ConductorActual   
+
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -32,6 +33,7 @@ app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 templates = Jinja2Templates(directory="public/templates")
+templatesReports = Jinja2Templates(directory="public/templates/Reports")
 
 
 @app.get("/", tags=["routes"])
@@ -160,46 +162,71 @@ async def CreateUser(
     contrasena: Optional[str] = Form(""),
     rol: str = Form(...),
     empresa_id: int = Form(...),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_database),
+    c_user: str = Cookie(None)
 ):
-    try:
-        print("paso 1")
-        cedula_existente = db.query(Usuario).filter(Usuario.cedula == cedula).first()
-        if cedula_existente:
-            print("paso 2")
-            raise HTTPException(status_code=400, detail="La cédula ya está en uso.")
+    
+    if not serverStatus(db):
+            alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-        correo_existente = db.query(Usuario).filter(Usuario.correo == correo).first()
-        if correo_existente:
-            print("paso 3")
-            raise HTTPException(status_code=400, detail="El correo ya está en uso.")
+    if not c_user:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-       # Encriptar la contraseña solo si se proporciona una
-        hashed_password = None
-        if contrasena and rol != "Conductor":
-            print("paso 4")
-            hashed_password = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
+    token_payload = tokenDecoder(c_user)
+    print("##########$$$$$$$$$$$$########## token ##########$$$$$$$$$$$$##########")
+    print("Token decodificado:", token_payload)
 
+    if not token_payload:
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-        # Crear el nuevo usuario
-        nuevo_usuario = Usuario(
-            cedula=cedula,
-            nombre=nombre,
-            apellido=apellido,
-            correo=correo,
-            contrasena=hashed_password,
-            rol=rol,
-            estado='Activo',
-            empresa_id=empresa_id
-        )
-        print("paso 5")
-        db.add(nuevo_usuario)
-        db.commit()
-        db.refresh(nuevo_usuario)
-        print("paso 6")
-        return templates.TemplateResponse("index.html", {"request": request})
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error al crear usuario: {str(e)}")
+    user_id = int(token_payload["sub"])
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+
+    if not usuario:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    empresa = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+
+    cedula_existente = db.query(Usuario).filter(Usuario.cedula == cedula).first()
+    if cedula_existente:
+        error_message = "La cédula ya está en uso."
+
+    correo_existente = db.query(Usuario).filter(Usuario.correo == correo).first()
+    if correo_existente:
+        print("paso 3")
+        error_message = "El correo ya está en uso."
+
+    if error_message:
+        return templates.TemplateResponse("CreateUser.html", {"request": request, "error_message": error_message,"empresa":empresa, "usuario": usuario})
+
+    # Encriptar la contraseña solo si se proporciona una
+    hashed_password = None
+    if contrasena and rol != "Conductor":
+        print("paso 4")
+        hashed_password = bcrypt.hashpw(contrasena.encode('utf-8'), bcrypt.gensalt())
+
+    # Crear el nuevo usuario
+    nuevo_usuario = Usuario(
+        cedula=cedula,
+        nombre=nombre,
+        apellido=apellido,
+        correo=correo,
+        contrasena=hashed_password,
+        rol=rol,
+        estado='Activo',
+        empresa_id=empresa_id
+    )
+    print("paso 5")
+    db.add(nuevo_usuario)
+    db.commit()
+    db.refresh(nuevo_usuario)
+    print("paso 6")
+    return templates.TemplateResponse("index.html", {"request": request})
+
 # -- END OF THE ROUTE -- #
 
 
@@ -302,6 +329,9 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
     if not usuario:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
+    # Recuperar alerta de la sesión
+    alert = request.session.pop("alert", None)
+
     # Subconsulta para obtener los IDs de conductores asignados
     conductores_asignados_subquery = db.query(ConductorActual.id_conductor).distinct()
 
@@ -327,7 +357,7 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
     print("Conductores no asignados:", conductores_no_asignados)
     print("Taxis no asignados:", taxis_no_asignados)
 
-    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados, "taxis": taxis_no_asignados})
+    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados, "taxis": taxis_no_asignados, "alert": alert})
 # -- END OF THE ROUTE -- #
 
 
@@ -339,6 +369,7 @@ async def create_allocation(
     id_taxi: int = Form(...),
     db: Session = Depends(get_database)
 ):
+
     try:
         if not serverStatus(db):
             alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
@@ -354,7 +385,19 @@ async def create_allocation(
             id_conductor=id_conductor,
             id_taxi=id_taxi
         )
-
+        
+        if nueva_asignacion:
+            alert = {"type": "general","message": "Asignación creada con éxito."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/allocation", status_code=status.HTTP_303_SEE_OTHER)
+        
+        
+        if not nueva_asignacion:
+            alert = {"type": "general","message": "Error al crear la asignación."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/allocation", status_code=status.HTTP_303_SEE_OTHER)
+        
+        
         db.add(nueva_asignacion)
         db.commit()
         db.refresh(nueva_asignacion)
@@ -377,20 +420,61 @@ async def create_allocation(
 # -- MODULO 2-- #
 
 @app.get("/register/daily", response_class=HTMLResponse, tags=["routes"])
-async def registro_diario_view(request: Request, db: Session = Depends(get_database)):
-    # Recuperar la alerta de la sesión
-    alert = request.session.pop("alert", None)
-    conductores = db.query(Usuario).filter(Usuario.rol == "Conductor").all()
-    return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores})
-
-@app.post("/register/daily", response_class=HTMLResponse, tags=["payments"])
+async def registro_diario_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    user_id = None
+    
+    try:
+        if not serverStatus(db):
+            raise HTTPException(status_code=500, detail="Error en conexión al servidor, contacte al proveedor del servicio.")
+        
+        if not c_user:
+            raise HTTPException(status_code=401, detail="No se proporcionó un token de usuario.")
+        
+        token_payload = tokenDecoder(c_user)
+        
+        if not token_payload:
+            alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+        
+        user_id = int(token_payload["sub"])
+        usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+        if not usuario:
+            raise HTTPException(status_code=401, detail="Usuario no encontrado.")
+        
+        empresas = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+        if not empresas:
+            raise HTTPException(status_code=500, detail="Error al obtener información de la empresa.")
+        
+        # Filtrar conductores por la empresa del usuario
+        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+        # Recuperar la alerta de la sesión
+        alert = request.session.pop("alert", None)
+        return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores})
+    except HTTPException as e:
+        alert = {"type": "general", "message": str(e.detail)}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    except Exception as e:
+        alert = {"type": "general", "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+   
+# -- MODULO 2 actualizar registro diario-- #    
+@app.post("/register/daily", tags=["payments"])
 async def registro_diario(
     request: Request,
     id_conductor: int = Form(...),
     valor: int = Form(...),
-    db: Session = Depends(get_database)
-):
-    datos_conductor = get_datos_conductor(id_conductor, db)
+    db: Session = Depends(get_database),
+):  
+    if not serverStatus(db):
+        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    datos_conductor = getDriverData(id_conductor, db)
 
     if not datos_conductor:
         alert = {"type": "conductor_not_found", "message": "El conductor no existe."}
@@ -401,13 +485,11 @@ async def registro_diario(
     cuota_diaria_taxi = datos_conductor["cuota_diaria_taxi"]
 
     fecha_actual = date.today()
-
     pago_existente = db.query(Pago).filter(
         Pago.id_conductor == id_conductor,
         Pago.fecha == fecha_actual,
         Pago.cuota_diaria_registrada == True
     ).first()
-
     if pago_existente:
         alert = {"type": "payment_already_registered", "message": "Ya se registró el pago de la cuota diaria para este conductor."}
         # Almacena la alerta en la sesión
@@ -427,7 +509,6 @@ async def registro_diario(
         db.add(nuevo_pago)
         db.commit()
         db.refresh(nuevo_pago)
-
         alert = {"type": "success", "message": "Pago registrado exitosamente."}
         # Almacena la alerta en la sesión
         request.session["alert"] = alert
@@ -435,4 +516,171 @@ async def registro_diario(
     # Redirige a la vista de registro diario
     return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
 
+@app.get("/update/driver", response_class=HTMLResponse, tags=["routes"])
+async def update_driver_value_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    user_id = None
+    
+    try:
+        print("paso 1 get")
+        if not serverStatus(db):
+            print("paso 2 get")
+            raise HTTPException(status_code=500, detail="Error en conexión al servidor, contacte al proveedor del servicio.")
+        print("paso 3 get")
+        if not c_user:
+            print("paso 4 get")
+            raise HTTPException(status_code=401, detail="No se proporcionó un token de usuario.")
+        
+        print("paso 5 get")
+        token_payload = tokenDecoder(c_user)
+        
+        print("paso 6 get")
+        if not token_payload:
+            print("paso 7 get")
+            alert = {"type": "general","message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+        
+        print("paso 8 get")
+        user_id = int(token_payload["sub"])
+        usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+        print("paso 9 get")
+        if not usuario:
+            print("paso 10 get")
+            raise HTTPException(status_code=401, detail="Usuario no encontrado.")
+        
+        empresas = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+        print("paso 11 get")
+        if not empresas:
+            print("paso 12 get")
+            raise HTTPException(status_code=500, detail="Error al obtener información de la empresa.")
+        
+        # Filtrar conductores por la empresa del usuario
+        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+
+        # Consultar fechas del conductor
+        fechas_conductor = db.query(Pago.fecha).filter(Pago.id_conductor == user_id).all()
+
+        # Recuperar la alerta de la sesión
+        alert = request.session.pop("alert", None)
+        print("paso 13 get")
+        return templates.TemplateResponse("registerDailyUpdate.html", {
+            "request": request,
+            "alert": alert,
+            "conductores": conductores,
+            "fechas_conductor": fechas_conductor  # Agregar las fechas del conductor
+        })
+        print("paso 14 get")
+
+    except HTTPException as e:
+        alert = {"type": "general", "message": str(e.detail)}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    except Exception as e:
+        alert = {"type": "general", "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        request.session["alert"] = alert
+        print("Error paso 15:", str(e))
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@app.post("/update/driver", tags=["payments"])
+async def update_driver_value(
+    request: Request,
+    id_conductor: int = Form(...),
+    valor: int = Form(...),
+    fecha_seleccionada: date = Form(...),
+    db: Session = Depends(get_database),
+    
+):  
+    print("paso 1 post")
+    if not serverStatus(db):
+        print("paso 2 post")
+        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    datos_conductor = getDriverData(id_conductor, db)
+
+    print("paso 3 post")
+    if not datos_conductor:
+        print("paso 4 post")
+        alert = {"type": "conductor_not_found", "message": "El conductor no existe."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
+        return RedirectResponse(url="/update/driver", status_code=status.HTTP_303_SEE_OTHER)
+
+    print("paso 5 post")
+    # Verificar si ya existe un registro para la fecha seleccionada
+    pago_existente = db.query(Pago).filter(
+        Pago.id_conductor == id_conductor,
+        Pago.fecha == fecha_seleccionada
+    ).first()
+
+    print("paso 6 post")
+    if pago_existente:
+        print("paso 7 post")
+        # Si existe, actualizar el valor
+        pago_existente.valor = valor
+        pago_existente.estado = valor >= datos_conductor["cuota_diaria_taxi"]
+    else:
+        print("paso 8 post")
+        # Si no existe, crear un nuevo registro
+        estado = valor >= datos_conductor["cuota_diaria_taxi"]
+        nuevo_pago = Pago(
+            id_conductor=id_conductor,
+            fecha=fecha_seleccionada,
+            valor=valor,
+            estado=estado,
+            cuota_diaria_registrada=True
+        )
+        db.add(nuevo_pago)
+
+    db.commit()
+    print("paso 9 post")
+    alert = {"type": "success", "message": "Valor del conductor actualizado exitosamente."}
+    # Almacena la alerta en la sesión
+    request.session["alert"] = alert
+
+    # Redirige a la vista de actualización de valor del conductor
+    return RedirectResponse(url="/update/driver", status_code=status.HTTP_303_SEE_OTHER)
 # -- FIN MODULO 2-- #
+
+    cedula_existente = db.query(Usuario).filter(
+        Usuario.cedula == cedula).first()
+    if cedula_existente:
+        raise HTTPException(
+            status_code=400, detail="La cédula ya está en uso.")
+
+    correo_existente = db.query(Usuario).filter(
+        Usuario.correo == correo).first()
+    if correo_existente:
+        raise HTTPException(
+            status_code=400, detail="El correo ya está en uso.")
+
+    nuevo_usuario = Usuario(cedula=cedula, nombre=nombre, apellido=apellido,
+                            correo=correo, contrasena=contrasena, rol=rol, estado='Activo')
+    db.add(nuevo_usuario)
+    db.commit()
+    db.refresh(nuevo_usuario)
+
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+# -- PATH TO  REPORTS -- #
+@app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
+async def drivers(request: Request,
+                    db: Session = Depends(get_database)
+                ):
+    conductores=db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
+
+    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
+
+@app.post("/reports", response_class=HTMLResponse, tags=["routes"])
+async def reports(request: Request,
+                    id_usuario: int = Form(...),
+                    db: Session = Depends(get_database)
+                ):
+    reports= db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
+
+    return templatesReports.TemplateResponse("./dailyreports.html", {"request": request, "reports": reports})
+
