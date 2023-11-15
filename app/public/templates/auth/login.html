@@ -22,7 +22,12 @@
       <h3>Inicio de sesion</h3>
 
       <label for="user">Usuario</label>
+      {% if triedUser: %}
+      <input type="text" placeholder="Cedula o Email" id="user" name="user" autocomplete="username" value="{{triedUser}}">
+      {% else: %}
       <input type="text" placeholder="Cedula o Email" id="user" name="user" autocomplete="username">
+      {% endif %}
+      
       {% if alert: %}
       {% if alert.type == 'user': %}
       <p class="showing-alert">{{alert.message}}</p>

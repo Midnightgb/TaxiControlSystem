@@ -20,10 +20,12 @@ from dotenv import load_dotenv
 from datetime import date
 
 from functions import *
-from models import Usuario, Empresa, Taxi, Pago, ConductorActual
+from models import *
 
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
+
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
@@ -44,7 +46,8 @@ async def root():
 @app.get("/login", response_class=HTMLResponse, tags=["routes"])
 async def login(request: Request):
     alert = request.session.pop("alert", None)
-    return templates.TemplateResponse("./auth/login.html", {"request": request, "alert": alert})
+    triedUser = request.session.pop("triedUser", None)
+    return templates.TemplateResponse("./auth/login.html", {"request": request, "alert": alert, "triedUser": triedUser})
 
 
 @app.get("/login/recover", response_class=HTMLResponse, tags=["routes"])
@@ -59,18 +62,18 @@ async def login_post(
     password: Optional[str] = Form(""),
     db: Session = Depends(get_database),
 ):
-
+    request.session["triedUser"] = user
     if not serverStatus(db):
         alert = {"type": "general",
                  "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     if not user and not password:
         alert = {"type": "user",
                  "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     if '@' in user:
         usuario = db.query(Usuario).filter(Usuario.correo == user).first()
@@ -81,19 +84,33 @@ async def login_post(
         alert = {"type": "user",
                  "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    role = usuario.rol
+    print(role)
+    if role == Rol.Conductor:
+        print('entro')
+        alert = {"type": "user",
+                 "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    if usuario.contrasena == None:
+        alert = {"type": "pass", "message": "La contraseña que ingresaste es incorrecta.",
+                 "link": "/login/recover"}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     if not bcrypt.checkpw(password.encode('utf-8'), usuario.contrasena.encode('utf-8')):
         alert = {"type": "pass", "message": "La contraseña que ingresaste es incorrecta.",
                  "link": "/login/recover"}
         request.session["alert"] = alert
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-    if usuario.estado == 'Inactivo':
+    if usuario.estado == Estado.Inactivo:
         alert = {"type": "general",
                  "message": "El usuario se encuentra inactivo, contacte al proveedor del servicio."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     response = RedirectResponse(
         url="/home",
@@ -119,18 +136,20 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
                  "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
     UUID = checkTokenStatus["userid"]
     userData = db.query(Usuario).filter(Usuario.id_usuario == UUID).first()
     if not userData:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     welcome = {"name": userData.nombre, "message": ""}
     alert = request.session.pop("alert", None)
     return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome})
 
 
 @app.get("/logout", tags=["auth"])
-async def logout():
+async def logout(request: Request):
+    request.session.pop("triedUser", None)
     response = RedirectResponse(
         url="/login", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie(key="c_user")
@@ -247,7 +266,7 @@ async def CreateUser(
     db.add(nuevo_usuario)
     db.commit()
     db.refresh(nuevo_usuario)
-    alert = {"type": "success", "message": "Usuario registrado exitosamente."} 
+    alert = {"type": "success", "message": "Usuario registrado exitosamente."}
     request.session["alert"] = alert
     return RedirectResponse(url="/register/user", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -355,13 +374,13 @@ async def create_taxi(
 
 # ========================================== END OF TAXIBLOCK ============================================ #
 
-# ========================================== ALLOCATIONBLOCK ============================================ #
+# ========================================== assignmentBLOCK ============================================ #
 
-# -- PATH TO REDIRECT TO ALLOCATION CREATION -- #
-@app.get("/register/allocation", response_class=HTMLResponse, tags=["create"])
+# -- PATH TO REDIRECT TO assignment CREATION -- #
+@app.get("/register/assignment", response_class=HTMLResponse, tags=["create"])
 async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
-    print("ENTRO A PASO 1", c_user)
+
     if not c_user:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -374,75 +393,51 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
     if not usuario:
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Subconsulta para obtener los IDs de conductores asignados
-    conductores_asignados_subquery = db.query(ConductorActual.id_conductor).distinct()
-    print("conductores_asignados_subquery", conductores_asignados_subquery)
-    # Subconsulta para obtener los IDs de taxis asignados
-    taxis_asignados_subquery = db.query(ConductorActual.id_taxi).distinct()
-    print("taxis_asignados_subquery", taxis_asignados_subquery)
-    # Consulta para traer los conductores no asignados en la misma empresa
-    conductores_no_asignados = db.query(Usuario).filter(
-        Usuario.rol == "conductor",
-        Usuario.empresa_id == usuario.empresa_id,
-        Usuario.id_usuario.in_(conductores_asignados_subquery),
-    ).all()
+    driversNotAssigned = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
+        ~Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
+    taxisNotAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
+        ~Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
 
-    # Consulta para traer los taxis no asignados en la misma empresa
-    taxis_no_asignados = db.query(Taxi).filter(
-        Taxi.empresa_id == usuario.empresa_id,
-        Taxi.id_taxi.in_(taxis_asignados_subquery),
-    ).all()
-
-    print("Usuario:", usuario)
-    print("Roles del usuario:", usuario.rol)
-    print("Token Payload:", token_payload)
-    print("Conductores no asignados:", conductores_no_asignados)
-    print("Taxis no asignados:", taxis_no_asignados)
-
-    return templates.TemplateResponse("CreateAllocation.html", {"request": request, "conductores": conductores_no_asignados, "taxis": taxis_no_asignados})
+    alert = request.session.pop("alert", None)
+    return templates.TemplateResponse("registerAssignment.html", {"request": request, "conductores": driversNotAssigned, "taxis": taxisNotAssigned, "alert": alert})
 # -- END OF THE ROUTE -- #
 
 
-# -- PATH TO PROCEED TO THE CREATION OF A NEW ALLOCATION -- #
-@app.post("/register/allocation", response_class=HTMLResponse)
-async def create_allocation(
+# -- PATH TO PROCEED TO THE CREATION OF A NEW assignment -- #
+@app.post("/register/assignment", response_class=HTMLResponse)
+async def create_assignment(
     request: Request,
     id_conductor: int = Form(...),
     id_taxi: int = Form(...),
     db: Session = Depends(get_database)
 ):
-    try:
-        if not serverStatus(db):
-            alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
-            request.session["alert"] = alert
-            return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    if not serverStatus(db):
+        alert = {"type": "general",
+                    "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
-        # Verificar si el conductor ya está asignado a un taxi
-        if db.query(ConductorActual).filter(ConductorActual.id_conductor == id_conductor).first():
-            raise HTTPException(status_code=400, detail="El conductor ya está asignado a un taxi.")
+    # Verificar si el conductor ya está asignado a un taxi
+    if db.query(ConductorActual).filter(ConductorActual.id_conductor == id_conductor).first():
+        alert = {"type": "error",
+                    "message": "El conductor ya está asignado a un taxi."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/assignment", status_code=status.HTTP_303_SEE_OTHER)
 
-        # Si pasa las validaciones, proceder con la creación de la asignación
-        nueva_asignacion = ConductorActual(
-            id_conductor=id_conductor,
-            id_taxi=id_taxi
-        )
+    # Si pasa las validaciones, proceder con la creación de la asignación
+    nueva_asignacion = ConductorActual(
+        id_conductor=id_conductor,
+        id_taxi=id_taxi
+    )
 
-        db.add(nueva_asignacion)
-        db.commit()
-        db.refresh(nueva_asignacion)
+    db.add(nueva_asignacion)
+    db.commit()
+    db.refresh(nueva_asignacion)
 
-        return templates.TemplateResponse("index.html", {"request": request, "message": "Asignación creada con éxito"})
-    except HTTPException as e:
-        # Capturamos las excepciones específicas de FastAPI
-        return templates.TemplateResponse("index.html", {"request": request, "error_message": e.detail})
-    except Exception as e:
-        # Capturamos otras excepciones y mostramos un mensaje genérico de error
-        return templates.TemplateResponse("index.html", {"request": request, "error_message": "Error al procesar la solicitud."})
+    return templates.TemplateResponse("index.html", {"request": request, "message": "Asignación creada con éxito"})
 # -- END OF THE ROUTE -- #
 
-# ========================================== END OF ALLOCATIONBLOCK ============================================ #
-
-
+# ========================================== END OF assignmentBLOCK ============================================ #
 
 
 # -- MODULO 2-- #
@@ -457,7 +452,8 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
                 status_code=500, detail="Error en conexión al servidor, contacte al proveedor del servicio.")
 
         if not c_user:
-            raise HTTPException(logout=401, detail="No se proporcionó un token de usuario.")
+            raise HTTPException(
+                logout=401, detail="No se proporcionó un token de usuario.")
 
         token_payload = tokenDecoder(c_user)
 
@@ -564,7 +560,7 @@ async def update_driver_value_view(request: Request, c_user: str = Cookie(None),
     try:
         if not serverStatus(db):
             alert = {"type": "general",
-                    "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
         if not c_user:
@@ -695,3 +691,13 @@ async def reports(request: Request,
     reports = db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
 
     return templatesReports.TemplateResponse("./dailyreports.html", {"request": request, "reports": reports})
+
+@app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
+async def not_found(request: Request, c_user: str = Cookie(None)):
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    return templates.TemplateResponse("./error404.html", {"request": request})
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return RedirectResponse(url="/404-NotFound", status_code=status.HTTP_303_SEE_OTHER)

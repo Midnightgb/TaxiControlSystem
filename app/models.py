@@ -67,7 +67,7 @@ class Taxi(Base):
 
     empresa = relationship("Empresa", back_populates="taxis")
     mantenimientos = relationship("Mantenimiento", back_populates="taxi")
-    conductor_actual = relationship("ConductorActual", back_populates="taxi")  # Add this line
+    conductor_actual = relationship("ConductorActual", back_populates="taxi")
     reporte_taxi = relationship("reporteTaxi", back_populates="taxi")
     
 class ConductorActual(Base):
