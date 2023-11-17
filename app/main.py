@@ -683,7 +683,7 @@ async def drivers(request: Request,
     return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
 
 
-@app.post("/reports", response_class=HTMLResponse, tags=["routes"])
+@app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
 async def reports(request: Request,
                   id_usuario: int = Form(...),
                   db: Session = Depends(get_database)

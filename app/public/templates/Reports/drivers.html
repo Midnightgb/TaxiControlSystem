@@ -35,7 +35,7 @@
                             <div class="card-body">
                                 <h5 class="card-title">{{ usuario.nombre }} {{ usuario.apellido }}</h5>
                                 <p class="card-text">{{usuario.correo}}</p>
-                                <form action="/reports" method="POST">
+                                <form action="/reports/driver/{{usuario.nombre}} {{ usuario.apellido }}" method="POST">
                                     <input type="hidden" name="id_usuario" value="{{usuario.id_usuario}}">
                                     <button type="submit" class="btn btn-primary">Ver informes</button>
                                 </form>
