@@ -93,7 +93,7 @@ async def login_post(
                  "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     if usuario.contrasena == None:
         alert = {"type": "pass", "message": "La contraseña que ingresaste es incorrecta.",
                  "link": "/login/recover"}
@@ -413,14 +413,14 @@ async def create_assignment(
 ):
     if not serverStatus(db):
         alert = {"type": "general",
-                    "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar si el conductor ya está asignado a un taxi
     if db.query(ConductorActual).filter(ConductorActual.id_conductor == id_conductor).first():
         alert = {"type": "error",
-                    "message": "El conductor ya está asignado a un taxi."}
+                 "message": "El conductor ya está asignado a un taxi."}
         request.session["alert"] = alert
         return RedirectResponse(url="/register/assignment", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -692,11 +692,13 @@ async def reports(request: Request,
 
     return templatesReports.TemplateResponse("./dailyreports.html", {"request": request, "reports": reports})
 
+
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse("./error404.html", {"request": request})
+
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
