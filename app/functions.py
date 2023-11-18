@@ -2,6 +2,7 @@ from jose import jwt
 from fastapi import HTTPException, Depends
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from sqlalchemy import func
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import joinedload, Session
 from sqlalchemy.sql import text
@@ -92,16 +93,18 @@ def userStatus(c_user, request):
         validation = {"status": True, "userid": token_payload["sub"]}
         return validation
 
-def obtener_fechas_conductor(id_conductor, db: Session):
-    if id_conductor:
-        # Obtener las fechas asociadas al conductor desde la base de datos
-        fechas_conductor = db.query(Pago.fecha).filter(
-            Pago.id_conductor == id_conductor
-        ).order_by(Pago.fecha.desc()).limit(7).all()
+def obtener_fechas_registradas(id_conductor, db):
+    fechas_registradas = db.query(func.distinct(Pago.fecha)).filter(
+        Pago.id_conductor == id_conductor,
+        Pago.cuota_diaria_registrada == True
+    ).all()
+    return [fecha[0] for fecha in fechas_registradas]
 
-        # Desempaquetar las fechas de la lista de tuplas
-        fechas_conductor = [fecha[0] for fecha in fechas_conductor]
+def obtener_cuota_actual(id_conductor, fecha_seleccionada, db):
+    cuota_actual = db.query(Pago.valor).filter(
+        Pago.id_conductor == id_conductor,
+        Pago.fecha == fecha_seleccionada,
+        Pago.cuota_diaria_registrada == True
+    ).first()
 
-        return fechas_conductor
-    else:
-        return []
+    return cuota_actual[0] if cuota_actual else None

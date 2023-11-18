@@ -479,6 +479,8 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         # Filtrar conductores por la empresa del usuario
         conductores = db.query(Usuario).filter(
             Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+        
+        
         # Recuperar la alerta de la sesión
         alert = request.session.pop("alert", None)
         return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores})
@@ -553,18 +555,18 @@ async def registro_diario(
     return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
 
 
-@app.get("/update/driver", response_class=HTMLResponse, tags=["routes"])
-async def update_driver_value_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+@app.get("/update/daily", response_class=HTMLResponse, tags=["routes"])
+async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
 
     try:
         if not serverStatus(db):
-            alert = {"type": "general",
-                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
-            request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            raise HTTPException(
+                status_code=500, detail="Error en conexión al servidor, contacte al proveedor del servicio.")
+
         if not c_user:
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            raise HTTPException(
+                logout=401, detail="No se proporcionó un token de usuario.")
 
         token_payload = tokenDecoder(c_user)
 
@@ -581,7 +583,7 @@ async def update_driver_value_view(request: Request, c_user: str = Cookie(None),
             raise HTTPException(
                 status_code=401, detail="Usuario no encontrado.")
 
-        empresas = db.query(Empresa).filter(
+        empresas = db.query(Empresa, Empresa.nombre).filter(
             Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
             raise HTTPException(
@@ -591,19 +593,16 @@ async def update_driver_value_view(request: Request, c_user: str = Cookie(None),
         conductores = db.query(Usuario).filter(
             Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
 
-        # Consultar fechas del conductor
-        fechas_conductor = db.query(Pago.fecha).filter(
-            Pago.id_conductor == user_id).all()
+        # Obtener fechas registradas para el conductor seleccionado
+        id_conductor_default = conductores[0].id_usuario if conductores else None
+        fechas_registradas = obtener_fechas_registradas(
+            id_conductor_default, db)
 
         # Recuperar la alerta de la sesión
         alert = request.session.pop("alert", None)
-        return templates.TemplateResponse("registerDailyUpdate.html", {
-            "request": request,
-            "alert": alert,
-            "conductores": conductores,
-            "fechas_conductor": fechas_conductor  # Agregar las fechas del conductor
-        })
-
+        
+        return templates.TemplateResponse("registerDailyUpdate.html", {"request": request, "alert": alert, "conductores": conductores, "fechas_registradas": fechas_registradas, "empresas": empresas})
+    
     except HTTPException as e:
         alert = {"type": "general", "message": str(e.detail)}
         request.session["alert"] = alert
@@ -616,60 +615,70 @@ async def update_driver_value_view(request: Request, c_user: str = Cookie(None),
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
 
-@app.post("/update/driver", tags=["payments"])
-async def update_driver_value(
+
+
+@app.post("/update/daily", tags=["payments"])
+async def actualizar_cuota_diaria(
     request: Request,
     id_conductor: int = Form(...),
-    valor: int = Form(...),
-    fecha_seleccionada: date = Form(...),
+    nueva_cuota: int = Form(...),
+    fecha_seleccionada: str = Form(...),
     db: Session = Depends(get_database),
-
 ):
-    if not serverStatus(db):
-        alert = {"type": "general",
-                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+    try:
+        if not serverStatus(db):
+            raise HTTPException(
+                status_code=500, detail="Error en conexión al servidor, contacte al proveedor del servicio.")
+
+        datos_conductor = getDriverData(id_conductor, db)
+
+        if not datos_conductor:
+            alert = {"type": "conductor_not_found",
+                     "message": "El conductor no existe."}
+            # Almacena la alerta en la sesión
+            request.session["alert"] = alert
+            return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
+
+        # Puedes utilizar la función datetime.strptime para convertir la cadena de fecha a un objeto datetime
+        fecha_seleccionada_dt = datetime.strptime(
+            fecha_seleccionada, "%Y-%m-%d").date()
+
+        # Verificar si ya existe un pago registrado para la fecha seleccionada
+        pago_existente = db.query(Pago).filter(
+            Pago.id_conductor == id_conductor,
+            Pago.fecha == fecha_seleccionada_dt,
+            Pago.cuota_diaria_registrada == True
+        ).first()
+
+        if not pago_existente:
+            alert = {"type": "payment_not_registered",
+                     "message": "No se encontró un pago registrado para la fecha seleccionada."}
+            # Almacena la alerta en la sesión
+            request.session["alert"] = alert
+            return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
+        
+        # Actualizar la cuota diaria para la fecha seleccionada
+        pago_existente.valor = nueva_cuota
+        pago_existente.estado = nueva_cuota >= datos_conductor["cuota_diaria_taxi"]
+        db.commit()
+
+        alert = {"type": "success", "message": "Cuota diaria actualizada exitosamente."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
+        
+        # Redirige a la vista de actualización diaria
+        return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
+
+    except HTTPException as e:
+        alert = {"type": "general", "message": str(e.detail)}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-    datos_conductor = getDriverData(id_conductor, db)
-
-    if not datos_conductor:
-        alert = {"type": "conductor_not_found",
-                 "message": "El conductor no existe."}
-        # Almacena la alerta en la sesión
+    except Exception as e:
+        alert = {"type": "general",
+                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/update/driver", status_code=status.HTTP_303_SEE_OTHER)
-
-    # Verificar si ya existe un registro para la fecha seleccionada
-    pago_existente = db.query(Pago).filter(
-        Pago.id_conductor == id_conductor,
-        Pago.fecha == fecha_seleccionada
-    ).first()
-
-    if pago_existente:
-        # Si existe, actualizar el valor
-        pago_existente.valor = valor
-        pago_existente.estado = valor >= datos_conductor["cuota_diaria_taxi"]
-    else:
-        # Si no existe, crear un nuevo registro
-        estado = valor >= datos_conductor["cuota_diaria_taxi"]
-        nuevo_pago = Pago(
-            id_conductor=id_conductor,
-            fecha=fecha_seleccionada,
-            valor=valor,
-            estado=estado,
-            cuota_diaria_registrada=True
-        )
-        db.add(nuevo_pago)
-
-    db.commit()
-    alert = {"type": "success",
-             "message": "Valor del conductor actualizado exitosamente."}
-    # Almacena la alerta en la sesión
-    request.session["alert"] = alert
-
-    # Redirige a la vista de actualización de valor del conductor
-    return RedirectResponse(url="/update/driver", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
 # -- PATH TO  REPORTS -- #
 
