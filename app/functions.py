@@ -17,6 +17,8 @@ from fastapi.responses import RedirectResponse
 import re
 
 
+
+
 load_dotenv()
 SECRET_KEY = os.environ.get("SECRET_KEY")
 def tokenConstructor(userId: str):
@@ -105,3 +107,6 @@ def obtener_fechas_conductor(id_conductor, db: Session):
         return fechas_conductor
     else:
         return []
+    
+
+

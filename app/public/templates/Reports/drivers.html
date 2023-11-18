@@ -31,7 +31,13 @@
                 {% if usuarios is not none %}
                     {% for usuario in usuarios %}
                         <div class="card col-lg-3 col-xl-3 mx-1 my-3" style="width: 20rem;">
-                            <img src="..." class="card-img-top" alt="...">
+                            {% if usuario.foto is not none %}
+                                
+                                <img src="data:image/png;base64,{{ usuario.foto }}" height="70px" width="90px" class="card-img-top" /> 
+                            {% else %}
+                                <img src="{{ url_for('static', path='assets/imgs/imagenPerfil.png')}}" class="card-img-top" height="70px" width="90px" >
+
+                            {% endif %}
                             <div class="card-body">
                                 <h5 class="card-title">{{ usuario.nombre }} {{ usuario.apellido }}</h5>
                                 <p class="card-text">{{usuario.correo}}</p>

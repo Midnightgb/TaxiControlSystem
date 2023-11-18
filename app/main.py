@@ -9,6 +9,7 @@ from fastapi import (
     Cookie,
     Query,
     Response,
+    UploadFile,
 )
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -26,6 +27,8 @@ from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
+import base64
+
 
 load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
@@ -203,6 +206,7 @@ async def CreateUser(
     contrasena: Optional[str] = Form(""),
     rol: str = Form(...),
     empresa_id: int = Form(...),
+    imagen:Optional[UploadFile]  = Form(None),
     db: Session = Depends(get_database),
     c_user: str = Cookie(None)
 ):
@@ -251,6 +255,11 @@ async def CreateUser(
     if contrasena and rol != "Conductor":
         hashed_password = bcrypt.hashpw(
             contrasena.encode('utf-8'), bcrypt.gensalt())
+    
+    image_bytes = None
+    if imagen:
+        image_bytes = await imagen.read()
+
 
     # Crear el nuevo usuario
     nuevo_usuario = Usuario(
@@ -261,7 +270,8 @@ async def CreateUser(
         contrasena=hashed_password,
         rol=rol,
         estado='Activo',
-        empresa_id=empresa_id
+        empresa_id=empresa_id,
+        foto=image_bytes if image_bytes else None 
     )
     db.add(nuevo_usuario)
     db.commit()
@@ -672,14 +682,21 @@ async def update_driver_value(
     return RedirectResponse(url="/update/driver", status_code=status.HTTP_303_SEE_OTHER)
 
 # -- PATH TO  REPORTS -- #
-
+# def convertir_a_base64(imagen):
+    #if imagen:
+       # with open(imagen, "rb") as imagen_archivo:
+       #     imagen_base64 = base64.b64encode(imagen_archivo.read())
+       # return imagen_base64
+    #else:
+        #return None
 
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
                   db: Session = Depends(get_database)
                   ):
     conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
-
+    
+    
     return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
 
 
