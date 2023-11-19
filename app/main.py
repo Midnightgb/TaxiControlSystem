@@ -682,13 +682,7 @@ async def update_driver_value(
     return RedirectResponse(url="/update/driver", status_code=status.HTTP_303_SEE_OTHER)
 
 # -- PATH TO  REPORTS -- #
-# def convertir_a_base64(imagen):
-    #if imagen:
-       # with open(imagen, "rb") as imagen_archivo:
-       #     imagen_base64 = base64.b64encode(imagen_archivo.read())
-       # return imagen_base64
-    #else:
-        #return None
+
 
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
@@ -697,7 +691,7 @@ async def drivers(request: Request,
     conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
     
     
-    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
+    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores,"guardar_imagen":guardar_imagen})
 
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])

@@ -108,5 +108,15 @@ def obtener_fechas_conductor(id_conductor, db: Session):
     else:
         return []
     
+def guardar_imagen(id_usuario,imagen):
+    print(imagen)
+    print(id_usuario)
+    if imagen:
+        
+        with open('public/dist/asset/imgs/foto_{}.png'.format(id_usuario), "wb") as imagen_archivo:
+            imagen_archivo.write(imagen)
+        return imagen_archivo.name
+    else:
+        return None
 
 
