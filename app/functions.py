@@ -11,13 +11,15 @@ from fastapi.security import OAuth2PasswordBearer
 import os
 
 from database import SessionLocal, get_database
-from models import ConductorActual, Usuario, Taxi, Pago
+from models import ConductorActual, Empresa, Usuario, Taxi, Pago
 
 from fastapi import status
 from fastapi.responses import RedirectResponse
 import re
 
 
+from fastapi.templating import Jinja2Templates
+templates = Jinja2Templates(directory="public/templates")
 load_dotenv()
 SECRET_KEY = os.environ.get("SECRET_KEY")
 def tokenConstructor(userId: str):

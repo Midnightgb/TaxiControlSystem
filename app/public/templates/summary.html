@@ -27,20 +27,26 @@
         </div>
         {% endif %}
 
-        <form action="/summary" method="GET" id="summaryForm">
+        <form action="/summary" method="POST" id="summaryForm">
             <label for="id_conductor">Seleccionar Conductor:</label>
             <select class="form-select" name="id_conductor" id="id_conductor" required>
                 <option value="" disabled selected>Seleccione un conductor</option>
                 {% for conductor in conductores %}
-                <option value="{{ conductor.id_usuario }}"
-                    {% if id_conductor_selected == conductor.id_usuario %}selected{% endif %}>{{ conductor.nombre }}
-                    {{conductor.apellido}}</option>
+                    <option value="{{ conductor.id_usuario }}" {% if id_conductor_selected == conductor.id_usuario %}selected{% endif %}>
+                        {{ conductor.nombre }} {{ conductor.apellido }}
+                    </option>
                 {% endfor %}
             </select>
-
-
+        
+            <label for="fecha_inicio">Fecha de inicio:</label>
+            <input type="date" name="fecha_inicio" id="fecha_inicio" required>
+        
+            <label for="fecha_fin">Fecha de fin:</label>
+            <input type="date" name="fecha_fin" id="fecha_fin" required>
+        
             <button type="submit" id="submitBtn">Mostrar Resumen</button>
         </form>
+        
 
 
         {% if cuotas_diarias  %}
