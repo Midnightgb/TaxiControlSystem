@@ -615,8 +615,6 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
 
-
-
 @app.post("/update/daily", tags=["payments"])
 async def actualizar_cuota_diaria(
     request: Request,
@@ -639,11 +637,11 @@ async def actualizar_cuota_diaria(
             request.session["alert"] = alert
             return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
 
-        # Puedes utilizar la función datetime.strptime para convertir la cadena de fecha a un objeto datetime
+        # fecha seleccionada esté registrada
         fecha_seleccionada_dt = datetime.strptime(
             fecha_seleccionada, "%Y-%m-%d").date()
 
-        # Verificar si ya existe un pago registrado para la fecha seleccionada
+        # filtrar si ya hay un pago registrado para la fecha seleccionada
         pago_existente = db.query(Pago).filter(
             Pago.id_conductor == id_conductor,
             Pago.fecha == fecha_seleccionada_dt,
