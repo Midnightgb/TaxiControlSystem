@@ -121,7 +121,7 @@ setInterval(() => {
       const minutesUntilExpiration = Math.round(timeDiff / (1000 * 60));
 
       // Verificar si está a menos de ciertos minutos de la expiración
-      const alertThreshold = 5;
+      const alertThreshold = 15;
       if (minutesUntilExpiration <= alertThreshold) {
         if (showedAlert) {
           return;
@@ -163,5 +163,5 @@ setInterval(() => {
       }
     }
   }
-}, 50000);
+}, 600000);
 
