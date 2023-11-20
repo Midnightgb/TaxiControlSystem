@@ -1,5 +1,5 @@
-<!doctype html >
-<html lang="en" >
+<!doctype html>
+<html lang="en">
 
 <head>
     <title>Title</title>
@@ -10,44 +10,44 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
-
-
 </head>
 
-<body >
-    <header>
-        <!-- place navbar here -->
-    </header>
-    <main>
+<body>
+    {% block nav %}
+    {% include 'components/nav.html' %}
+    {% endblock %}
+    <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
         <div class=" container mx-auto flex flex-wrap">
             <div class="fixed top-0 left-0 right-0">
                 <div class="mx-auto flex flex-wrap justify-center items-end columns-2 mt-4">
                     <h1 class="text-4xl font-bold text-gray-600">CONDUCTORES</h1>
                 </div>
-                <form class="flex flex-wrap mx-20 justify-end items-end space-x-4 " action="/driver/search" method="POST">
-                    <input type="text" name="search" id="search" placeholder="buscar" class="border-2 border-sky-500  rounded ">
+                <form class="flex flex-wrap mx-20 justify-end items-end space-x-4 " action="/driver/search"
+                    method="POST">
+                    <input type="text" name="search" id="search" placeholder="buscar"
+                        class="border-2 border-sky-500  rounded ">
                     <button type="submit" class="bg-blue-500 text-white px-4  rounded hover:bg-sky-700">buscar</button>
                 </form>
 
-                {% if usuarios is not none %}
+                {% if usuarios: %}
                 <div class="flex flex-wrap justify-center mt-4">
                     {% for usuario in usuarios %}
                     <div class="bg-white shadow-md my-4 mx-2 p-6  justify-end items-end " style="width: 19rem;">
 
                         <div class="flex mt-4 justify-center items-center ">
-                            {% if usuario.foto is not none %}
-                            <img src="data:image/png;base64,{{ usuario.foto }} "
-                            height="70px" width="90px" class="card-img-top" />
+                            {% if usuario.foto: %}
+                            <img src="{{ usuario.foto }} " height="90px" width="90px" class="card-img-top" />
                             {% else %}
                             <img src="{{ url_for('static', path='assets/imgs/imagenPerfil.png')}}" class="aspect-video"
-                                height="70px" width="90px">
+                                width="90px">
                             {% endif %}
                         </div>
 
                         <div class="relative mt-4 justify-center items-center columns-1 ">
-                            <h5 class="text-xl font-semibold my-2 mx-10 w-25 ">{{ usuario.nombre }} {{ usuario.apellido }}</h5>
+                            <h5 class="text-xl font-semibold my-2 mx-10 w-25 ">{{ usuario.nombre }}
+                                {{ usuario.apellido }}</h5>
                             <p class="text-gray-600 my-2 w-25 mx-10">{{usuario.correo}}</p>
-                            <form action="/reports/driver/{{usuario.nombre}} {{ usuario.apellido }}" method="POST" >
+                            <form action="/reports/driver/{{usuario.nombre}} {{ usuario.apellido }}" method="POST">
                                 <input type="hidden" name="id_usuario" value="{{usuario.id_usuario}}">
                                 <button type="submit"
                                     class="bg-blue-500 text-white px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">Ver
@@ -72,6 +72,7 @@
         <!-- place footer here -->
     </footer>
 
+    <script src="{{ url_for('static', path='js/app.js')}}"></script>
 
 </body>
 

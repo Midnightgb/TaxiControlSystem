@@ -15,7 +15,9 @@ from models import ConductorActual, Usuario, Taxi, Pago
 from fastapi import status
 from fastapi.responses import RedirectResponse
 import re
-
+from PIL import Image
+from io import BytesIO
+import base64
 
 
 
@@ -120,5 +122,15 @@ def convert_to_bynary(upload_file):
     except Exception as e:
         print(f"Error al convertir a binario: {e}")
         return None
-    
 
+def convertIMG(foto: bytes):
+    try:
+        image = Image.open(BytesIO(foto))
+        img_io = BytesIO()
+        image.save(img_io, format='JPEG')
+        img_io.seek(0)
+        base64_image = base64.b64encode(img_io.getvalue()).decode('utf-8')
+        return f"data:image/jpeg;base64,{base64_image}"
+    except Exception as e:
+        print(f"Error al procesar la imagen: {str(e)}")
+        return None

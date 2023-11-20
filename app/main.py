@@ -709,10 +709,11 @@ async def drivers(request: Request,
 
 
     conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
-    
-    
-
-    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
+    for conductor in conductores:
+        if conductor.foto:
+            conductor.foto = convertIMG(conductor.foto)
+        
+    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
 
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
