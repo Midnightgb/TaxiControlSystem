@@ -448,13 +448,18 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
 
     try:
         if not serverStatus(db):
-            raise HTTPException(
-                status_code=500, detail="Error en conexión al servidor, contacte al proveedor del servicio.")
+            alert = {"type": "general",
+                        "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
 
         if not c_user:
-            raise HTTPException(
-                logout=401, detail="No se proporcionó un token de usuario.")
-
+            alert = {"type": "general",
+                        "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
         token_payload = tokenDecoder(c_user)
 
         if not token_payload:
@@ -473,8 +478,11 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         empresas = db.query(Empresa).filter(
             Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            raise HTTPException(
-                status_code=500, detail="Error al obtener información de la empresa.")
+            alert = {"type": "general",
+                     "message": "Error al obtener información de la empresa."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
 
         # Filtrar conductores por la empresa del usuario
         conductores = db.query(Usuario).filter(
@@ -561,12 +569,17 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
 
     try:
         if not serverStatus(db):
-            raise HTTPException(
-                status_code=500, detail="Error en conexión al servidor, contacte al proveedor del servicio.")
+            alert = {"type": "general",
+                        "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
 
         if not c_user:
-            raise HTTPException(
-                logout=401, detail="No se proporcionó un token de usuario.")
+            alert = {"type": "general",
+                        "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         token_payload = tokenDecoder(c_user)
 
@@ -580,14 +593,18 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
         usuario = db.query(Usuario).filter(
             Usuario.id_usuario == user_id).first()
         if not usuario:
-            raise HTTPException(
-                status_code=401, detail="Usuario no encontrado.")
+            alert = {"type": "general",
+                        "message": "Usuario no encontrado."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         empresas = db.query(Empresa, Empresa.nombre).filter(
             Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            raise HTTPException(
-                status_code=500, detail="Error al obtener información de la empresa.")
+            alert = {"type": "general",
+                        "message": "Error al obtener información de la empresa."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         # Filtrar conductores por la empresa del usuario
         conductores = db.query(Usuario).filter(
@@ -625,8 +642,10 @@ async def actualizar_cuota_diaria(
 ):
     try:
         if not serverStatus(db):
-            raise HTTPException(
-                status_code=500, detail="Error en conexión al servidor, contacte al proveedor del servicio.")
+            alert = {"type": "general",
+                        "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         datos_conductor = getDriverData(id_conductor, db)
 
@@ -688,19 +707,18 @@ async def resumen_cuotas_view(
     db: Session = Depends(get_database)
 ):
     try:
-        # Verifica el estado del servidor
+  
         if not serverStatus(db):
             alert = {"type": "general", "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-        # Verifica si se proporcionó un token de usuario
+       
         if not c_user:
             alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-        # Decodifica el token y obtén el ID del usuario
         token_payload = tokenDecoder(c_user)
         if not token_payload:
             alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
@@ -708,15 +726,19 @@ async def resumen_cuotas_view(
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
         user_id = int(token_payload["sub"])
 
-        # Obtiene el usuario desde la base de datos
         usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
         if not usuario:
-            raise HTTPException(status_code=401, detail="Usuario no encontrado.")
+            alert = {"type": "general", "message": "Usuario no encontrado."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
 
         # Obtiene la información de la empresa
         empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            raise HTTPException(status_code=500, detail="Error al obtener información de la empresa.")
+            alert = {"type": "general", "message": "Error al obtener información de la empresa."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         # Filtra conductores por la empresa del usuario
         conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
@@ -808,11 +830,16 @@ async def resumen_cuotas_post(
 
         usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
         if not usuario:
-            raise HTTPException(status_code=401, detail="Usuario no encontrado.")
+            alert = {"type": "general", "message": "Usuario no encontrado."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
 
         empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            raise HTTPException(status_code=500, detail="Error al obtener información de la empresa.")
+            alert = {"type": "general", "message": "Error al obtener información de la empresa."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
 
