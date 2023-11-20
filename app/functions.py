@@ -108,15 +108,17 @@ def obtener_fechas_conductor(id_conductor, db: Session):
     else:
         return []
     
-def guardar_imagen(id_usuario,imagen):
-    print(imagen)
-    print(id_usuario)
-    if imagen:
-        
-        with open('public/dist/asset/imgs/foto_{}.png'.format(id_usuario), "wb") as imagen_archivo:
-            imagen_archivo.write(imagen)
-        return imagen_archivo.name
-    else:
+def convert_to_bynary(upload_file):
+    try:
+        if upload_file and hasattr(upload_file, 'file'):
+            
+            with upload_file.file as imagen_archivo:
+                imagen = imagen_archivo.read()
+                return imagen
+        else:
+            return None
+    except Exception as e:
+        print(f"Error al convertir a binario: {e}")
         return None
-
+    
 

@@ -27,7 +27,7 @@ from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
-import base64
+from sqlalchemy import or_
 
 
 load_dotenv()
@@ -258,7 +258,7 @@ async def CreateUser(
     
     image_bytes = None
     if imagen:
-        image_bytes = await imagen.read()
+        image_bytes = convert_to_bynary(imagen)
 
 
     # Crear el nuevo usuario
@@ -686,12 +686,33 @@ async def update_driver_value(
 
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
-                  db: Session = Depends(get_database)
-                  ):
+                    c_user: str = Cookie(None),
+                    db: Session = Depends(get_database)
+                    ):
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    checkTokenStatus = userStatus(c_user, request)
+    if not checkTokenStatus["status"]:
+        return checkTokenStatus["redirect"]
+
+    if not serverStatus(db):
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    UUID = checkTokenStatus["userid"]
+    userData = db.query(Usuario).filter(Usuario.id_usuario == UUID).first()
+    if not userData:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+
     conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
     
     
-    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores,"guardar_imagen":guardar_imagen})
+
+    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
 
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
@@ -703,6 +724,25 @@ async def reports(request: Request,
 
     return templatesReports.TemplateResponse("./dailyreports.html", {"request": request, "reports": reports})
 
+@app.post("/driver/search", response_class=HTMLResponse, tags=["routes"])
+async def search(request: Request,
+                    search: Optional[str] = Form(None),
+                    db: Session = Depends(get_database)
+                    ):
+    conductores = None
+    if not search:
+        conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
+    else:
+        conductores = db.query(Usuario).filter(
+            Usuario.rol == 'Conductor',
+            or_(
+                Usuario.nombre == search,
+                Usuario.correo == search,
+                Usuario.cedula == search
+            )
+        ).all()
+
+    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
 
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):
