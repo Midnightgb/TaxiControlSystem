@@ -73,3 +73,52 @@ document.addEventListener("keydown", (e) => {
 
 // toggle hamburger menu
 hamburgerBtn.addEventListener("click", toggleHamburger);
+
+function getCookie(name) {
+  const cookies = document.cookie.split("; ");
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].split("=");
+    if (cookie[0] === name) {
+      return cookie[1];
+    }
+  }
+  return null;
+}
+function getCookieExpiration(name) {
+  const cookie = decodeURIComponent(document.cookie);
+  const cookieParts = cookie.split('; ');
+  const jwtPart = cookieParts.find(part => part.startsWith(`${name}=`));
+  console.log("jwtPart:", jwtPart);
+  if (jwtPart) {
+    const jwtToken = jwtPart.split('=')[1];
+    console.log("jwtToken:", jwtToken);
+    const [, payload] = jwtToken.split('.');
+    console.log("payload:", payload);
+    const decodedPayload = atob(payload);
+    console.log("decodedPayload:", decodedPayload);
+    const expiration = JSON.parse(decodedPayload).exp;
+    console.log("expiration:", expiration);
+
+    if (expiration) {
+      const expirationDate = new Date(expiration * 1000); // Multiplica por 1000 para convertir de segundos a milisegundos
+      return expirationDate;
+    }
+  }
+  return null;
+}
+
+
+
+console.log("Cookies:", document.cookie);
+const myCookie = getCookie("c_user");
+if (myCookie) {
+  console.log("Valor de la cookie:", myCookie);
+  const expiration = getCookieExpiration("c_user");
+  if (expiration) {
+    console.log("Tiempo de expiración:", expiration);
+  } else {
+    console.log("La cookie no tiene tiempo de expiración");
+  }
+} else {
+  console.log("La cookie no existe");
+}
