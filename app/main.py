@@ -712,7 +712,7 @@ async def drivers(request: Request,
     for conductor in conductores:
         if conductor.foto:
             conductor.foto = convertIMG(conductor.foto)
-        
+            
     return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
 
 
@@ -743,7 +743,7 @@ async def search(request: Request,
             )
         ).all()
 
-    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
+    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
 
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):
