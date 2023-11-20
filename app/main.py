@@ -677,9 +677,86 @@ async def actualizar_cuota_diaria(
                  "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+ 
+@app.get("/summary", response_class=HTMLResponse, tags=["routes"])
+async def resumen_cuotas_view(request: Request, c_user: str = Cookie(None), id_conductor: int = None, db: Session = Depends(get_database)):
+    try:
+        if not serverStatus(db):
+            alert = {"type": "general",
+                        "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
 
-# -- PATH TO  REPORTS -- #
+        if not c_user:
+            alert = {"type": "general",
+                        "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert    
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            
+        token_payload = tokenDecoder(c_user)
 
+        if not token_payload:
+            alert = {"type": "general",
+                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+        user_id = int(token_payload["sub"])
+        usuario = db.query(Usuario).filter(
+            Usuario.id_usuario == user_id).first()
+        if not usuario:
+            raise HTTPException(
+                status_code=401, detail="Usuario no encontrado.")
+
+        empresas = db.query(Empresa, Empresa.nombre).filter(
+            Empresa.id_empresa == usuario.empresa_id).first()
+        if not empresas:
+            raise HTTPException(
+                status_code=500, detail="Error al obtener información de la empresa.")
+
+        # Filtrar conductores por la empresa del usuario
+        conductores = db.query(Usuario).filter(
+            Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+
+        # Recuperar la alerta de la sesión
+        alert = request.session.pop("alert", None)
+
+        cuotas_diarias = []
+        conductor = None
+
+        if id_conductor is not None:
+            datos_conductor = getDriverData(id_conductor, db)
+
+            if datos_conductor:
+                cuotas_diarias = db.query(Pago).filter(
+                    Pago.id_conductor == id_conductor
+                ).all()
+
+                conductor = db.query(Usuario).filter(
+                    Usuario.id_usuario == id_conductor
+                ).first()
+            else:
+                alert = {"type": "conductor_not_found",
+                         "message": "El conductor no existe."}
+
+            if not cuotas_diarias:
+                alert = {"type": "no_payments",
+                         "message": "No se encontraron pagos registrados para este conductor."}
+                request.session["alert"] = alert
+
+        return templates.TemplateResponse("summary.html", {"request": request, "alert": alert, "conductores": conductores, "empresas": empresas, "id_conductor_selected": id_conductor, "cuotas_diarias": cuotas_diarias, "conductor": conductor})
+
+    except HTTPException as e:
+        alert = {"type": "general", "message": str(e.detail)}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    except Exception as e:
+        alert = {"type": "general",
+                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
