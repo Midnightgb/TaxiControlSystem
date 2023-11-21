@@ -749,13 +749,18 @@ async def search(request: Request,
                 Usuario.cedula == search
             )
         ).all()
+        for conductor in conductores:
+            if conductor.foto:
+                conductor.foto = convertIMG(conductor.foto)
+
+
         if not conductores:
             alert = {"type": "general",
                      "message": "No se encontraron resultados."}    
             request.session["alert"] = alert
             return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
 
-    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
+    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
 
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):
