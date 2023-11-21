@@ -13,7 +13,7 @@ from fastapi import (
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 import bcrypt
 import os
 from dotenv import load_dotenv
@@ -485,13 +485,14 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         
 
         # Filtrar conductores por la empresa del usuario
-        conductores = db.query(Usuario).filter(
-            Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
-        
-        
+        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
+            Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
+        taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
+            Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+            
         # Recuperar la alerta de la sesión
         alert = request.session.pop("alert", None)
-        return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores})
+        return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores, "taxis": taxisAssigned})
     except HTTPException as e:
         alert = {"type": "general", "message": str(e.detail)}
         request.session["alert"] = alert

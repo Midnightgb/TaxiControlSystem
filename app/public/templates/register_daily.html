@@ -19,10 +19,12 @@
             <div class="mb-3">
                 <label for="id_conductor" class="form-label">Conductor</label>
                 <select class="form-select" name="id_conductor" id="id_conductor" required>
+                    <option value="" disabled selected>Seleccione un conductor</option>
                     {% for conductor in conductores %}
-                    <option value="{{ conductor.id_usuario }}">{{ conductor.nombre }} {{ conductor.apellido }}</option>
+                        <option value="{{ conductor.id_usuario }}">{{ conductor.nombre }} {{ conductor.apellido }}</option>
                     {% endfor %}
                 </select>
+                
             </div>            
             <div class="mb-3">
                 <label for="valor" class="form-label">Valor</label>
@@ -37,7 +39,6 @@
             <button type="submit" class="btn btn-primary">Registrar Cuota</button>
         </form>
     </div>
-
     <!-- Bootstrap JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
         integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
