@@ -725,6 +725,25 @@ async def reports(request: Request,
 
     return templatesReports.TemplateResponse("./dailyreports.html", {"request": request, "reports": reports})
 
+@app.get("/renew/token", tags=["auth"])
+async def renew_token(request: Request, c_user: str = Cookie(None)):
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    token_payload = tokenDecoder(c_user)
+
+    if not token_payload:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    response = RedirectResponse(
+        url="/home",
+        status_code=status.HTTP_303_SEE_OTHER)
+    response.set_cookie(
+        key="c_user",
+        value=tokenConstructor(token_payload["sub"]))
+
+    return response
+
 @app.post("/driver/search", response_class=HTMLResponse, tags=["routes"])
 async def search(request: Request,
                     search: Optional[str] = Form(None),
@@ -744,6 +763,7 @@ async def search(request: Request,
         ).all()
 
     return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
+
 
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):

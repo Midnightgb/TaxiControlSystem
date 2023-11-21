@@ -4,8 +4,8 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", sans-serif;
+  box-sizing: border-box !important;
+  font-family: "Inter", sans-serif !important;
 }
 
 :root {
@@ -21,22 +21,22 @@
 }
 
 body {
-  font-family: inherit;
-  background-color: var(--white);
-  color: var(--dark-grey);
-  letter-spacing: -0.4px;
+  font-family: inherit !important;
+  background-color: var(--white) !important;
+  color: var(--dark-grey) !important;
+  letter-spacing: -0.4px !important;
 }
 
-ul {
+.container-nav ul {
   list-style: none;
 }
 
-a {
+.container-nav a {
   text-decoration: none;
   color: inherit;
 }
 
-button {
+.container-nav button {
   border: none;
   background-color: transparent;
   cursor: pointer;
@@ -68,7 +68,7 @@ button {
   border-bottom: var(--border);
 }
 
-.container {
+.container-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -218,7 +218,7 @@ button {
     display: block;
   }
 
-  .container {
+  .container-nav {
     padding: 1.2rem;
   }
 

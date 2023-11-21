@@ -73,3 +73,95 @@ document.addEventListener("keydown", (e) => {
 
 // toggle hamburger menu
 hamburgerBtn.addEventListener("click", toggleHamburger);
+
+function getCookie(name) {
+  const cookies = document.cookie.split("; ");
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].split("=");
+    if (cookie[0] === name) {
+      return cookie[1];
+    }
+  }
+  return null;
+}
+
+function getCookieExpiration(name) {
+  const cookie = decodeURIComponent(document.cookie);
+  const cookieParts = cookie.split('; ');
+  const jwtPart = cookieParts.find(part => part.startsWith(`${name}=`));
+  if (jwtPart) {
+    const jwtToken = jwtPart.split('=')[1];
+    const [, payload] = jwtToken.split('.');
+    const decodedPayload = atob(payload);
+    const expiration = JSON.parse(decodedPayload).exp;
+    if (expiration) {
+      const expirationDate = new Date(expiration * 1000);
+      return expirationDate;
+    }
+  }
+  return null;
+}
+
+let showedAlert = false;
+setInterval(() => {
+  const myCookie = getCookie("c_user");
+  if (myCookie) {
+    const expiration = getCookieExpiration("c_user");
+    if (expiration) {
+      // Obtener hora actual
+      const now = new Date();
+
+      // Obtener hora de expiración de la cookie
+      const expirationTime = new Date(expiration);
+
+      // Calcular la diferencia en milisegundos entre la hora actual y la hora de expiración
+      const timeDiff = expirationTime - now;
+
+      // Convertir la diferencia a minutos
+      const minutesUntilExpiration = Math.round(timeDiff / (1000 * 60));
+
+      // Verificar si está a menos de ciertos minutos de la expiración
+      const alertThreshold = 15;
+      if (minutesUntilExpiration <= alertThreshold) {
+        if (showedAlert) {
+          return;
+        }
+        showedAlert = true;
+        const timerDuration = 300000; // Duración del temporizador en milisegundos
+
+        const swalOptions = {
+          title: "Tu sesión está a punto de expirar",
+          confirmButtonText: "Renovar",
+          showCancelButton: true,
+          cancelButtonText: "Cerrar sesión",
+          icon: "warning",
+          timer: timerDuration,
+          timerProgressBar: true,
+          allowEscapeKey: false,
+          allowOutsideClick: false,
+        };
+        
+        const swalAlert = Swal.fire(swalOptions);
+        swalAlert.then((result) => {
+          if (result.isConfirmed) {
+            showedAlert = false;
+            window.location.href = "/renew/token";
+          }
+          if (result.isDismissed) {
+            window.location.href = "/logout";
+          }
+        });
+        
+        setTimeout(() => {
+          swalAlert.then((result) => {
+          if (result.dismiss === Swal.DismissReason.timer) {
+              window.location.href = "/logout";
+            }
+          });
+        }, timerDuration);
+        
+      }
+    }
+  }
+}, 600000);
+
