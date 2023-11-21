@@ -1,13 +1,15 @@
 let alertType = document.getElementById("alert-type").innerText;
 let alertMessage = document.getElementById("alert-message").innerText;
-let backgroundColor = alertType == "success" ? "#1f1f1f" : "#ff6464";
+let backgroundColor = alertType == "success" ? "#1f1f1f" : "#ff3333";
 let textColor = "#fff"
+let iconColor = alertType == "success" ? " " : "#65141a";
 const Toast = Swal.mixin({
     toast: true,
     position: "top-end",
     showConfirmButton: false,
-    timer: 5000000,
+    timer: 10000,
     timerProgressBar: true,
+    iconColor: iconColor,
     background: backgroundColor,
     color: textColor,
     didOpen: (toast) => {
