@@ -40,13 +40,9 @@ def getDriverData(id_conductor, db: SessionLocal):
         conductor_actual = db.query(ConductorActual).filter(
             ConductorActual.id_conductor==id_conductor
         ).first()
-        print("conductor actual:", conductor_actual.id_taxi)
-        if conductor_actual:
-            taxi = conductor_actual.id_taxi
-            taxi = db.query(Taxi).filter(
-                Taxi.id_taxi==taxi
-            ).first()
-            
+
+        if conductor_actual and conductor_actual.taxi:
+            taxi = conductor_actual.taxi
             data = {
                 "id_conductor": conductor_actual.id_conductor,
                 "nombre": conductor_actual.conductor.nombre,

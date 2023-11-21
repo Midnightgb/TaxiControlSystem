@@ -726,6 +726,7 @@ async def resumen_cuotas_view(
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
         user_id = int(token_payload["sub"])
 
+        # Obtiene el usuario desde la base de datos
         usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
         if not usuario:
             alert = {"type": "general", "message": "Usuario no encontrado."}
@@ -752,7 +753,7 @@ async def resumen_cuotas_view(
         # Verifica si se proporcionó un ID de conductor y si existe
         if id_conductor is not None:
             datos_conductor = getDriverData(id_conductor, db)
-
+            print("Datos del conductor:", datos_conductor)
             if datos_conductor:
                 # Si se proporcionan fechas, filtra por rango de fechas
                 if fecha_inicio and fecha_fin:
@@ -762,19 +763,17 @@ async def resumen_cuotas_view(
                         Pago.id_conductor == id_conductor,
                         Pago.fecha.between(fecha_inicio, fecha_fin)
                     ).all()
+                    print("Cuotas diarias dentro del rango:", cuotas_diarias)
                 else:
                     # Sin fechas, obtén todos los pagos para el conductor
                     cuotas_diarias = db.query(Pago).filter(Pago.id_conductor == id_conductor).all()
-
+                    print("Todas las cuotas diarias:", cuotas_diarias)
                 # Obtiene la información del conductor
                 conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
-            else:
-                alert = {"type": "conductor_not_found", "message": "El conductor no existe."}
-
-            # Si no hay cuotas diarias, muestra un mensaje de alerta
-            if not cuotas_diarias:
-                alert = {"type": "no_payments", "message": "No se encontraron pagos registrados para este conductor."}
-                request.session["alert"] = alert
+            
+        if not cuotas_diarias:
+            alert = {"type": "no_payments", "message": "No se encontraron pagos registrados para este conductor."}
+            request.session["alert"] = alert  
 
         # Renderiza el template con los resultados
         return templates.TemplateResponse("summary.html", {
@@ -850,9 +849,9 @@ async def resumen_cuotas_post(
 
         if id_conductor is not None:
             datos_conductor = getDriverData(id_conductor, db)
-
+            print("Datos del conductor:", datos_conductor)
             if datos_conductor:
-
+                # Si se proporcionan fechas, filtra por rango de fechas
                 if fecha_inicio and fecha_fin:
                     fecha_inicio = datetime.combine(fecha_inicio, datetime.min.time())
                     fecha_fin = datetime.combine(fecha_fin, datetime.max.time())
@@ -860,16 +859,18 @@ async def resumen_cuotas_post(
                         Pago.id_conductor == id_conductor,
                         Pago.fecha.between(fecha_inicio, fecha_fin)
                     ).all()
+                    print("Cuotas diarias dentro del rango:", cuotas_diarias)
                 else:
+                    # Sin fechas, obtén todos los pagos para el conductor
                     cuotas_diarias = db.query(Pago).filter(Pago.id_conductor == id_conductor).all()
-
+                    print("Todas las cuotas diarias:", cuotas_diarias)
+                # Obtiene la información del conductor
                 conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
-            else:
-                alert = {"type": "conductor_not_found", "message": "El conductor no existe."}
-
-            if not cuotas_diarias:
-                alert = {"type": "no_payments", "message": "No se encontraron pagos registrados para este conductor."}
-                request.session["alert"] = alert
+            
+        
+        if not cuotas_diarias:
+            alert = {"type": "no_payments", "message": "No se encontraron pagos registrados para este conductor."}
+            request.session["alert"] = alert 
 
         return templates.TemplateResponse("summary.html", {
             "request": request,
