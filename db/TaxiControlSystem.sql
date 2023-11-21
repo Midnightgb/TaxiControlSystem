@@ -21,6 +21,7 @@ CREATE TABLE `usuarios` (
   `contrasena` VARCHAR(250),
   `rol` enum('Administrador','Conductor','Secretaria') NOT NULL,
   `estado` enum('Activo','Inactivo') DEFAULT 'Activo' NOT NULL,
+  `foto` BLOB DEFAULT NULL,
   `empresa_id` INT NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

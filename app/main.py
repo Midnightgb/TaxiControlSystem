@@ -9,6 +9,7 @@ from fastapi import (
     Cookie,
     Query,
     Response,
+    UploadFile,
 )
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -26,6 +27,8 @@ from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from sqlalchemy import or_
+
 
 load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
@@ -203,6 +206,7 @@ async def CreateUser(
     contrasena: Optional[str] = Form(""),
     rol: str = Form(...),
     empresa_id: int = Form(...),
+    imagen:Optional[UploadFile]  = Form(None),
     db: Session = Depends(get_database),
     c_user: str = Cookie(None)
 ):
@@ -251,6 +255,11 @@ async def CreateUser(
     if contrasena and rol != "Conductor":
         hashed_password = bcrypt.hashpw(
             contrasena.encode('utf-8'), bcrypt.gensalt())
+    
+    image_bytes = None
+    if imagen:
+        image_bytes = convert_to_bynary(imagen)
+
 
     # Crear el nuevo usuario
     nuevo_usuario = Usuario(
@@ -261,7 +270,8 @@ async def CreateUser(
         contrasena=hashed_password,
         rol=rol,
         estado='Activo',
-        empresa_id=empresa_id
+        empresa_id=empresa_id,
+        foto=image_bytes if image_bytes else None 
     )
     db.add(nuevo_usuario)
     db.commit()
@@ -676,11 +686,34 @@ async def update_driver_value(
 
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
-                  db: Session = Depends(get_database)
-                  ):
-    conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
+                    c_user: str = Cookie(None),
+                    db: Session = Depends(get_database)
+                    ):
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
+    checkTokenStatus = userStatus(c_user, request)
+    if not checkTokenStatus["status"]:
+        return checkTokenStatus["redirect"]
+
+    if not serverStatus(db):
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    UUID = checkTokenStatus["userid"]
+    userData = db.query(Usuario).filter(Usuario.id_usuario == UUID).first()
+    if not userData:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+
+    conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
+    for conductor in conductores:
+        if conductor.foto:
+            conductor.foto = convertIMG(conductor.foto)
+            
+    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
 
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
@@ -710,6 +743,27 @@ async def renew_token(request: Request, c_user: str = Cookie(None)):
         value=tokenConstructor(token_payload["sub"]))
 
     return response
+
+@app.post("/driver/search", response_class=HTMLResponse, tags=["routes"])
+async def search(request: Request,
+                    search: Optional[str] = Form(None),
+                    db: Session = Depends(get_database)
+                    ):
+    conductores = None
+    if not search:
+        conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
+    else:
+        conductores = db.query(Usuario).filter(
+            Usuario.rol == 'Conductor',
+            or_(
+                Usuario.nombre == search,
+                Usuario.correo == search,
+                Usuario.cedula == search
+            )
+        ).all()
+
+    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
+
 
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):
