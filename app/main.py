@@ -484,10 +484,11 @@ async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = 
 
     taxis = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).all()
 
-    if not taxis:
-        return RedirectResponse(url="viewTaxi", status_code=status.HTTP_303_SEE_OTHER)
-
     alert = request.session.pop("alert", None)
+
+    if not taxis:
+        return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": [], "alert": alert, "no_taxis_message": "No hay taxis disponibles."})
+
     return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": taxis, "alert": alert})
 # -- END OF THE ROUTE -- #
 
