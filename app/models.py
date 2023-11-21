@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Date, Boolean
+from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Date, Boolean,BLOB
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
 from enum import Enum as PyEnum
@@ -44,6 +44,7 @@ class Usuario(Base):
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
     empresa_id  = Column(Integer, ForeignKey("empresas.id_empresa"))
+    foto = Column(BLOB, default=None)
 
     empresa = relationship("Empresa", back_populates="usuarios")
     taxis = relationship("ConductorActual", back_populates="conductor")
@@ -58,6 +59,7 @@ class Taxi(Base):
     placa = Column(String(6), nullable=False, unique=True)
     modelo = Column(String(45), nullable=False)
     marca = Column(String(45), nullable=False)
+    matricula = Column(String(6), nullable=False)
     tipo_combustible = Column(Enum(TipoCombustible), nullable=False)
     cuota_diaria = Column(Integer, nullable=False)
     fecha_adquisicion = Column(String, server_default=func.now(), nullable=False)

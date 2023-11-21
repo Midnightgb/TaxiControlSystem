@@ -16,6 +16,10 @@ from models import ConductorActual, Empresa, Usuario, Taxi, Pago
 from fastapi import status
 from fastapi.responses import RedirectResponse
 import re
+from PIL import Image
+from io import BytesIO
+import base64
+
 
 
 load_dotenv()
@@ -102,5 +106,30 @@ def obtener_cuota_actual(id_conductor, fecha_seleccionada, db):
         Pago.fecha == fecha_seleccionada,
         Pago.cuota_diaria_registrada == True
     ).first()
-
     return cuota_actual[0] if cuota_actual else None
+
+    
+def convert_to_bynary(upload_file):
+    try:
+        if upload_file and hasattr(upload_file, 'file'):
+            
+            with upload_file.file as imagen_archivo:
+                imagen = imagen_archivo.read()
+                return imagen
+        else:
+            return None
+    except Exception as e:
+        print(f"Error al convertir a binario: {e}")
+        return None
+
+def convertIMG(foto: bytes):
+    try:
+        image = Image.open(BytesIO(foto))
+        img_io = BytesIO()
+        image.save(img_io, format='JPEG')
+        img_io.seek(0)
+        base64_image = base64.b64encode(img_io.getvalue()).decode('utf-8')
+        return f"data:image/jpeg;base64,{base64_image}"
+    except Exception as e:
+        print(f"Error al procesar la imagen: {str(e)}")
+        return None
