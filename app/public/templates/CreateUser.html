@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Registro Usuario</title>
+    <title>Taxi Control - Registro Usuario</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -15,13 +15,11 @@
 </head>
 
 
-<body class="font-sans antialiased bg-gray-100">
+<body>
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
-    <main class="p-6 mx-auto max-w-screen-xl">
-
-
+    <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
         <div class="container mx-auto">
             <h1 class="text-3xl font-bold text-center">Registro de Usuario</h1>
 
@@ -66,7 +64,8 @@
                 <div class="mb-4">
                     <label for="rol" class="block text-sm font-medium text-gray-600">Tipo de Usuario:</label>
                     <select class="form-select mt-1 block w-full rounded-md border border-gray-300
-                        focus:outline-none focus:border-blue-500" name="rol" id="rol" required onchange="updatePasswordField()">
+                        focus:outline-none focus:border-blue-500" name="rol" id="rol" required
+                        onchange="updatePasswordField()">
                         <option value="" disabled selected>Seleccione rol</option>
                         {% if usuario and usuario.rol.value == "Administrador" %}
                         <option value="Secretaria">Secretaria</option>
@@ -90,7 +89,8 @@
                 </div>
 
                 <button type="submit"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Registrar Usuario</button>
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Registrar
+                    Usuario</button>
             </form>
         </div>
     </main>

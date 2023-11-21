@@ -38,7 +38,6 @@ app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 templates = Jinja2Templates(directory="public/templates")
-templatesReports = Jinja2Templates(directory="public/templates/Reports")
 
 
 @app.get("/", tags=["routes"])
@@ -1154,7 +1153,7 @@ async def reports(request: Request,
                   ):
     reports = db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
 
-    return templatesReports.TemplateResponse("./dailyreports.html", {"request": request, "reports": reports})
+    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports})
 
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def search(request: Request,
