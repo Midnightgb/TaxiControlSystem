@@ -8,3 +8,4 @@ python-multipart
 bcrypt
 python-dotenv
 itsdangerous
+pillow
