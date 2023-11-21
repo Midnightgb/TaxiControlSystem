@@ -484,7 +484,6 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
         
 
-        # Filtrar conductores por la empresa del usuario
         conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
             Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
         taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
@@ -608,8 +607,10 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         # Filtrar conductores por la empresa del usuario
-        conductores = db.query(Usuario).filter(
-            Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
+            Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
+        taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
+            Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
 
         # Obtener fechas registradas para el conductor seleccionado
         id_conductor_default = conductores[0].id_usuario if conductores else None
@@ -619,7 +620,7 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
         # Recuperar la alerta de la sesión
         alert = request.session.pop("alert", None)
         
-        return templates.TemplateResponse("registerDailyUpdate.html", {"request": request, "alert": alert, "conductores": conductores, "fechas_registradas": fechas_registradas, "empresas": empresas})
+        return templates.TemplateResponse("registerDailyUpdate.html", {"request": request, "alert": alert, "conductores": conductores, "fechas_registradas": fechas_registradas, "empresas": empresas, "taxis": taxisAssigned})
     
     except HTTPException as e:
         alert = {"type": "general", "message": str(e.detail)}
