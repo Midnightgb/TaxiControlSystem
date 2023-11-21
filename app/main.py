@@ -522,7 +522,7 @@ async def registro_diario(
 
     if not datos_conductor:
         alert = {"type": "conductor_not_found",
-                 "message": "El conductor no existe."}
+                 "message": "No tiene un taxi asignado."}
         # Almacena la alerta en la sesión
         request.session["alert"] = alert
         return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
