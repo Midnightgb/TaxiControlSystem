@@ -1110,6 +1110,7 @@ async def drivers(request: Request,
                     c_user: str = Cookie(None),
                     db: Session = Depends(get_database)
                     ):
+    alert = request.session.pop("alert", None)
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -1127,14 +1128,20 @@ async def drivers(request: Request,
     userData = db.query(Usuario).filter(Usuario.id_usuario == UUID).first()
     if not userData:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    token_payload = tokenDecoder(c_user)
 
+    user_id = int(token_payload["sub"])
 
-    conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
+    usuario = db.query(Usuario).filter(
+        Usuario.id_usuario == user_id).first()
+
+    conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
     for conductor in conductores:
         if conductor.foto:
             conductor.foto = convertIMG(conductor.foto)
-            
-    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
+
+    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores, "alert": alert})
 
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
@@ -1146,26 +1153,7 @@ async def reports(request: Request,
 
     return templatesReports.TemplateResponse("./dailyreports.html", {"request": request, "reports": reports})
 
-@app.get("/renew/token", tags=["auth"])
-async def renew_token(request: Request, c_user: str = Cookie(None)):
-    if not c_user:
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-
-    token_payload = tokenDecoder(c_user)
-
-    if not token_payload:
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-
-    response = RedirectResponse(
-        url="/home",
-        status_code=status.HTTP_303_SEE_OTHER)
-    response.set_cookie(
-        key="c_user",
-        value=tokenConstructor(token_payload["sub"]))
-
-    return response
-
-@app.post("/driver/search", response_class=HTMLResponse, tags=["routes"])
+@app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def search(request: Request,
                     search: Optional[str] = Form(None),
                     db: Session = Depends(get_database)
@@ -1182,9 +1170,13 @@ async def search(request: Request,
                 Usuario.cedula == search
             )
         ).all()
+        if not conductores:
+            alert = {"type": "general",
+                     "message": "No se encontraron resultados."}    
+            request.session["alert"] = alert
+            return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
 
-    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
-
+    return templatesReports.TemplateResponse("./drivers.html", {"request": request, "usuarios": conductores})
 
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):
