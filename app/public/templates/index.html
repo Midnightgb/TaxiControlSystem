@@ -19,11 +19,6 @@
     <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
         <h1>Bienvenido {{welcome.name}}</h1>
 
-        {% if alert %}
-                <div class="alert alert-{{ alert.type }}" role="alert">
-                    {{ alert.message }}
-                </div>
-        {% endif %}
         <div class="grid grid-cols-2 gap-6">
             <div class="bg-gray-500 rounded-lg" id="chart"></div>
             <div class="bg-gray-500 rounded-lg">02</div>

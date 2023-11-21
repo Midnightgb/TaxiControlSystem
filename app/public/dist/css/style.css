@@ -6,7 +6,6 @@
   padding: 0;
   box-sizing: border-box !important;
   font-family: "Inter", sans-serif !important;
-  transition: all 0.3s ease-in-out;
 }
 
 :root {

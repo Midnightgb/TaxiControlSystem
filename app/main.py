@@ -643,8 +643,10 @@ async def create_assignment(
     db.add(nueva_asignacion)
     db.commit()
     db.refresh(nueva_asignacion)
-
-    return templates.TemplateResponse("index.html", {"request": request, "message": "Asignación creada con éxito"})
+    alert = {"type": "success", "message": "Asignación registrada exitosamente."}
+    request.session["alert"] = alert
+    
+    return RedirectResponse(url="/register/assignment", status_code=status.HTTP_303_SEE_OTHER)
 # -- END OF THE ROUTE -- #
 
 # ========================================== END OF assignmentBLOCK ============================================ #

@@ -38,8 +38,7 @@
                             {% if usuario.foto: %}
                             <img src="{{ usuario.foto }} " height="90px" width="90px" class="card-img-top" />
                             {% else %}
-                            <img src="{{ url_for('static', path='assets/imgs/imagenPerfil.png')}}" class="aspect-video"
-                                width="90px">
+                            <img src="{{ url_for('static', path='assets/imgs/imagenPerfil.png')}}" width="90px">
                             {% endif %}
                         </div>
 
