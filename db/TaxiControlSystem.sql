@@ -35,6 +35,7 @@ CREATE TABLE `taxis` (
   `placa` VARCHAR(6) NOT NULL UNIQUE,
   `modelo` VARCHAR(45) NOT NULL,
   `marca` VARCHAR(45) NOT NULL,
+  `matricula` VARCHAR(6) NOT NULL,
   `tipo_combustible` enum('Gasolina','Ambos','Gas') NOT NULL,
   `cuota_diaria` INT NOT NULL,
   `fecha_adquisicion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
