@@ -59,6 +59,7 @@ class Taxi(Base):
     placa = Column(String(6), nullable=False, unique=True)
     modelo = Column(String(45), nullable=False)
     marca = Column(String(45), nullable=False)
+    matricula = Column(String(6), nullable=False)
     tipo_combustible = Column(Enum(TipoCombustible), nullable=False)
     cuota_diaria = Column(Integer, nullable=False)
     fecha_adquisicion = Column(String, server_default=func.now(), nullable=False)

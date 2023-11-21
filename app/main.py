@@ -5,7 +5,7 @@ from fastapi import (
     Form,
     status,
     Depends,
-    HTTPException,
+    HTTPException, 
     Cookie,
     Query,
     Response,
@@ -161,8 +161,6 @@ async def logout(request: Request):
 # ========================================== USERBLOCK ============================================ #
 
 # -- PATH TO REDIRECT TO USER CREATION -- #
-
-
 @app.get("/register/user", response_class=HTMLResponse, tags=["create"])
 async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
@@ -194,8 +192,6 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW USER -- #
-
-
 @app.post("/register/user", response_class=HTMLResponse)
 async def CreateUser(
     request: Request,
@@ -266,7 +262,7 @@ async def CreateUser(
         cedula=cedula,
         nombre=nombre,
         apellido=apellido,
-        correo=correo,
+        correo=correo.lower(),
         contrasena=hashed_password,
         rol=rol,
         estado='Activo',
@@ -279,9 +275,95 @@ async def CreateUser(
     alert = {"type": "success", "message": "Usuario registrado exitosamente."}
     request.session["alert"] = alert
     return RedirectResponse(url="/register/user", status_code=status.HTTP_303_SEE_OTHER)
-
 # -- END OF THE ROUTE -- #
 
+# -- PATH TO REDIRECT TO USER UPDATE -- #
+@app.post("/update/user/path", response_class=HTMLResponse, tags=["update"])
+async def update_user(
+    request: Request, 
+    c_user: str = Cookie(None), 
+    id_usuario: str = Form(...), 
+    db: Session = Depends(get_database)
+):
+
+    if not serverStatus(db):
+        alert = {"type": "danger","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Validar que el usuario esté logueado
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Validar que el token sea válido
+    token_payload = tokenDecoder(c_user)
+    if not token_payload:
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
+
+    empresa = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+
+    if not usuario:
+        alert = {"type": "general","message": "El usuario no existe."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
+    
+    return templates.TemplateResponse("updateUser.html", {"request": request, "usuario": usuario, "empresa": empresa})
+# -- END OF THE ROUTE -- #
+
+# -- PATH TO PROCEED TO THE UPDATE OF A USER -- #
+@app.post("/update/user", response_class=HTMLResponse, tags=["update"])
+async def update_user(
+    request: Request,
+    c_user: str = Cookie(None),
+    cedula: str = Form(...),
+    nombre: str = Form(...),
+    apellido: str = Form(...),
+    correo: str = Form(...),
+    rol: str = Form(...),
+    empresa_id: int = Form(...),
+    db: Session = Depends(get_database)
+):
+    if not serverStatus(db):
+        alert = {"type": "danger","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Validar que el usuario esté logueado
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Validar que el token sea válido
+    token_payload = tokenDecoder(c_user)
+
+    if not token_payload:
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Obtén el usuario existente
+    user = db.query(Usuario).filter(Usuario.cedula == cedula).first()
+
+    if user:
+        user.cedula = cedula
+        user.nombre = nombre
+        user.apellido = apellido
+        user.correo = correo.lower()
+        user.rol = rol
+        user.empresa_id = empresa_id
+
+        db.commit()
+
+        alert = {"type": "success", "message": "Usuario actualizado con éxito"}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        # Manejar el caso donde el usuario no existe
+        alert = {"type": "danger", "message": "Usuario no encontrado"}
+        request.session["alert"] = alert
 
 # ========================================== END OF USERBLOCK ============================================ #
 
@@ -319,8 +401,6 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW TAXI -- #
-
-
 @app.post("/register/taxi", response_class=HTMLResponse)
 async def create_taxi(
     request: Request,
@@ -328,6 +408,7 @@ async def create_taxi(
     placa: str = Form(...),
     modelo: str = Form(...),
     marca: str = Form(...),
+    matricula: str = Form(...),
     tipo_combustible: str = Form(...),
     cuota_diaria: int = Form(...),
     db: Session = Depends(get_database)
@@ -367,9 +448,10 @@ async def create_taxi(
     # Si pasa las validaciones, proceder con la creación del nuevo taxi
     nuevo_taxi = Taxi(
         empresa_id=empresa_id,
-        placa=placa,
+        placa=placa.upper(),
         modelo=modelo,
         marca=marca,
+        matricula=matricula.upper(),
         tipo_combustible=tipo_combustible,
         cuota_diaria=cuota_diaria
     )
@@ -380,6 +462,123 @@ async def create_taxi(
     alert = {"type": "success", "message": "Taxi registrado exitosamente."}
     request.session["alert"] = alert
     return RedirectResponse(url="/register/taxi", status_code=status.HTTP_303_SEE_OTHER)
+# -- END OF THE ROUTE -- #
+
+# -- PATH TO REDIRECT TO TAXI VIEW -- #
+@app.get("/view/taxi", response_class=HTMLResponse, tags=["routes"])
+async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    user_id = None
+
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    token_payload = tokenDecoder(c_user)
+
+    user_id = int(token_payload["sub"])
+
+    usuario = db.query(Usuario).filter(
+        Usuario.id_usuario == user_id).first()
+
+    if not usuario:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    taxis = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).all()
+
+    if not taxis:
+        return RedirectResponse(url="viewTaxi", status_code=status.HTTP_303_SEE_OTHER)
+
+    alert = request.session.pop("alert", None)
+    return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": taxis, "alert": alert})
+# -- END OF THE ROUTE -- #
+
+# -- PATH TO REDIRECT TO TAXI UPDATE -- #
+@app.post("/update/taxi/path", response_class=HTMLResponse, tags=["update"])
+async def update_taxi(
+    request: Request, 
+    c_user: str = Cookie(None), 
+    id_taxi: str = Form(...), 
+    db: Session = Depends(get_database)
+):
+
+    if not serverStatus(db):
+        alert = {"type": "danger","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Validar que el usuario esté logueado
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Validar que el token sea válido
+    token_payload = tokenDecoder(c_user)
+    if not token_payload:
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    taxi = db.query(Taxi).filter(Taxi.id_taxi == id_taxi).first()
+
+    empresa = db.query(Empresa).filter(Empresa.id_empresa == taxi.empresa_id).first()
+
+    if not taxi:
+        alert = {"type": "general","message": "El taxi no existe."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
+    
+    return templates.TemplateResponse("updateTaxi.html", {"request": request, "taxi": taxi, "empresa": empresa})
+# -- END OF THE ROUTE -- #
+
+# -- PATH TO PROCEED TO THE UPDATE OF A TAXI -- #
+@app.post("/update/taxi", response_class=HTMLResponse, tags=["update"])
+async def update_taxi(
+    request: Request,
+    c_user: str = Cookie(None),
+    placa: str = Form(...),
+    modelo: str = Form(...),
+    marca: str = Form(...),
+    matricula: str = Form(...),
+    tipo_combustible: str = Form(...),
+    cuota_diaria: int = Form(...),
+    db: Session = Depends(get_database)
+):
+    if not serverStatus(db):
+        alert = {"type": "danger","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Validar que el usuario esté logueado
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Validar que el token sea válido
+    token_payload = tokenDecoder(c_user)
+
+    if not token_payload:
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    # Obtén el taxi existente
+    taxi = db.query(Taxi).filter(Taxi.placa == placa).first()
+
+    if taxi:
+        taxi.placa = placa
+        taxi.modelo = modelo
+        taxi.marca = marca
+        taxi.matricula = matricula
+        taxi.tipo_combustible = tipo_combustible
+        taxi.cuota_diaria = cuota_diaria
+
+        db.commit()
+
+        alert = {"type": "success", "message": "Taxi actualizado con éxito"}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        # Manejar el caso donde el taxi no existe
+        alert = {"type": "danger", "message": "Taxi no encontrado"}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
 
 # ========================================== END OF TAXIBLOCK ============================================ #
