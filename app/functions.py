@@ -15,6 +15,10 @@ from models import ConductorActual, Usuario, Taxi, Pago
 from fastapi import status
 from fastapi.responses import RedirectResponse
 import re
+from PIL import Image
+from io import BytesIO
+import base64
+
 
 
 load_dotenv()
@@ -105,3 +109,28 @@ def obtener_fechas_conductor(id_conductor, db: Session):
         return fechas_conductor
     else:
         return []
+    
+def convert_to_bynary(upload_file):
+    try:
+        if upload_file and hasattr(upload_file, 'file'):
+            
+            with upload_file.file as imagen_archivo:
+                imagen = imagen_archivo.read()
+                return imagen
+        else:
+            return None
+    except Exception as e:
+        print(f"Error al convertir a binario: {e}")
+        return None
+
+def convertIMG(foto: bytes):
+    try:
+        image = Image.open(BytesIO(foto))
+        img_io = BytesIO()
+        image.save(img_io, format='JPEG')
+        img_io.seek(0)
+        base64_image = base64.b64encode(img_io.getvalue()).decode('utf-8')
+        return f"data:image/jpeg;base64,{base64_image}"
+    except Exception as e:
+        print(f"Error al procesar la imagen: {str(e)}")
+        return None

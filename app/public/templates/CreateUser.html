@@ -28,7 +28,7 @@
             </div>
         {% endif %}
 
-        <form action="/register/user" method="POST">
+        <form action="/register/user" method="POST" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="cedula" class="form-label">CEDULA:</label>
                 <input type="number" class="form-control" name="cedula" id="cedula" required>
@@ -70,6 +70,10 @@
                 <select class="form-select" name="empresa_id" id="empresa_id" required>
                     <option selected value="{{ empresa.id_empresa }}">{{ empresa.nombre }}</option>
                 </select>
+            </div>
+            <div class="mb-3">
+                <label for="imagen" class="form-label">Foto:</label>
+                <input type="file" class="form-control" name="imagen" id="imagen" accept="image/*">
             </div>
 
             <button type="submit" class="btn btn-primary">Registrar Usuario</button>
