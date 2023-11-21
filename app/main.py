@@ -229,21 +229,20 @@ async def CreateUser(
     if not usuario:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-    empresa = db.query(Empresa).filter(
-        Empresa.id_empresa == usuario.empresa_id).first()
-    error_message = None
     cedula_existente = db.query(Usuario).filter(
         Usuario.cedula == cedula).first()
     if cedula_existente:
-        error_message = "La cédula ya está en uso."
+        alert = {"type": "error", "message": "La cédula ya está en uso."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/user", status_code=status.HTTP_303_SEE_OTHER)
 
     correo_existente = db.query(Usuario).filter(
         Usuario.correo == correo).first()
     if correo_existente:
-        error_message = "El correo ya está en uso."
+        alert = {"type": "error", "message": "El correo ya está en uso."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/user", status_code=status.HTTP_303_SEE_OTHER)
 
-    if error_message:
-        return templates.TemplateResponse("CreateUser.html", {"request": request, "error_message": error_message, "empresa": empresa, "usuario": usuario})
 
     # Encriptar la contraseña solo si se proporciona una
     hashed_password = None
@@ -286,7 +285,7 @@ async def update_user(
 ):
 
     if not serverStatus(db):
-        alert = {"type": "danger","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -327,7 +326,7 @@ async def update_user(
     db: Session = Depends(get_database)
 ):
     if not serverStatus(db):
-        alert = {"type": "danger","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -361,7 +360,7 @@ async def update_user(
         return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
     else:
         # Manejar el caso donde el usuario no existe
-        alert = {"type": "danger", "message": "Usuario no encontrado"}
+        alert = {"type": "error", "message": "Usuario no encontrado"}
         request.session["alert"] = alert
 
 # ========================================== END OF USERBLOCK ============================================ #
@@ -414,7 +413,7 @@ async def create_taxi(
 ):
 
     if not serverStatus(db):
-        alert = {"type": "danger",
+        alert = {"type": "error",
                  "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
@@ -501,7 +500,7 @@ async def update_taxi(
 ):
 
     if not serverStatus(db):
-        alert = {"type": "danger","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -521,9 +520,9 @@ async def update_taxi(
     empresa = db.query(Empresa).filter(Empresa.id_empresa == taxi.empresa_id).first()
 
     if not taxi:
-        alert = {"type": "general","message": "El taxi no existe."}
+        alert = {"type": "error","message": "El taxi no existe."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
     
     return templates.TemplateResponse("updateTaxi.html", {"request": request, "taxi": taxi, "empresa": empresa})
 # -- END OF THE ROUTE -- #
@@ -542,7 +541,7 @@ async def update_taxi(
     db: Session = Depends(get_database)
 ):
     if not serverStatus(db):
-        alert = {"type": "danger","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -576,7 +575,7 @@ async def update_taxi(
         return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
     else:
         # Manejar el caso donde el taxi no existe
-        alert = {"type": "danger", "message": "Taxi no encontrado"}
+        alert = {"type": "error", "message": "Taxi no encontrado"}
         request.session["alert"] = alert
         return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -675,7 +674,7 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
 
         if not token_payload:
             alert = {"type": "general",
-                     "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+                        "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -689,10 +688,10 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         empresas = db.query(Empresa).filter(
             Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            alert = {"type": "general",
-                     "message": "Error al obtener información de la empresa."}
+            alert = {"type": "error",
+                        "message": "Error al obtener información de la empresa."}
             request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
         
 
         conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
@@ -710,7 +709,7 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
 
     except Exception as e:
         alert = {"type": "general",
-                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+                    "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 # -- MODULO 2 actualizar registro diario-- #
@@ -725,15 +724,15 @@ async def registro_diario(
 ):
     if not serverStatus(db):
         alert = {"type": "general",
-                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                    "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     datos_conductor = getDriverData(id_conductor, db)
 
     if not datos_conductor:
-        alert = {"type": "conductor_not_found",
-                 "message": "No tiene un taxi asignado."}
+        alert = {"type": "error",
+                    "message": "El conductor no tiene un taxi asignado."}
         # Almacena la alerta en la sesión
         request.session["alert"] = alert
         return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
@@ -747,9 +746,8 @@ async def registro_diario(
         Pago.cuota_diaria_registrada == True
     ).first()
     if pago_existente:
-        alert = {"type": "payment_already_registered",
-                 "message": "Ya se registró el pago de la cuota diaria para este conductor."}
-        # Almacena la alerta en la sesión
+        alert = {"type": "error",
+                    "message": "Este conductor ya tiene un pago registrado para el día de hoy."}
         request.session["alert"] = alert
         return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
     else:
@@ -796,7 +794,7 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
 
         if not token_payload:
             alert = {"type": "general",
-                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+                        "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -804,18 +802,18 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
         usuario = db.query(Usuario).filter(
             Usuario.id_usuario == user_id).first()
         if not usuario:
-            alert = {"type": "general",
+            alert = {"type": "error",
                         "message": "Usuario no encontrado."}
             request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
 
         empresas = db.query(Empresa, Empresa.nombre).filter(
             Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            alert = {"type": "general",
+            alert = {"type": "error",
                         "message": "Error al obtener información de la empresa."}
             request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
 
         # Filtrar conductores por la empresa del usuario
         conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
@@ -860,10 +858,11 @@ async def actualizar_cuota_diaria(
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
+
         datos_conductor = getDriverData(id_conductor, db)
 
         if not datos_conductor:
-            alert = {"type": "conductor_not_found",
+            alert = {"type": "error",
                      "message": "El conductor no existe."}
             # Almacena la alerta en la sesión
             request.session["alert"] = alert
@@ -881,7 +880,7 @@ async def actualizar_cuota_diaria(
         ).first()
 
         if not pago_existente:
-            alert = {"type": "payment_not_registered",
+            alert = {"type": "error",
                      "message": "No se encontró un pago registrado para la fecha seleccionada."}
             # Almacena la alerta en la sesión
             request.session["alert"] = alert
@@ -942,17 +941,17 @@ async def resumen_cuotas_view(
         # Obtiene el usuario desde la base de datos
         usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
         if not usuario:
-            alert = {"type": "general", "message": "Usuario no encontrado."}
+            alert = {"type": "error", "message": "Usuario no encontrado."}
             request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(url="/summary", status_code=status.HTTP_303_SEE_OTHER)
         
 
         # Obtiene la información de la empresa
         empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            alert = {"type": "general", "message": "Error al obtener información de la empresa."}
+            alert = {"type": "error", "message": "Error al obtener información de la empresa."}
             request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(url="/summary", status_code=status.HTTP_303_SEE_OTHER)
 
         # Filtra conductores por la empresa del usuario
         conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
@@ -985,7 +984,7 @@ async def resumen_cuotas_view(
                 conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
             
         if not cuotas_diarias:
-            alert = {"type": "no_payments", "message": "No se encontraron pagos registrados para este conductor."}
+            alert = {"type": "error", "message": "No se encontraron pagos registrados para este conductor."}
             request.session["alert"] = alert  
 
         # Renderiza el template con los resultados
@@ -1042,16 +1041,16 @@ async def resumen_cuotas_post(
 
         usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
         if not usuario:
-            alert = {"type": "general", "message": "Usuario no encontrado."}
+            alert = {"type": "error", "message": "Usuario no encontrado."}
             request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(url="/summary", status_code=status.HTTP_303_SEE_OTHER)
         
 
         empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            alert = {"type": "general", "message": "Error al obtener información de la empresa."}
+            alert = {"type": "error", "message": "Error al obtener información de la empresa."}
             request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(url="/summary", status_code=status.HTTP_303_SEE_OTHER)
 
         conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
 
@@ -1082,7 +1081,7 @@ async def resumen_cuotas_post(
             
         
         if not cuotas_diarias:
-            alert = {"type": "no_payments", "message": "No se encontraron pagos registrados para este conductor."}
+            alert = {"type": "error", "message": "No se encontraron pagos registrados para este conductor."}
             request.session["alert"] = alert 
 
         return templates.TemplateResponse("summary.html", {
@@ -1122,7 +1121,7 @@ async def drivers(request: Request,
 
     if not serverStatus(db):
         alert = {"type": "general",
-                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                    "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     
@@ -1178,7 +1177,7 @@ async def search(request: Request,
 
 
         if not conductores:
-            alert = {"type": "general",
+            alert = {"type": "error",
                      "message": "No se encontraron resultados."}    
             request.session["alert"] = alert
             return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
@@ -1204,6 +1203,18 @@ async def renew_token(request: Request, c_user: str = Cookie(None)):
         value=tokenConstructor(token_payload["sub"]))
 
     return response
+@app.get("/pruebas", response_class=HTMLResponse, tags=["routes"])
+async def pruebas(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    token_payload = tokenDecoder(c_user)
+
+    if not token_payload:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    alert = {"type": "error", "message": "si funca."}
+
+    return templates.TemplateResponse("./pr.html", {"request": request, "alert": alert})
 
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):

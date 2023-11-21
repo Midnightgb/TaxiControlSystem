@@ -1,13 +1,6 @@
 /* style.css */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap");
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box !important;
-  font-family: "Inter", sans-serif !important;
-}
-
 :root {
   --dark-grey: #333333;
   --medium-grey: #636363;
@@ -21,7 +14,10 @@
 }
 
 body {
-  font-family: inherit !important;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box !important;
+  font-family: "Inter", sans-serif !important;
   background-color: var(--white) !important;
   color: var(--dark-grey) !important;
   letter-spacing: -0.4px !important;
@@ -290,4 +286,7 @@ body {
   .right-container {
     display: none;
   }
+}
+.swal2-container{
+  box-sizing: unset !important;
 }

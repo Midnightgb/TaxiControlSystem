@@ -23,13 +23,6 @@
         <div class="container mx-auto">
             <h1 class="text-3xl font-bold text-center">Registro de Usuario</h1>
 
-            {% if error_message %}
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <strong class="font-bold">Error!</strong>
-                <span class="block sm:inline">{{ error_message }}</span>
-            </div>
-            {% endif %}
-
             <form action="/register/user" method="POST" enctype="multipart/form-data" class="mt-4">
                 <div class="mb-4">
                     <label for="cedula" class="block text-sm font-medium text-gray-600">CEDULA:</label>
@@ -119,29 +112,7 @@
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>
-    <script>
-        let alertType = document.getElementById("alert-type").innerText;
-        let alertMessage = document.getElementById("alert-message").innerText;
-        let backgroundColor = alertType == "success" ? "#1f1f1f" : "#ff0028";
-        let textColor = "#fff"
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-            background: backgroundColor,
-            color: textColor,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
-        Toast.fire({
-            icon: alertType,
-            title: alertMessage
-        });
-    </script>
+    <script src="{{ url_for('static', path='js/alert.js')}}"></script>
     {% endif %}
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
 

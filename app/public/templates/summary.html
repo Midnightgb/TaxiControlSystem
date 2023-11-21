@@ -11,25 +11,17 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 
 <body>
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
-    <main class="p-6 mx-auto max-w-7xl">
+    <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
         {% for empresa in empresas %}
         <h1 class="text-center text-2xl font-bold">{{ empresa.nombre }}</h1>
         {% endfor %}
         <h1 class="text-2xl font-bold">Resumen de Cuotas Diarias</h1>
-    
-        {% if alert %}
-        <div class="alert alert-{{ alert.type }} alert-dismissible fade show" role="alert">
-            {{ alert.message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
     
         <form action="/summary" method="POST" id="summaryForm" class="mb-4">
             <label for="id_conductor" class="block text-sm font-medium text-gray-700">Seleccionar Conductor:</label>
@@ -84,6 +76,11 @@
         </table>
         {% endif %}
     </main>
+    {% if alert %}
+    <p id="alert-type" style="display: none;">{{ alert.type }}</p>
+    <p id="alert-message" style="display: none;">{{ alert.message }}</p>
+    <script src="{{ url_for('static', path='js/alert.js')}}"></script>
+    {% endif %}
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
 </body>
 </html>

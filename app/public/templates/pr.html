@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Taxi Control - Registro Cuota Diaria</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
+</head>
+
+<body class="bg-gray-100">
+    {% block nav %}
+    {% include 'components/nav.html' %}
+    {% endblock %}
+    <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
+        <div class="container">
+            <h1 class="text-2xl font-bold mb-4">Registro Diario Cuota</h1>
+
+        </div>
+    </main>
+    <script src="{{ url_for('static', path='js/app.js')}}"></script>
+    {% if alert %}
+    <p id="alert-type" style="display: none;">{{ alert.type }}</p>
+    <p id="alert-message" style="display: none;">{{ alert.message }}</p>
+    <script src="{{ url_for('static', path='js/alert.js')}}"></script>
+    {% endif %}
+</body>
+
+</html>
