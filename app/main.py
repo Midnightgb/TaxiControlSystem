@@ -5,7 +5,7 @@ from fastapi import (
     Form,
     status,
     Depends,
-    HTTPException, 
+    HTTPException,
     Cookie,
     Query,
     Response,
@@ -144,9 +144,45 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     if not userData:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-    welcome = {"name": userData.nombre, "message": ""}
+    empresa = db.query(Empresa).filter(
+        Empresa.id_empresa == userData.empresa_id).first()
+
+    if not empresa:
+        alert = {"type": "general",
+                 "message": "Error al obtener información de la empresa."}
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    assistantsInCompany = db.query(Usuario).filter(
+        Usuario.rol == "Secretaria", Usuario.empresa_id == empresa.id_empresa).all()
+    taxisInCompany = db.query(Taxi).filter(
+        Taxi.empresa_id == empresa.id_empresa).all()
+    driversInCompany = db.query(Usuario).filter(
+        Usuario.rol == "Conductor", Usuario.empresa_id == empresa.id_empresa).all()
+
+
+    counterAssistants = 0
+    counterTaxis = 0
+    counterDrivers = 0
+
+    for assitant in assistantsInCompany:
+        counterAssistants += 1
+    for taxi in taxisInCompany:
+        counterTaxis += 1
+    for driver in driversInCompany:
+        counterDrivers += 1
+
+    print(counterAssistants)
+    print(counterTaxis)
+    print(counterDrivers)
+
+    dataDashboard = {
+        "assistants": counterAssistants,
+        "taxis": counterTaxis,
+        "drivers": counterDrivers
+    }
+    welcome = {"name": userData.nombre}
     alert = request.session.pop("alert", None)
-    return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome})
+    return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome, "empresa": empresa, "dataDashboard": dataDashboard})
 
 
 @app.get("/logout", tags=["auth"])
@@ -160,6 +196,8 @@ async def logout(request: Request):
 # ========================================== USERBLOCK ============================================ #
 
 # -- PATH TO REDIRECT TO USER CREATION -- #
+
+
 @app.get("/register/user", response_class=HTMLResponse, tags=["create"])
 async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
@@ -191,6 +229,8 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW USER -- #
+
+
 @app.post("/register/user", response_class=HTMLResponse)
 async def CreateUser(
     request: Request,
@@ -201,7 +241,7 @@ async def CreateUser(
     contrasena: Optional[str] = Form(""),
     rol: str = Form(...),
     empresa_id: int = Form(...),
-    imagen:Optional[UploadFile]  = Form(None),
+    imagen: Optional[UploadFile] = Form(None),
     db: Session = Depends(get_database),
     c_user: str = Cookie(None)
 ):
@@ -243,17 +283,15 @@ async def CreateUser(
         request.session["alert"] = alert
         return RedirectResponse(url="/register/user", status_code=status.HTTP_303_SEE_OTHER)
 
-
     # Encriptar la contraseña solo si se proporciona una
     hashed_password = None
     if contrasena and rol != "Conductor":
         hashed_password = bcrypt.hashpw(
             contrasena.encode('utf-8'), bcrypt.gensalt())
-    
+
     image_bytes = None
     if imagen:
         image_bytes = convert_to_bynary(imagen)
-
 
     # Crear el nuevo usuario
     nuevo_usuario = Usuario(
@@ -265,7 +303,7 @@ async def CreateUser(
         rol=rol,
         estado='Activo',
         empresa_id=empresa_id,
-        foto=image_bytes if image_bytes else None 
+        foto=image_bytes if image_bytes else None
     )
     db.add(nuevo_usuario)
     db.commit()
@@ -276,43 +314,51 @@ async def CreateUser(
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO REDIRECT TO USER UPDATE -- #
+
+
 @app.post("/update/user/path", response_class=HTMLResponse, tags=["update"])
 async def update_user(
-    request: Request, 
-    c_user: str = Cookie(None), 
-    id_usuario: str = Form(...), 
+    request: Request,
+    c_user: str = Cookie(None),
+    id_usuario: str = Form(...),
     db: Session = Depends(get_database)
 ):
 
     if not serverStatus(db):
-        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     # Validar que el usuario esté logueado
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     # Validar que el token sea válido
     token_payload = tokenDecoder(c_user)
     if not token_payload:
-        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        alert = {"type": "general",
+                 "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
-    usuario = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
 
-    empresa = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+    usuario = db.query(Usuario).filter(
+        Usuario.id_usuario == id_usuario).first()
+
+    empresa = db.query(Empresa).filter(
+        Empresa.id_empresa == usuario.empresa_id).first()
 
     if not usuario:
-        alert = {"type": "general","message": "El usuario no existe."}
+        alert = {"type": "general", "message": "El usuario no existe."}
         request.session["alert"] = alert
         return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     return templates.TemplateResponse("updateUser.html", {"request": request, "usuario": usuario, "empresa": empresa})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE UPDATE OF A USER -- #
+
+
 @app.post("/update/user", response_class=HTMLResponse, tags=["update"])
 async def update_user(
     request: Request,
@@ -326,22 +372,24 @@ async def update_user(
     db: Session = Depends(get_database)
 ):
     if not serverStatus(db):
-        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     # Validar que el usuario esté logueado
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     # Validar que el token sea válido
     token_payload = tokenDecoder(c_user)
 
     if not token_payload:
-        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        alert = {"type": "general",
+                 "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     # Obtén el usuario existente
     user = db.query(Usuario).filter(Usuario.cedula == cedula).first()
 
@@ -368,6 +416,8 @@ async def update_user(
 # ========================================== TAXIBLOCK ============================================ #
 
 # -- PATH TO REDIRECT TO TAXI CREATION -- #
+
+
 @app.get("/register/taxi", response_class=HTMLResponse, tags=["create"])
 async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
@@ -399,6 +449,8 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW TAXI -- #
+
+
 @app.post("/register/taxi", response_class=HTMLResponse)
 async def create_taxi(
     request: Request,
@@ -463,6 +515,10 @@ async def create_taxi(
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO REDIRECT TO TAXI VIEW -- #
+@app.get("/taxis", tags=["routes"])
+async def taxis(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
+
 @app.get("/view/taxi", response_class=HTMLResponse, tags=["routes"])
 async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
@@ -491,43 +547,50 @@ async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = 
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO REDIRECT TO TAXI UPDATE -- #
+
+
 @app.post("/update/taxi/path", response_class=HTMLResponse, tags=["update"])
 async def update_taxi(
-    request: Request, 
-    c_user: str = Cookie(None), 
-    id_taxi: str = Form(...), 
+    request: Request,
+    c_user: str = Cookie(None),
+    id_taxi: str = Form(...),
     db: Session = Depends(get_database)
 ):
 
     if not serverStatus(db):
-        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     # Validar que el usuario esté logueado
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     # Validar que el token sea válido
     token_payload = tokenDecoder(c_user)
     if not token_payload:
-        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        alert = {"type": "general",
+                 "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     taxi = db.query(Taxi).filter(Taxi.id_taxi == id_taxi).first()
 
-    empresa = db.query(Empresa).filter(Empresa.id_empresa == taxi.empresa_id).first()
+    empresa = db.query(Empresa).filter(
+        Empresa.id_empresa == taxi.empresa_id).first()
 
     if not taxi:
-        alert = {"type": "error","message": "El taxi no existe."}
+        alert = {"type": "error", "message": "El taxi no existe."}
         request.session["alert"] = alert
         return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     return templates.TemplateResponse("updateTaxi.html", {"request": request, "taxi": taxi, "empresa": empresa})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE UPDATE OF A TAXI -- #
+
+
 @app.post("/update/taxi", response_class=HTMLResponse, tags=["update"])
 async def update_taxi(
     request: Request,
@@ -541,22 +604,24 @@ async def update_taxi(
     db: Session = Depends(get_database)
 ):
     if not serverStatus(db):
-        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     # Validar que el usuario esté logueado
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     # Validar que el token sea válido
     token_payload = tokenDecoder(c_user)
 
     if not token_payload:
-        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        alert = {"type": "general",
+                 "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     # Obtén el taxi existente
     taxi = db.query(Taxi).filter(Taxi.placa == placa).first()
 
@@ -643,7 +708,7 @@ async def create_assignment(
     db.refresh(nueva_asignacion)
     alert = {"type": "success", "message": "Asignación registrada exitosamente."}
     request.session["alert"] = alert
-    
+
     return RedirectResponse(url="/register/assignment", status_code=status.HTTP_303_SEE_OTHER)
 # -- END OF THE ROUTE -- #
 
@@ -659,22 +724,21 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
     try:
         if not serverStatus(db):
             alert = {"type": "general",
-                        "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-        
 
         if not c_user:
             alert = {"type": "general",
-                        "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+                     "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-        
+
         token_payload = tokenDecoder(c_user)
 
         if not token_payload:
             alert = {"type": "general",
-                        "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+                     "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -689,16 +753,15 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
             Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
             alert = {"type": "error",
-                        "message": "Error al obtener información de la empresa."}
+                     "message": "Error al obtener información de la empresa."}
             request.session["alert"] = alert
             return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
-        
 
         conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
             Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
         taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
             Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
-            
+
         # Recuperar la alerta de la sesión
         alert = request.session.pop("alert", None)
         return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores, "taxis": taxisAssigned})
@@ -709,7 +772,7 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
 
     except Exception as e:
         alert = {"type": "general",
-                    "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 # -- MODULO 2 actualizar registro diario-- #
@@ -724,7 +787,7 @@ async def registro_diario(
 ):
     if not serverStatus(db):
         alert = {"type": "general",
-                    "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -732,7 +795,7 @@ async def registro_diario(
 
     if not datos_conductor:
         alert = {"type": "error",
-                    "message": "El conductor no tiene un taxi asignado."}
+                 "message": "El conductor no tiene un taxi asignado."}
         # Almacena la alerta en la sesión
         request.session["alert"] = alert
         return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
@@ -747,7 +810,7 @@ async def registro_diario(
     ).first()
     if pago_existente:
         alert = {"type": "error",
-                    "message": "Este conductor ya tiene un pago registrado para el día de hoy."}
+                 "message": "Este conductor ya tiene un pago registrado para el día de hoy."}
         request.session["alert"] = alert
         return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
     else:
@@ -779,14 +842,13 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
     try:
         if not serverStatus(db):
             alert = {"type": "general",
-                        "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-        
 
         if not c_user:
             alert = {"type": "general",
-                        "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -794,7 +856,7 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
 
         if not token_payload:
             alert = {"type": "general",
-                        "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -803,7 +865,7 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
             Usuario.id_usuario == user_id).first()
         if not usuario:
             alert = {"type": "error",
-                        "message": "Usuario no encontrado."}
+                     "message": "Usuario no encontrado."}
             request.session["alert"] = alert
             return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -811,7 +873,7 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
             Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
             alert = {"type": "error",
-                        "message": "Error al obtener información de la empresa."}
+                     "message": "Error al obtener información de la empresa."}
             request.session["alert"] = alert
             return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -828,9 +890,9 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
 
         # Recuperar la alerta de la sesión
         alert = request.session.pop("alert", None)
-        
+
         return templates.TemplateResponse("registerDailyUpdate.html", {"request": request, "alert": alert, "conductores": conductores, "fechas_registradas": fechas_registradas, "empresas": empresas, "taxis": taxisAssigned})
-    
+
     except HTTPException as e:
         alert = {"type": "general", "message": str(e.detail)}
         request.session["alert"] = alert
@@ -854,10 +916,9 @@ async def actualizar_cuota_diaria(
     try:
         if not serverStatus(db):
             alert = {"type": "general",
-                        "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-
 
         datos_conductor = getDriverData(id_conductor, db)
 
@@ -885,16 +946,17 @@ async def actualizar_cuota_diaria(
             # Almacena la alerta en la sesión
             request.session["alert"] = alert
             return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
-        
+
         # Actualizar la cuota diaria para la fecha seleccionada
         pago_existente.valor = nueva_cuota
         pago_existente.estado = nueva_cuota >= datos_conductor["cuota_diaria_taxi"]
         db.commit()
 
-        alert = {"type": "success", "message": "Cuota diaria actualizada exitosamente."}
+        alert = {"type": "success",
+                 "message": "Cuota diaria actualizada exitosamente."}
         # Almacena la alerta en la sesión
         request.session["alert"] = alert
-        
+
         # Redirige a la vista de actualización diaria
         return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -919,42 +981,47 @@ async def resumen_cuotas_view(
     db: Session = Depends(get_database)
 ):
     try:
-  
+
         if not serverStatus(db):
-            alert = {"type": "general", "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            alert = {"type": "general",
+                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-       
         if not c_user:
-            alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            alert = {"type": "general",
+                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         token_payload = tokenDecoder(c_user)
         if not token_payload:
-            alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            alert = {"type": "general",
+                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
         user_id = int(token_payload["sub"])
 
         # Obtiene el usuario desde la base de datos
-        usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+        usuario = db.query(Usuario).filter(
+            Usuario.id_usuario == user_id).first()
         if not usuario:
             alert = {"type": "error", "message": "Usuario no encontrado."}
             request.session["alert"] = alert
             return RedirectResponse(url="/summary", status_code=status.HTTP_303_SEE_OTHER)
-        
 
         # Obtiene la información de la empresa
-        empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == usuario.empresa_id).first()
+        empresas = db.query(Empresa, Empresa.nombre).filter(
+            Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            alert = {"type": "error", "message": "Error al obtener información de la empresa."}
+            alert = {"type": "error",
+                     "message": "Error al obtener información de la empresa."}
             request.session["alert"] = alert
             return RedirectResponse(url="/summary", status_code=status.HTTP_303_SEE_OTHER)
 
         # Filtra conductores por la empresa del usuario
-        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+        conductores = db.query(Usuario).filter(
+            Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
 
         # Recupera la alerta de la sesión
         alert = request.session.pop("alert", None)
@@ -969,8 +1036,10 @@ async def resumen_cuotas_view(
             if datos_conductor:
                 # Si se proporcionan fechas, filtra por rango de fechas
                 if fecha_inicio and fecha_fin:
-                    fecha_inicio = datetime.combine(fecha_inicio, datetime.min.time())
-                    fecha_fin = datetime.combine(fecha_fin, datetime.max.time())
+                    fecha_inicio = datetime.combine(
+                        fecha_inicio, datetime.min.time())
+                    fecha_fin = datetime.combine(
+                        fecha_fin, datetime.max.time())
                     cuotas_diarias = db.query(Pago).filter(
                         Pago.id_conductor == id_conductor,
                         Pago.fecha.between(fecha_inicio, fecha_fin)
@@ -978,14 +1047,17 @@ async def resumen_cuotas_view(
                     print("Cuotas diarias dentro del rango:", cuotas_diarias)
                 else:
                     # Sin fechas, obtén todos los pagos para el conductor
-                    cuotas_diarias = db.query(Pago).filter(Pago.id_conductor == id_conductor).all()
+                    cuotas_diarias = db.query(Pago).filter(
+                        Pago.id_conductor == id_conductor).all()
                     print("Todas las cuotas diarias:", cuotas_diarias)
                 # Obtiene la información del conductor
-                conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
-            
+                conductor = db.query(Usuario).filter(
+                    Usuario.id_usuario == id_conductor).first()
+
         if not cuotas_diarias:
-            alert = {"type": "error", "message": "No se encontraron pagos registrados para este conductor."}
-            request.session["alert"] = alert  
+            alert = {
+                "type": "error", "message": "No se encontraron pagos registrados para este conductor."}
+            request.session["alert"] = alert
 
         # Renderiza el template con los resultados
         return templates.TemplateResponse("summary.html", {
@@ -1006,9 +1078,11 @@ async def resumen_cuotas_view(
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     except Exception as e:
-        alert = {"type": "general", "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        alert = {"type": "general",
+                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
 
 @app.post("/summary", response_class=HTMLResponse, tags=["routes"])
 async def resumen_cuotas_post(
@@ -1021,38 +1095,43 @@ async def resumen_cuotas_post(
     try:
 
         if not serverStatus(db):
-            alert = {"type": "general", "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            alert = {"type": "general",
+                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-        
+
         c_user = request.cookies.get("c_user")
         if not c_user:
-            alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            alert = {"type": "general",
+                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         token_payload = tokenDecoder(c_user)
         if not token_payload:
-            alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            alert = {"type": "general",
+                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
         user_id = int(token_payload["sub"])
 
-
-        usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+        usuario = db.query(Usuario).filter(
+            Usuario.id_usuario == user_id).first()
         if not usuario:
             alert = {"type": "error", "message": "Usuario no encontrado."}
             request.session["alert"] = alert
             return RedirectResponse(url="/summary", status_code=status.HTTP_303_SEE_OTHER)
-        
 
-        empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == usuario.empresa_id).first()
+        empresas = db.query(Empresa, Empresa.nombre).filter(
+            Empresa.id_empresa == usuario.empresa_id).first()
         if not empresas:
-            alert = {"type": "error", "message": "Error al obtener información de la empresa."}
+            alert = {"type": "error",
+                     "message": "Error al obtener información de la empresa."}
             request.session["alert"] = alert
             return RedirectResponse(url="/summary", status_code=status.HTTP_303_SEE_OTHER)
 
-        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+        conductores = db.query(Usuario).filter(
+            Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
 
         alert = request.session.pop("alert", None)
 
@@ -1065,8 +1144,10 @@ async def resumen_cuotas_post(
             if datos_conductor:
                 # Si se proporcionan fechas, filtra por rango de fechas
                 if fecha_inicio and fecha_fin:
-                    fecha_inicio = datetime.combine(fecha_inicio, datetime.min.time())
-                    fecha_fin = datetime.combine(fecha_fin, datetime.max.time())
+                    fecha_inicio = datetime.combine(
+                        fecha_inicio, datetime.min.time())
+                    fecha_fin = datetime.combine(
+                        fecha_fin, datetime.max.time())
                     cuotas_diarias = db.query(Pago).filter(
                         Pago.id_conductor == id_conductor,
                         Pago.fecha.between(fecha_inicio, fecha_fin)
@@ -1074,15 +1155,17 @@ async def resumen_cuotas_post(
                     print("Cuotas diarias dentro del rango:", cuotas_diarias)
                 else:
                     # Sin fechas, obtén todos los pagos para el conductor
-                    cuotas_diarias = db.query(Pago).filter(Pago.id_conductor == id_conductor).all()
+                    cuotas_diarias = db.query(Pago).filter(
+                        Pago.id_conductor == id_conductor).all()
                     print("Todas las cuotas diarias:", cuotas_diarias)
                 # Obtiene la información del conductor
-                conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
-            
-        
+                conductor = db.query(Usuario).filter(
+                    Usuario.id_usuario == id_conductor).first()
+
         if not cuotas_diarias:
-            alert = {"type": "error", "message": "No se encontraron pagos registrados para este conductor."}
-            request.session["alert"] = alert 
+            alert = {
+                "type": "error", "message": "No se encontraron pagos registrados para este conductor."}
+            request.session["alert"] = alert
 
         return templates.TemplateResponse("summary.html", {
             "request": request,
@@ -1102,15 +1185,17 @@ async def resumen_cuotas_post(
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     except Exception as e:
-        alert = {"type": "general", "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        alert = {"type": "general",
+                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
+
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
-                    c_user: str = Cookie(None),
-                    db: Session = Depends(get_database)
-                    ):
+                  c_user: str = Cookie(None),
+                  db: Session = Depends(get_database)
+                  ):
     alert = request.session.pop("alert", None)
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
@@ -1121,15 +1206,15 @@ async def drivers(request: Request,
 
     if not serverStatus(db):
         alert = {"type": "general",
-                    "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     UUID = checkTokenStatus["userid"]
     userData = db.query(Usuario).filter(Usuario.id_usuario == UUID).first()
     if not userData:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
+
     token_payload = tokenDecoder(c_user)
 
     user_id = int(token_payload["sub"])
@@ -1137,7 +1222,8 @@ async def drivers(request: Request,
     usuario = db.query(Usuario).filter(
         Usuario.id_usuario == user_id).first()
 
-    conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+    conductores = db.query(Usuario).filter(
+        Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
     for conductor in conductores:
         if conductor.foto:
             conductor.foto = convertIMG(conductor.foto)
@@ -1154,14 +1240,16 @@ async def reports(request: Request,
 
     return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports})
 
+
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def search(request: Request,
-                    search: Optional[str] = Form(None),
-                    db: Session = Depends(get_database)
-                    ):
+                 search: Optional[str] = Form(None),
+                 db: Session = Depends(get_database)
+                 ):
     conductores = None
     if not search:
-        conductores = db.query(Usuario).filter(Usuario.rol == 'Conductor').all()
+        conductores = db.query(Usuario).filter(
+            Usuario.rol == 'Conductor').all()
     else:
         conductores = db.query(Usuario).filter(
             Usuario.rol == 'Conductor',
@@ -1175,10 +1263,9 @@ async def search(request: Request,
             if conductor.foto:
                 conductor.foto = convertIMG(conductor.foto)
 
-
         if not conductores:
             alert = {"type": "error",
-                     "message": "No se encontraron resultados."}    
+                     "message": "No se encontraron resultados."}
             request.session["alert"] = alert
             return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -1203,6 +1290,8 @@ async def renew_token(request: Request, c_user: str = Cookie(None)):
         value=tokenConstructor(token_payload["sub"]))
 
     return response
+
+
 @app.get("/pruebas", response_class=HTMLResponse, tags=["routes"])
 async def pruebas(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     if not c_user:
@@ -1215,6 +1304,7 @@ async def pruebas(request: Request, c_user: str = Cookie(None), db: Session = De
     alert = {"type": "error", "message": "si funca."}
 
     return templates.TemplateResponse("./pr.html", {"request": request, "alert": alert})
+
 
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):

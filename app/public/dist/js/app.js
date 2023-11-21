@@ -163,5 +163,11 @@ setInterval(() => {
       }
     }
   }
-}, 600000);
+}, 300000);
 
+let loader = document.getElementById("loader");
+window.addEventListener("load", function () {
+  this.setTimeout(() => {
+    loader.style.display = "none";
+  }, 1000);
+});
