@@ -6,3 +6,5 @@ conda create --name taxicontrol python=3.9
 conda activate taxicontrol
 pip install -r requirements.txt
 ```
+https://medevel.com/os-js-calendar/
+https://gramthanos.github.io/jsCalendar/demos.html
