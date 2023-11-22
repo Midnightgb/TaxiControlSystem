@@ -791,6 +791,11 @@ async def registro_diario(
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
+    if valor < 0:
+        alert = {"type": "error", "message": "El valor no puede ser negativo."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+    
     datos_conductor = getDriverData(id_conductor, db)
 
     if not datos_conductor:
@@ -946,6 +951,13 @@ async def actualizar_cuota_diaria(
             # Almacena la alerta en la sesión
             request.session["alert"] = alert
             return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
+        
+        if nueva_cuota < pago_existente.valor:
+            alert = {"type": "error",
+                     "message": "El valor no puede ser menor a la cuota registrada."}
+            # Almacena la alerta en la sesión
+            request.session["alert"] = alert
+            return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
 
         # Actualizar la cuota diaria para la fecha seleccionada
         pago_existente.valor = nueva_cuota
@@ -1054,11 +1066,6 @@ async def resumen_cuotas_view(
                 conductor = db.query(Usuario).filter(
                     Usuario.id_usuario == id_conductor).first()
 
-        if not cuotas_diarias:
-            alert = {
-                "type": "error", "message": "No se encontraron pagos registrados para este conductor."}
-            request.session["alert"] = alert
-
         # Renderiza el template con los resultados
         return templates.TemplateResponse("summary.html", {
             "request": request,
@@ -1164,7 +1171,8 @@ async def resumen_cuotas_post(
 
         if not cuotas_diarias:
             alert = {
-                "type": "error", "message": "No se encontraron pagos registrados para este conductor."}
+                "type": "error", 
+                "message": "No se encontraron resultados para la búsqueda del conductor " + conductor.nombre + " " + conductor.apellido + "en la fecha inicio {0} y fecha fin {1}".format(fecha_inicio, fecha_fin)}
             request.session["alert"] = alert
 
         return templates.TemplateResponse("summary.html", {

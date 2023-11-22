@@ -1,3 +1,5 @@
+CREATE DATABASE IF NOT EXISTS taxicontrolsystem;
+USE taxicontrolsystem;
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
@@ -242,9 +244,6 @@ CREATE TABLE `usuarios` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `usuarios`
---
 
 INSERT INTO `usuarios` (`id_usuario`, `cedula`, `nombre`, `apellido`, `correo`, `contrasena`, `rol`, `estado`, `foto`, `empresa_id`, `created_at`, `updated_at`) VALUES
 (1, 1234, 'Julian', 'Vasquez', 'julianvaskes12@hotmail.com', '$2y$10$.LoHrb62oXUyoTUp8HXj/eGZA7GG0kk5tFQi08kFA0/l5l20LMNai', 'Administrador', 'Activo', NULL, 1, '2023-11-11 22:56:25', '2023-11-15 04:17:26'),
@@ -270,9 +269,6 @@ INSERT INTO `usuarios` (`id_usuario`, `cedula`, `nombre`, `apellido`, `correo`, 
 INSERT INTO `usuarios` (`id_usuario`, `cedula`, `nombre`, `apellido`, `correo`, `contrasena`, `rol`, `estado`, `foto`, `empresa_id`, `created_at`, `updated_at`) VALUES
 (18, 10000, 'carolina', 'hernandez', 'caro@gmail.com', '$2b$12$2gBj3redZvPx5BsoQykOYOfmpBSJLAFKukV1sw0tGbJPlZcXOf2DC', 'Secretaria', 'Activo', NULL, 1, '2023-11-21 14:23:22', '2023-11-21 14:23:22');
 
---
--- Índices para tablas volcadas
---
 
 --
 -- Indices de la tabla `conductor_actual`
