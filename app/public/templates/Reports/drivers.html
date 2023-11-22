@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Title</title>
+    <title>Taxi Control - Conductores</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -10,9 +10,13 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/loader.css')}}">
 </head>
 
 <body>
+    {% block loader %}
+    {% include 'components/loader.html' %}
+    {% endblock %}
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
@@ -32,14 +36,14 @@
                 {% if usuarios: %}
                 <div class="flex flex-wrap justify-center mt-4">
                     {% for usuario in usuarios %}
-                    <div class="bg-white shadow-md my-4 mx-2 p-6  justify-end items-end " style="width: 18rem;" data-drivers="{{usuario.nombre}}">
+                    <div class="bg-white shadow-md my-4 mx-2 p-6  justify-end items-end " style="width: 18rem;"
+                        data-drivers="{{usuario.nombre}}">
 
                         <div class="flex mt-4 justify-center items-center ">
                             {% if usuario.foto: %}
-                            <img src="{{ usuario.foto }} " height="90px" width="90px" class="card-img-top" />
+                            <img src="{{ usuario.foto }} " height="90px" width="90px" class="card-img-top rounded-full" />
                             {% else %}
-                            <img src="{{ url_for('static', path='assets/imgs/imagenPerfil.png')}}" class="aspect-video"
-                                width="90px">
+                            <img src="{{ url_for('static', path='assets/imgs/imagenPerfil.png')}}" width="90px">
                             {% endif %}
                         </div>
 
@@ -57,7 +61,8 @@
 
                             <form action="/update/user/path" method="POST">
                                 <input type="hidden" name="id_usuario" value="{{usuario.id_usuario}}">
-                                <button type="submit" class="bg-blue-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
+                                <button type="submit"
+                                    class="bg-blue-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
                                     Editar
                                 </button>
                             </form>
@@ -83,64 +88,43 @@
 
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
     <script>
-    const formSearch = document.getElementById('formSearch');
-    const search = document.getElementById('search');
-    const drivers = document.querySelectorAll('[data-drivers]');
-    console.log(drivers);
+        const formSearch = document.getElementById('formSearch');
+        const search = document.getElementById('search');
+        const drivers = document.querySelectorAll('[data-drivers]');
+        console.log(drivers);
 
-    formSearch.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const searchValue = search.value;
-        if (searchValue === '') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: 'Debes ingresar un valor para buscar',
-            })
-        } else {
-            let founded = false;
-            drivers.forEach((driver) => {
-                const driverName = driver.dataset.drivers;
-                if (driverName.includes(searchValue)) {
-                    driver.style.display = 'block';
-                    founded = true;
-                } else {
-                    driver.style.display = 'none';
+        formSearch.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const searchValue = search.value;
+            if (searchValue === '') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Debes ingresar un valor para buscar',
+                })
+            } else {
+                let founded = false;
+                drivers.forEach((driver) => {
+                    const driverName = driver.dataset.drivers;
+                    if (driverName.includes(searchValue)) {
+                        driver.style.display = 'block';
+                        founded = true;
+                    } else {
+                        driver.style.display = 'none';
+                    }
+                })
+                if (!founded) {
+                    formSearch.submit();
                 }
-            })
-            if (!founded) {
-                formSearch.submit();
             }
-        }
-    })
+        })
     </script>
     {% if alert %}
-        <p id="alert-type" style="display: none;">{{ alert.type }}</p>
-        <p id="alert-message" style="display: none;">{{ alert.message }}</p>
-        <script>
-            let alertType = document.getElementById("alert-type").innerText;
-            let alertMessage = document.getElementById("alert-message").innerText;
-            let backgroundColor = alertType == "success" ? "#1f1f1f" : "#ff0028";
-            let textColor = "#fff"
-            const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-            background : backgroundColor,
-            color: textColor,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-            });
-            Toast.fire({
-            icon: alertType,
-            title: alertMessage
-            });
-        </script>
-{% endif %}
+    <p id="alert-type" style="display: none;">{{ alert.type }}</p>
+    <p id="alert-message" style="display: none;">{{ alert.message }}</p>
+    <script src="{{ url_for('static', path='js/alert.js')}}"></script>
+    {% endif %}
+    <script src="{{ url_for('static', path='js/app.js')}}"></script>
 </body>
 
 </html>

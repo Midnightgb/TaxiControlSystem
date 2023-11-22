@@ -2,61 +2,59 @@
 <html lang="en">
 
 <head>
-    <title>Actualizar Usuario</title>
+    <title>Taxi Control - Actualizar Usuario</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
 </head>
 
-<body class="font-sans antialiased bg-gray-100">
+<body>
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
-    <main class="p-6 mx-auto max-w-screen-xl">
-
+    <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
         <div class="container mx-auto">
             <h1 class="text-3xl font-bold text-center">Actualizar de Usuario</h1>
-
-            {% if error_message %}
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <strong class="font-bold">Error!</strong>
-                <span class="block sm:inline">{{ error_message }}</span>
-            </div>
-            {% endif %}
 
             <form action="/update/user" method="POST" enctype="multipart/form-data" class="mt-4">
                 <div class="mb-4">
                     <label for="cedula" class="block text-sm font-medium text-gray-600">CEDULA:</label>
                     <input type="number" class="form-input mt-1 block w-full rounded-md border border-gray-300
-                        focus:outline-none focus:border-blue-500" name="cedula" id="cedula" value="{{ usuario.cedula }}" required readonly>
+                        focus:outline-none focus:border-blue-500" name="cedula" id="cedula"
+                        value="{{ usuario.cedula }}" required readonly>
                 </div>
 
                 <div class="mb-4">
                     <label for="nombre" class="block text-sm font-medium text-gray-600">NOMBRES:</label>
                     <input type="text" class="form-input mt-1 block w-full rounded-md border border-gray-300
-                        focus:outline-none focus:border-blue-500" name="nombre" id="nombre" value="{{ usuario.nombre }}" required>
+                        focus:outline-none focus:border-blue-500" name="nombre" id="nombre"
+                        value="{{ usuario.nombre }}" required>
                 </div>
 
                 <div class="mb-4">
                     <label for="apellido" class="block text-sm font-medium text-gray-600">APELLIDOS:</label>
                     <input type="text" class="form-input mt-1 block w-full rounded-md border border-gray-300
-                        focus:outline-none focus:border-blue-500" name="apellido" id="apellido" value="{{ usuario.apellido }}" required>
+                        focus:outline-none focus:border-blue-500" name="apellido" id="apellido"
+                        value="{{ usuario.apellido }}" required>
                 </div>
 
                 <div class="mb-4">
                     <label for="correo" class="block text-sm font-medium text-gray-600">Correo Electrónico:</label>
                     <input type="email" class="form-input mt-1 block w-full rounded-md border border-gray-300
-                        focus:outline-none focus:border-blue-500" name="correo" id="correo" value="{{ usuario.correo }}" required>
+                        focus:outline-none focus:border-blue-500" name="correo" id="correo"
+                        value="{{ usuario.correo }}" required>
                 </div>
 
                 <div class="mb-4">
                     <label for="rol" class="block text-sm font-medium text-gray-600">Tipo de Usuario:</label>
                     <select class="form-select mt-1 block w-full rounded-md border border-gray-300
-                        focus:outline-none focus:border-blue-500" name="rol" id="rol" required onchange="updatePasswordField()">
+                        focus:outline-none focus:border-blue-500" name="rol" id="rol" required
+                        onchange="updatePasswordField()">
                         <option value="" disabled>Seleccione rol</option>
                         {% if usuario and usuario.rol == "Administrador" %}
                         <option value="Administrador" selected>Administrador</option>
@@ -76,14 +74,11 @@
                 </div>
 
                 <button type="submit"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar Usuario</button>
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar
+                    Usuario</button>
             </form>
         </div>
     </main>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
     <script>
         function updatePasswordField() {
             var rolSelect = document.getElementById("rol");
@@ -106,33 +101,9 @@
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>
-    <script>
-        let alertType = document.getElementById("alert-type").innerText;
-        let alertMessage = document.getElementById("alert-message").innerText;
-        let backgroundColor = alertType == "success" ? "#1f1f1f" : "#ff0028";
-        let textColor = "#fff"
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-            background: backgroundColor,
-            color: textColor,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
-        Toast.fire({
-            icon: alertType,
-            title: alertMessage
-        });
-    </script>
+    <script src="{{ url_for('static', path='js/alert.js')}}"></script>
     {% endif %}
-
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
-
 </body>
 
 </html>

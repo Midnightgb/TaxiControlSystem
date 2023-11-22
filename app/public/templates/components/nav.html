@@ -1,12 +1,12 @@
 <header id="nav-menu" aria-label="navigation bar">
-  <div class="container-nav">
+  <div class="container-nav bg-zinc-100">
     <div class="nav-start">
       <a class="logo" href="#">
         <img src="{{ url_for('static', path='assets/imgs/logo250.png')}}" width="80" height="80" alt="Inc Logo" />
       </a>
       <nav class="menu">
         
-        <ul class="menu-bar">
+        <ul class="menu-bar bg-zinc-100">
           <li><a class="nav-link" href="/home">Inicio</a></li>
           <li>
             <button class="nav-link dropdown-btn" data-dropdown="dropdown1" aria-haspopup="true" aria-expanded="false" aria-label="browse">
@@ -14,8 +14,6 @@
               <i class="bx bx-chevron-down" aria-hidden="true"></i>
             </button>
             <div id="dropdown1" class="dropdown">
-<!--                <li><a class="nav-link" href="/register/daily">Registro Cuota</a></li>
-              <li><a class="nav-link" href="/register/allocation">asignar</a></li>  -->
               <ul role="menu">
                 <li role="menuitem">
                   <a class="dropdown-link" href="/register/user">
@@ -46,7 +44,7 @@
                 </li>
                 <li role="menuitem">
                   <a class="dropdown-link" href="/register/daily">
-                    <img src="https://raw.githubusercontent.com/Evavic44/responsive-navbar-with-dropdown/main/assets/icons/cf.svg" class="icon" />
+                    <img src="https://raw.githubusercontent.com/Evavic44/responsive-navbar-with-dropdown/main/assets/icons/botd.svg" class="icon" />
                     <div>
                       <span class="dropdown-link-title">Registro Cuotas</span>
                       <p>Aca podras registrar las cuotas</p>
@@ -54,8 +52,17 @@
                   </a>
                 </li>
                 <li role="menuitem">
-                  <a class="dropdown-link" href="/summary">
+                  <a class="dropdown-link" href="/update/daily">
                     <img src="https://raw.githubusercontent.com/Evavic44/responsive-navbar-with-dropdown/main/assets/icons/cf.svg" class="icon" />
+                    <div>
+                      <span class="dropdown-link-title">Actualizar Cuotas</span>
+                      <p>Aca podras actualizar cuotas</p>
+                    </div>
+                  </a>
+                </li>
+                <li role="menuitem">
+                  <a class="dropdown-link" href="/summary">
+                    <img src="https://raw.githubusercontent.com/Evavic44/responsive-navbar-with-dropdown/main/assets/icons/fs.svg" class="icon" />
                     <div>
                       <span class="dropdown-link-title">Resumen de cuota</span>
                       <p>Aca podras ver el Resumen</p>
