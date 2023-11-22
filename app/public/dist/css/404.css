@@ -254,7 +254,7 @@
     transform: scale(.98)
   }
 }
-p{
+.p{
   position: absolute;
   bottom: 0;
   left: 50%;
