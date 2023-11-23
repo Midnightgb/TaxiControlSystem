@@ -159,14 +159,18 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
         Taxi.empresa_id == empresa.id_empresa).all()
     driversInCompany = db.query(Usuario).filter(
         Usuario.rol == "Conductor", Usuario.empresa_id == empresa.id_empresa).all()
-    incomeTodayInCompany = db.query(Pago).filter(
-        Pago.estado == True, Pago.fecha == date.today()).all()
-    
+    incomeTodayInCompany = db.query(Pago).filter(Pago.fecha == date.today()).all()
+    expensesTodayInCompany = db.query(Mantenimiento).filter(Mantenimiento.fecha == date.today()).all()
+
+    expensesToday = 0
+    for expense in expensesTodayInCompany:
+        expensesToday += expense.valor
+        print(expensesToday)
+
+
     incomeToday = 0
     for income in incomeTodayInCompany:
         incomeToday += income.valor
-        print(incomeToday)
-    print(incomeToday)
 
     numAssistants = 0
     numCars = 0
@@ -182,15 +186,20 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     print(numAssistants)
     print(numCars)
     print(numDrivers)
+    print(incomeToday)
+    print(expensesToday)
 
     dataDashboard = {
         "assistants": numAssistants,
         "cars": numCars,
-        "drivers": numDrivers
+        "drivers": numDrivers,
+        "incomeToday": incomeToday,
+        "expensesToday": expensesToday
     }
+
     welcome = {"name": userData.nombre}
     alert = request.session.pop("alert", None)
-    return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome, "empresa": empresa, "dataDashboard": dataDashboard})
+    return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome, "empresa": empresa, "db": dataDashboard})
 
 
 @app.get("/logout", tags=["auth"])
