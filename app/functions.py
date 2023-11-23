@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 import os
 
 from database import SessionLocal, get_database
-from models import ConductorActual, Empresa, Usuario, Taxi, Pago
+from models import *
 
 from fastapi import status
 from fastapi.responses import RedirectResponse
@@ -19,6 +19,8 @@ import re
 from PIL import Image
 from io import BytesIO
 import base64
+
+from typing import List
 
 
 
@@ -133,3 +135,31 @@ def convertIMG(foto: bytes):
     except Exception as e:
         print(f"Error al procesar la imagen: {str(e)}")
         return None
+
+
+
+def obtener_usuarios_paginados(
+    db: Session,
+    page: int = 1,
+    per_page: int = 8,
+    empresa_id: int = None,
+    rol: str = None
+) -> List[Usuario]:
+    offset = (page - 1) * per_page
+
+    
+    total_usuarios = db.query(func.count(Usuario.id_usuario)).filter(
+        Usuario.empresa_id == empresa_id,
+        Usuario.rol == rol
+    ).scalar()
+
+    
+    total_paginas = (total_usuarios + per_page - 1) // per_page
+
+    
+    usuarios_paginados = db.query(Usuario).filter(
+        Usuario.empresa_id == empresa_id,
+        Usuario.rol == rol
+    ).offset(offset).limit(per_page).all()
+
+    return {"usuarios": usuarios_paginados, "total_paginas": total_paginas}
