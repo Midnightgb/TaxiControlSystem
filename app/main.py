@@ -231,15 +231,15 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
         print("mes reporte", report.month)
         report.month = MONTHS_IN_SPANISH[report.month]
         print("mes reporte", report.month)
-        dataDashboard["reports"]["data"][report.month]["ingresos"] += report.ingresos
-        dataDashboard["reports"]["data"][report.month]["gastos"] += report.gastos
+        dataDashboard["reports"]["data"][report.month]["income"] += report.ingresos
+        dataDashboard["reports"]["data"][report.month]["expenses"] += report.gastos
         print("gastos")
         print(report.fecha)
         print(report.ingresos)
         print(report.gastos)
         print(report.month)
         print("#####")
-
+    
     dateToday = date.today()
     dateToday = dateToday.strftime("%d/%m/%Y")
 

@@ -102,10 +102,12 @@
         var ingresos = [];
         var gastos = [];
         var meses = [];
+        console.table(reports.data);
         for (var month in reports.data) {
             meses.push(month);
-            ingresos.push(reports.data[month].ingresos);
-            gastos.push(reports.data[month].gastos);
+            console.log(meses);
+            ingresos.push(reports.data[month].income);
+            gastos.push(reports.data[month].expenses);
         }
         var options = {
             chart: {
