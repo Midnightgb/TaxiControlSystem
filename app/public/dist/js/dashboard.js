@@ -59,18 +59,35 @@ console.table(reports.data);
 
 var options = {
   chart: {
-    type: 'line'
-  },
-  toolbar: {
-    show: true,
-    tools: {
-      download: true,
-      selection: false,
-      zoom: false,
-      zoomin: false,
-      zoomout: false,
-      pan: false,
-      reset: false
+    type: 'line',
+    toolbar: {
+      show: true,
+      tools: {
+        download: true,
+        selection: false,
+        zoom: false,
+        zoomin: false,
+        zoomout: false,
+        pan: false,
+        reset: false
+      },
+      export: {
+        csv: {
+          filename: "Reporte de ingresos y gastos mensuales",
+          columnDelimiter: ',',
+          headerCategory: 'category',
+          headerValue: 'value',
+          dateFormatter(timestamp) {
+            return new Date(timestamp).toDateString()
+          }
+        },
+        svg: {
+          filename: "Reporte de ingresos y gastos mensuales"
+        },
+        png: {
+          filename: "Reporte de ingresos y gastos mensuales"
+        }
+      },
     },
   },
   series: [{

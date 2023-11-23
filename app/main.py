@@ -185,7 +185,7 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     for expense in expensesTodayInCompany:
         expensesToday += expense.costo
 
-    incomeToday = 150000
+    incomeToday = 0
     for income in incomeTodayInCompany:
         incomeToday += income.valor
     numAssistants = 0
