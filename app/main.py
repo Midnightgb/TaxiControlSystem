@@ -188,7 +188,6 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     incomeToday = 150000
     for income in incomeTodayInCompany:
         incomeToday += income.valor
-
     numAssistants = 0
     numCars = 0
     numDrivers = 0
@@ -224,15 +223,18 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     }
     
     for report in monthlyReports:
-        report.created_at = report.created_at.strftime("%m/%d/%Y, %H:%M:%S")
-        report.month = int(report.created_at.split(",")[0].split("/")[0])
-        report.month -= 1
+        report.fecha = report.fecha.strftime("%m/%d/%Y, %H:%M:%S")
+        report.month = int(report.fecha.split(",")[0].split("/")[0])
+        print("mes reporte", report.month)
+        print("mes actual", date.today().month)
         report.month = calendar.month_name[report.month]
+        print("mes reporte", report.month)
         report.month = MONTHS_IN_SPANISH[report.month]
+        print("mes reporte", report.month)
         dataDashboard["reports"]["data"][report.month]["ingresos"] += report.ingresos
         dataDashboard["reports"]["data"][report.month]["gastos"] += report.gastos
         print("gastos")
-        print(report.created_at)
+        print(report.fecha)
         print(report.ingresos)
         print(report.gastos)
         print(report.month)

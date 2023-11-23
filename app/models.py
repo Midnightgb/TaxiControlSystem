@@ -125,6 +125,7 @@ class Reporte(Base):
     ingresos = Column(Integer, nullable=False)
     gastos = Column(Integer, nullable=False)
     empresa_id = Column(Integer, ForeignKey("empresas.id_empresa"))
+    fecha = Column(Date, nullable=False)
     created_at = Column(String, server_default=func.now(), nullable=False)
     updated_at = Column(String, server_default=func.now(),
                         onupdate=func.now(), nullable=False)
