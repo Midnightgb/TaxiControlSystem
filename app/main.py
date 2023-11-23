@@ -449,8 +449,6 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW TAXI -- #
-
-
 @app.post("/register/taxi", response_class=HTMLResponse)
 async def create_taxi(
     request: Request,
@@ -547,8 +545,6 @@ async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = 
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO REDIRECT TO TAXI UPDATE -- #
-
-
 @app.post("/update/taxi/path", response_class=HTMLResponse, tags=["update"])
 async def update_taxi(
     request: Request,
@@ -589,8 +585,6 @@ async def update_taxi(
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE UPDATE OF A TAXI -- #
-
-
 @app.post("/update/taxi", response_class=HTMLResponse, tags=["update"])
 async def update_taxi(
     request: Request,
@@ -643,8 +637,7 @@ async def update_taxi(
         alert = {"type": "error", "message": "Taxi no encontrado"}
         request.session["alert"] = alert
         return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
-
-
+# -- END OF THE ROUTE -- #
 # ========================================== END OF TAXIBLOCK ============================================ #
 
 # ========================================== assignmentBLOCK ============================================ #
@@ -674,7 +667,6 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
     alert = request.session.pop("alert", None)
     return templates.TemplateResponse("registerAssignment.html", {"request": request, "conductores": driversNotAssigned, "taxis": taxisNotAssigned, "alert": alert})
 # -- END OF THE ROUTE -- #
-
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW assignment -- #
 @app.post("/register/assignment", response_class=HTMLResponse)
@@ -716,7 +708,6 @@ async def create_assignment(
 
 
 # -- MODULO 2-- #
-
 @app.get("/register/daily", response_class=HTMLResponse, tags=["routes"])
 async def registro_diario_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     user_id = None
@@ -777,7 +768,6 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 # -- MODULO 2 actualizar registro diario-- #
 
-
 @app.post("/register/daily", tags=["payments"])
 async def registro_diario(
     request: Request,
@@ -833,7 +823,6 @@ async def registro_diario(
 
     # Redirige a la vista de registro diario
     return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
-
 
 @app.get("/update/daily", response_class=HTMLResponse, tags=["routes"])
 async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
@@ -903,7 +892,6 @@ async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(No
                  "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-
 
 @app.post("/update/daily", tags=["payments"])
 async def actualizar_cuota_diaria(
@@ -1083,7 +1071,6 @@ async def resumen_cuotas_view(
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-
 @app.post("/summary", response_class=HTMLResponse, tags=["routes"])
 async def resumen_cuotas_post(
     request: Request,
@@ -1190,7 +1177,6 @@ async def resumen_cuotas_post(
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
                   c_user: str = Cookie(None),
@@ -1230,7 +1216,6 @@ async def drivers(request: Request,
 
     return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores, "alert": alert})
 
-
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
 async def reports(request: Request,
                   id_usuario: int = Form(...),
@@ -1239,7 +1224,6 @@ async def reports(request: Request,
     reports = db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
 
     return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports})
-
 
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def search(request: Request,
@@ -1271,7 +1255,6 @@ async def search(request: Request,
 
     return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
 
-
 @app.get("/renew/token", tags=["auth"])
 async def renew_token(request: Request, c_user: str = Cookie(None)):
     if not c_user:
@@ -1291,7 +1274,6 @@ async def renew_token(request: Request, c_user: str = Cookie(None)):
 
     return response
 
-
 @app.get("/pruebas", response_class=HTMLResponse, tags=["routes"])
 async def pruebas(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     if not c_user:
@@ -1305,14 +1287,114 @@ async def pruebas(request: Request, c_user: str = Cookie(None), db: Session = De
 
     return templates.TemplateResponse("./pr.html", {"request": request, "alert": alert})
 
-
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     return templates.TemplateResponse("./error404.html", {"request": request})
 
-
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     return RedirectResponse(url="/404-NotFound", status_code=status.HTTP_303_SEE_OTHER)
+
+
+# ========================================== MAINTENANCEBLOCK ============================================ #
+
+# -- PATH TO REDIRECT TO maintenance CREATION -- #
+@app.get("/maintenance", response_class=HTMLResponse, tags=["routes"])
+async def maintenance(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    if not c_user:
+            alert = {"type": "general",
+                        "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    token_payload = tokenDecoder(c_user)
+    user_id = int(token_payload["sub"])
+
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+
+    if not usuario:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    empresa = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+
+    if not empresa:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Consulta para obtener todos los taxis asociados a la empresa
+    taxis = db.query(Taxi).filter(Taxi.empresa_id == empresa.id_empresa).all()
+
+    alert = request.session.pop("alert", None)
+    return templates.TemplateResponse(
+        "maintenance.html", {"request": request, "alert": alert, "empresa": empresa, "taxis": taxis}
+    )
+# -- END OF THE ROUTE -- #
+
+# -- PATH TO PROCEED TO THE CREATION OF A NEW maintenance -- #
+@app.post("/maintenance", response_class=HTMLResponse, tags=["routes"])
+async def maintenance(
+    request: Request,
+    c_user: str = Cookie(None),
+    placa: str = Form(...),
+    fecha: str = Form(...),
+    descripcion: str = Form(...),
+    costo: int = Form(...),
+    db: Session = Depends(get_database)
+):
+    if not serverStatus(db):
+            alert = {"type": "general",
+                        "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    c_user = request.cookies.get("c_user")
+
+    if not c_user:
+        alert = {"type": "general",
+                    "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    token_payload = tokenDecoder(c_user)
+    if not token_payload:
+        alert = {"type": "general",
+                    "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+
+    print(" ============================================ Placa:", placa)
+
+    # Obtener el taxi por placa
+    taxi = db.query(Taxi).filter(Taxi.placa == placa).first()
+
+    # Verificar si se encontró el taxi
+    if not taxi:
+        alert = {"type": "error", "message": "No se encontró ningún taxi con la placa proporcionada."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/maintenance", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Continuar con el registro del mantenimiento
+    nuevo_mantenimiento = Mantenimiento(
+        id_taxi=taxi.id_taxi,
+        fecha=fecha,
+        descripcion=descripcion,
+        costo=costo
+    )
+
+    db.add(nuevo_mantenimiento)
+    db.commit()
+    db.refresh(nuevo_mantenimiento)
+    alert = {"type": "success", "message": "Mantenimiento registrado exitosamente."}
+    request.session["alert"] = alert
+
+    return RedirectResponse(url="/maintenance", status_code=status.HTTP_303_SEE_OTHER)
+# -- END OF THE ROUTE -- #
+
+# ========================================== END OF MAINTENANCEBLOCK ============================================ #
+
+
+
+
+
