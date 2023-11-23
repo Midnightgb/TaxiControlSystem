@@ -6,10 +6,10 @@
     <title>Taxi Control - Home</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind/output.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/loader.css')}}">
 </head>
 
@@ -41,7 +41,7 @@
                 <p class="text-center text-lg font-bold my-5">
                     <i class='bx'><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAB3klEQVRYR+1Xi1HDMAxtN4ANwgawQdkANoAJgAkoEwAT0A1gA7IBbNBsABvAez07pypOFH9ayl10p8vPkp+fZMmZzw5M5geGZzYBsiIyMVSCoQpObqALKO+PLKeB7w3evUGfobzvFStkp7B8TwQRmvQbL8+hn32ILEAEQ2ZKChk6SQFEdj6cIVd2Da2hvI+VCxi8CiOyRF8dGWJoidH3zuIJ17tYFGr8I55v3buVW2AUoDVGV87iElcmZY5oxo9jGNLGjHlKqPSccpHBsPWFrHS4PDAzbH2ASofLAzLDFgLExONK9iEPmITRaEUD2icYD2JrB2tAuyiEFtPcLO2O04B+LOsdfW9xWIBqt91ZaXOFTLCHVU6DqTMESCYcO/xXBqIGtmducXTzAr0K5fIQIBZDOvKincTg061HL3BUyNhMV2LWnITnwmSH1812FCA6YQ/jlU3WN8YYZuRYNmcytYCyzrFIehkFKHXiFLv/AygncVOYoU0NZeffiN5lpc/QFkh/Em3PWqHmunRJLJ2xJpUQfwL1vjon0bGAho66MUB1azK7PZ2HGPpTQPoIstWNY+gIjNUM+drULUjCmGWdvz8VlGD4t0nWSohcbA2H7AaNdFwqFCXAbnxMgCwqfwEYYmAlIDYHNAAAAABJRU5ErkJggg=="/></i>
                     <p class="text-center text-lg font-bold my-5">
-                        Vehículos: {{dataDashboard.taxis}}
+                        Vehículos: {{dataDashboard.cars}}
                     </p>
                     <p class="text-center text-lg font-bold my-5">
                         <a href="{{ url_for('taxis') }}" class="text-blue-500">Ver vehículos</a>
@@ -63,9 +63,12 @@
 
         <article class="grid grid-cols-2 gap-6">
             <section class="bg-zinc-100 rounded-lg z-0 shadow-xl" id="chart">
-                <p class="text-center text-2xl font-bold my-5"><i class='bx bx-dollar-circle'></i>Ingresos mensuales</p>
+                <p class="text-center text-2xl font-bold my-5">
+                    Ingresos mensuales
+                    <i class='bx bx-dollar-circle'></i>
+                </p>
             </section>
-<!--             <div class="bg-zinc-100 rounded-lg">
+<!--                <div class="bg-zinc-100 rounded-lg">
                 <div>
                     Gastos: $580.000
                 </div>
@@ -86,20 +89,20 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         var options = {
-        chart: {
-            type: 'line'
-        },
-        series: [{
-            name: 'Ingresos',
-            data: [100000,175000,137000,200000,452000, 300000, 250000, 300000, 870000, 1000000, 580000, 700000]
-        }],
-        stroke: {
-            curve: 'smooth',
-            width: 3,
-        },
-        xaxis: {
-            categories: ["ene","feb","mar","abr","may","jun","jul", "ago","sep","oct","nov","dic"]
-        }
+            chart: {
+                type: 'line'
+            },
+            series: [{
+                name: 'Ingresos',
+                data: [100000,175000,137000,200000,452000, 300000, 250000, 300000, 870000, 1000000, 580000, 700000]
+            }],
+            stroke: {
+                curve: 'smooth',
+                width: 3,
+            },
+            xaxis: {
+                categories: ["ene","feb","mar","abr","may","jun","jul", "ago","sep","oct","nov","dic"]
+            }
         }
 
         var chart = new ApexCharts(document.querySelector("#chart"), options);

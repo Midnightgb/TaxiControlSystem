@@ -152,33 +152,41 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
                  "message": "Error al obtener información de la empresa."}
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
+    # Querys para obtener la información del dashboard
     assistantsInCompany = db.query(Usuario).filter(
         Usuario.rol == "Secretaria", Usuario.empresa_id == empresa.id_empresa).all()
-    taxisInCompany = db.query(Taxi).filter(
+    carsInCompany = db.query(Taxi).filter(
         Taxi.empresa_id == empresa.id_empresa).all()
     driversInCompany = db.query(Usuario).filter(
         Usuario.rol == "Conductor", Usuario.empresa_id == empresa.id_empresa).all()
+    incomeTodayInCompany = db.query(Pago).filter(
+        Pago.estado == True, Pago.fecha == date.today()).all()
+    
+    incomeToday = 0
+    for income in incomeTodayInCompany:
+        incomeToday += income.valor
+        print(incomeToday)
+    print(incomeToday)
 
+    numAssistants = 0
+    numCars = 0
+    numDrivers = 0
 
-    counterAssistants = 0
-    counterTaxis = 0
-    counterDrivers = 0
-
-    for assitant in assistantsInCompany:
-        counterAssistants += 1
-    for taxi in taxisInCompany:
-        counterTaxis += 1
+    for assistant in assistantsInCompany:
+        numAssistants += 1
+    for taxi in carsInCompany:
+        numCars += 1
     for driver in driversInCompany:
-        counterDrivers += 1
+        numDrivers += 1
 
-    print(counterAssistants)
-    print(counterTaxis)
-    print(counterDrivers)
+    print(numAssistants)
+    print(numCars)
+    print(numDrivers)
 
     dataDashboard = {
-        "assistants": counterAssistants,
-        "taxis": counterTaxis,
-        "drivers": counterDrivers
+        "assistants": numAssistants,
+        "cars": numCars,
+        "drivers": numDrivers
     }
     welcome = {"name": userData.nombre}
     alert = request.session.pop("alert", None)
