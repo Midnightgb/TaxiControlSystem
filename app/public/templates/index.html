@@ -93,42 +93,13 @@
 
     <footer>
     </footer>
-
-    <script src="{{ url_for('static', path='js/app.js')}}"></script>
-    <script src="{{ url_for('static', path='js/dashboard.js')}}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
     <script>
         var reports = JSON.parse('{{ db.reports | tojson | safe }}');
-        var ingresos = [];
-        var gastos = [];
-        var meses = [];
-        console.table(reports.data);
-        for (var month in reports.data) {
-            meses.push(month);
-            console.log(meses);
-            ingresos.push(reports.data[month].income);
-            gastos.push(reports.data[month].expenses);
-        }
-        var options = {
-            chart: {
-                type: 'line'
-            },
-            series: [{
-                name: 'Ingresos',
-                data: ingresos
-            }, {
-                name: 'Gastos',
-                data: gastos
-            }],
-            xaxis: {
-                categories: meses
-            }
-        }
-
-        var chart = new ApexCharts(document.querySelector("#chart"), options);
-
-        chart.render();
     </script>
+    <script src="{{ url_for('static', path='js/app.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="{{ url_for('static', path='js/dashboard.js')}}"></script>
 </body>
 
 </html>
