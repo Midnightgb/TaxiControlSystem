@@ -596,6 +596,10 @@ video {
   z-index: auto;
 }
 
+.-z-10 {
+  z-index: -10;
+}
+
 .col-start-1 {
   grid-column-start: 1;
 }
