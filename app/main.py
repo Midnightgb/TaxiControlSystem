@@ -185,7 +185,7 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     for expense in expensesTodayInCompany:
         expensesToday += expense.costo
 
-    incomeToday = 0
+    incomeToday = 150000
     for income in incomeTodayInCompany:
         incomeToday += income.valor
 
@@ -222,6 +222,7 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
             "data": defaultdict(lambda: defaultdict(int)),
         }
     }
+    
     for report in monthlyReports:
         report.created_at = report.created_at.strftime("%m/%d/%Y, %H:%M:%S")
         report.month = int(report.created_at.split(",")[0].split("/")[0])

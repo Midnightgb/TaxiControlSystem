@@ -163,7 +163,13 @@ setInterval(() => {
       }
     }
   }
-}, 300000);
+  console.log("Checking session");
+  console.log("Cookie: " + myCookie);
+  console.log("Expiration: " + expiration);
+  console.log("Minutes until expiration: " + minutesUntilExpiration);
+  console.log("Showed alert: " + showedAlert);
+  console.log("---------------------------");
+}, 150000);
 
 let loader = document.getElementById("loader");
 window.addEventListener("load", function () {
