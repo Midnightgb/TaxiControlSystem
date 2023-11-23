@@ -19,6 +19,7 @@ import bcrypt
 import os
 from dotenv import load_dotenv
 from datetime import date
+import calendar
 
 from functions import *
 from models import *
@@ -39,7 +40,20 @@ app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 templates = Jinja2Templates(directory="public/templates")
 
-
+MONTHS_IN_SPANISH = {
+    'January': 'Ene',
+    'February': 'Feb',
+    'March': 'Mar',
+    'April': 'Abr',
+    'May': 'May',
+    'June': 'Jun',
+    'July': 'Jul',
+    'August': 'Ago',
+    'September': 'Sept',
+    'October': 'Oct',
+    'November': 'Nov',
+    'December': 'Dic'
+}
 @app.get("/", tags=["routes"])
 async def root():
     return RedirectResponse(url="/logout")
@@ -159,14 +173,27 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
         Taxi.empresa_id == empresa.id_empresa).all()
     driversInCompany = db.query(Usuario).filter(
         Usuario.rol == "Conductor", Usuario.empresa_id == empresa.id_empresa).all()
+    #falta filtrar por empresa los datos de ingresos y gastos
     incomeTodayInCompany = db.query(Pago).filter(Pago.fecha == date.today()).all()
     expensesTodayInCompany = db.query(Mantenimiento).filter(Mantenimiento.fecha == date.today()).all()
+    expensesPerMonthInCompany = db.query(Reporte).filter(Empresa.id_empresa == empresa.id_empresa).all()
+    
+    for expense in expensesPerMonthInCompany:
+        expense.created_at = expense.created_at.strftime("%m/%d/%Y, %H:%M:%S")
+        expense.month = int(expense.created_at.split(",")[0].split("/")[0])
+        expense.month -= 1
+        expense.month = calendar.month_name[expense.month]
+        expense.month = MONTHS_IN_SPANISH[expense.month]
+        print("gastos")
+        print(expense.created_at)
+        print(expense.ingresos)
+        print(expense.gastos)
+        print(expense.month)
+        print("#####")
 
     expensesToday = 0
     for expense in expensesTodayInCompany:
         expensesToday += expense.costo
-        print(expensesToday)
-
 
     incomeToday = 0
     for income in incomeTodayInCompany:
@@ -183,21 +210,32 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     for driver in driversInCompany:
         numDrivers += 1
 
-    print(numAssistants)
-    print(numCars)
-    print(numDrivers)
-    print(incomeToday)
-    print(expensesToday)
+    #print(numAssistants)
+    #print(numCars)
+    #print(numDrivers)
+    #print(incomeToday)
+    #print(expensesToday)
 
     dataDashboard = {
         "assistants": numAssistants,
         "cars": numCars,
         "drivers": numDrivers,
-        "incomeToday": incomeToday,
-        "expensesToday": expensesToday
+        "income": {
+            "totalToday": incomeToday,
+            "data": []
+        },
+        "expenses": {
+            "totalToday": expensesToday,
+            "data": []
+        },
     }
+    dateToday = date.today()
+    dateToday = dateToday.strftime("%d/%m/%Y")
 
-    welcome = {"name": userData.nombre}
+    welcome = {
+        "name": userData.nombre,
+        "day": dateToday,
+        }
     alert = request.session.pop("alert", None)
     return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome, "empresa": empresa, "db": dataDashboard})
 
