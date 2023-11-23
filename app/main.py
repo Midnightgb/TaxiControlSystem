@@ -20,6 +20,7 @@ import os
 from dotenv import load_dotenv
 from datetime import date
 import calendar
+from collections import defaultdict
 
 from functions import *
 from models import *
@@ -54,6 +55,7 @@ MONTHS_IN_SPANISH = {
     'November': 'Nov',
     'December': 'Dic'
 }
+
 @app.get("/", tags=["routes"])
 async def root():
     return RedirectResponse(url="/logout")
@@ -176,20 +178,8 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     #falta filtrar por empresa los datos de ingresos y gastos
     incomeTodayInCompany = db.query(Pago).filter(Pago.fecha == date.today()).all()
     expensesTodayInCompany = db.query(Mantenimiento).filter(Mantenimiento.fecha == date.today()).all()
-    expensesPerMonthInCompany = db.query(Reporte).filter(Empresa.id_empresa == empresa.id_empresa).all()
+    monthlyReports = db.query(Reporte).filter(Empresa.id_empresa == empresa.id_empresa).all()
     
-    for expense in expensesPerMonthInCompany:
-        expense.created_at = expense.created_at.strftime("%m/%d/%Y, %H:%M:%S")
-        expense.month = int(expense.created_at.split(",")[0].split("/")[0])
-        expense.month -= 1
-        expense.month = calendar.month_name[expense.month]
-        expense.month = MONTHS_IN_SPANISH[expense.month]
-        print("gastos")
-        print(expense.created_at)
-        print(expense.ingresos)
-        print(expense.gastos)
-        print(expense.month)
-        print("#####")
 
     expensesToday = 0
     for expense in expensesTodayInCompany:
@@ -228,7 +218,25 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
             "totalToday": expensesToday,
             "data": []
         },
+        "reports": {
+            "data": defaultdict(lambda: defaultdict(int)),
+        }
     }
+    for report in monthlyReports:
+        report.created_at = report.created_at.strftime("%m/%d/%Y, %H:%M:%S")
+        report.month = int(report.created_at.split(",")[0].split("/")[0])
+        report.month -= 1
+        report.month = calendar.month_name[report.month]
+        report.month = MONTHS_IN_SPANISH[report.month]
+        dataDashboard["reports"]["data"][report.month]["ingresos"] += report.ingresos
+        dataDashboard["reports"]["data"][report.month]["gastos"] += report.gastos
+        print("gastos")
+        print(report.created_at)
+        print(report.ingresos)
+        print(report.gastos)
+        print(report.month)
+        print("#####")
+
     dateToday = date.today()
     dateToday = dateToday.strftime("%d/%m/%Y")
 

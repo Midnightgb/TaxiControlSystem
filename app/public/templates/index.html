@@ -71,7 +71,7 @@
         </article>
 
         <article class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <section class="bg-zinc-100 rounded-lg -z-10 shadow-xl" id="chart">
+            <section class="bg-zinc-100 rounded-lg shadow-xl" id="chart">
                 <p class="text-center text-2xl font-bold my-5">
                     Ingresos mensuales
                     <i class='bx bx-dollar-circle ms-10'></i>
@@ -98,22 +98,28 @@
     <script src="{{ url_for('static', path='js/dashboard.js')}}"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
+        var reports = JSON.parse('{{ db.reports | tojson | safe }}');
+        var ingresos = [];
+        var gastos = [];
+        var meses = [];
+        for (var month in reports.data) {
+            meses.push(month);
+            ingresos.push(reports.data[month].ingresos);
+            gastos.push(reports.data[month].gastos);
+        }
         var options = {
             chart: {
                 type: 'line'
             },
             series: [{
                 name: 'Ingresos',
-                data: [100000, 175000, 137000, 200000, 452000, 300000, 250000, 300000, 870000, 1000000,
-                    580000, 700000
-                ]
+                data: ingresos
+            }, {
+                name: 'Gastos',
+                data: gastos
             }],
-            stroke: {
-                curve: 'smooth',
-                width: 3,
-            },
             xaxis: {
-                categories: ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+                categories: meses
             }
         }
 
