@@ -164,7 +164,7 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
 
     expensesToday = 0
     for expense in expensesTodayInCompany:
-        expensesToday += expense.valor
+        expensesToday += expense.costo
         print(expensesToday)
 
 
@@ -178,7 +178,7 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
 
     for assistant in assistantsInCompany:
         numAssistants += 1
-    for taxi in carsInCompany:
+    for car in carsInCompany:
         numCars += 1
     for driver in driversInCompany:
         numDrivers += 1

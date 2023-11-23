@@ -5,7 +5,7 @@ window.onload = function () {
   const incomeSpan = document.getElementById("income");
   const incomeText = incomeSpan.innerText;
   const expenseSpan = document.getElementById("expense");
-  const expenseText = expense.innerText;
+  const expenseText = expenseSpan.innerText;
   
   moneyFormat(incomeText, incomeSpan);
   moneyFormat(expenseText, expenseSpan);
