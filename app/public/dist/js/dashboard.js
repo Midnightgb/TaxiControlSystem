@@ -4,8 +4,11 @@ let expense;
 window.onload = function () {
   const incomeSpan = document.getElementById("income");
   const incomeText = incomeSpan.innerText;
-  expense = document.getElementById("expense");
+  const expenseSpan = document.getElementById("expense");
+  const expenseText = expense.innerText;
+  
   moneyFormat(incomeText, incomeSpan);
+  moneyFormat(expenseText, expenseSpan);
 }
 
 function moneyFormat(money, span) {
