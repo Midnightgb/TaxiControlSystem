@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session, joinedload
 import bcrypt
 import os
 from dotenv import load_dotenv
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from functions import *
 from models import *
@@ -27,7 +27,7 @@ from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 
 load_dotenv()
@@ -1252,11 +1252,48 @@ async def reports(request: Request,
                   id_usuario: int = Form(...),
                   db: Session = Depends(get_database)
                   ):
-    reports = db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
+    
+    #mes actual
+    now = datetime.now()
+    current_month = now.strftime("%B") 
+    
+    # Obtener la fecha de inicio del mes actual
+    today = datetime.now()
+    start_of_month = datetime(today.year, today.month, 1)
 
-    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports})
+    # Obtener la fecha de inicio del próximo mes para limitar los pagos al mes actual
+    next_month = start_of_month.replace(day=28) + timedelta(days=4)
+    end_of_month = next_month - timedelta(days=next_month.day)
 
+    # Obtener la lista de pagos del mes actual
+    reports = (
+        db.query(Pago)
+        .filter(Pago.id_conductor == id_usuario)
+        .filter(Pago.fecha.between(start_of_month, end_of_month))
+        .all()
+    )
 
+    # Obtener el total acumulado de pagos del mes actual
+    total_acumulado = (
+        db.query(func.sum(Pago.valor))
+        .filter(Pago.id_conductor == id_usuario)
+        .filter(Pago.fecha.between(start_of_month, end_of_month))
+        .scalar() or 0.0  # Manejar el caso en que no hay pagos
+    )
+
+    conductor = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
+    taxi_actual = (
+            db.query(Taxi)
+            .join(ConductorActual, ConductorActual.id_taxi == Taxi.id_taxi)
+            .filter(ConductorActual.id_conductor == id_usuario)
+            .first()
+    )
+    
+
+    return templates.TemplateResponse(
+        "./Reports/dailyreports.html",
+        {"request": request, "reports": reports, "conductor": conductor, "taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "current_month": current_month}
+    )
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def search(request: Request,
                  search: Optional[str] = Form(None),
