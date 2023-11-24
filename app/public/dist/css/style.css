@@ -75,7 +75,7 @@ body {
 
 .menu {
   position: relative;
-  background: var(--white);
+  /* background: var(--white); */
 }
 
 .menu-bar li:first-child .dropdown {

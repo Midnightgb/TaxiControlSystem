@@ -19,6 +19,8 @@ import bcrypt
 import os
 from dotenv import load_dotenv
 from datetime import date, datetime, timedelta
+import calendar
+from collections import defaultdict
 
 from functions import *
 from models import *
@@ -39,6 +41,20 @@ app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 templates = Jinja2Templates(directory="public/templates")
 
+MONTHS_IN_SPANISH = {
+    'January': 'Ene',
+    'February': 'Feb',
+    'March': 'Mar',
+    'April': 'Abr',
+    'May': 'May',
+    'June': 'Jun',
+    'July': 'Jul',
+    'August': 'Ago',
+    'September': 'Sept',
+    'October': 'Oct',
+    'November': 'Nov',
+    'December': 'Dic'
+}
 
 @app.get("/", tags=["routes"])
 async def root():
@@ -159,38 +175,70 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
         Taxi.empresa_id == empresa.id_empresa).all()
     driversInCompany = db.query(Usuario).filter(
         Usuario.rol == "Conductor", Usuario.empresa_id == empresa.id_empresa).all()
-    incomeTodayInCompany = db.query(Pago).filter(
-        Pago.estado == True, Pago.fecha == date.today()).all()
+    #falta filtrar por empresa los datos de ingresos y gastos
+    incomeTodayInCompany = db.query(Pago).filter(Pago.fecha == date.today()).all()
+    expensesTodayInCompany = db.query(Mantenimiento).filter(Mantenimiento.fecha == date.today()).all()
+    monthlyReports = db.query(Reporte).filter(Empresa.id_empresa == empresa.id_empresa).all()
     
+
+    expensesToday = 0
+    for expense in expensesTodayInCompany:
+        expensesToday += expense.costo
+
     incomeToday = 0
     for income in incomeTodayInCompany:
         incomeToday += income.valor
-        print(incomeToday)
-    print(incomeToday)
-
     numAssistants = 0
     numCars = 0
     numDrivers = 0
 
     for assistant in assistantsInCompany:
         numAssistants += 1
-    for taxi in carsInCompany:
+    for car in carsInCompany:
         numCars += 1
     for driver in driversInCompany:
         numDrivers += 1
 
-    print(numAssistants)
-    print(numCars)
-    print(numDrivers)
-
     dataDashboard = {
         "assistants": numAssistants,
         "cars": numCars,
-        "drivers": numDrivers
+        "drivers": numDrivers,
+        "income": {
+            "totalToday": incomeToday,
+            "data": []
+        },
+        "expenses": {
+            "totalToday": expensesToday,
+            "data": []
+        },
+        "reports": {
+            "data": defaultdict(lambda: defaultdict(int)),
+        }
     }
-    welcome = {"name": userData.nombre}
+    
+    for report in monthlyReports:
+        report.fecha = report.fecha.strftime("%m/%d/%Y, %H:%M:%S")
+        report.month = int(report.fecha.split(",")[0].split("/")[0])
+        print("mes reporte", report.month)
+        print("mes actual", date.today().month)
+        dataDashboard["reports"]["data"][report.month]["income"] += report.ingresos
+        dataDashboard["reports"]["data"][report.month]["expenses"] += report.gastos
+        print("gastos")
+        print(report.fecha)
+        print(report.ingresos)
+        print(report.gastos)
+        print(report.month)
+        print("#####")
+    
+    dateToday = date.today()
+    dateToday = dateToday.strftime("%d/%m/%Y")
+
+    welcome = {
+        "name": userData.nombre,
+        "day": dateToday,
+        }
     alert = request.session.pop("alert", None)
-    return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome, "empresa": empresa, "dataDashboard": dataDashboard})
+    return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome, "empresa": empresa, "db": dataDashboard})
 
 
 @app.get("/logout", tags=["auth"])
