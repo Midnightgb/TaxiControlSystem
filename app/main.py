@@ -1257,9 +1257,11 @@ async def resumen_cuotas_post(
 
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
-                  c_user: str = Cookie(None),
-                  db: Session = Depends(get_database)
-                  ):
+                    c_user: str = Cookie(None),
+                    db: Session = Depends(get_database),
+                    page: int = 1,
+                    per_page: int = 8
+                    ):
     alert = request.session.pop("alert", None)
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
@@ -1270,7 +1272,7 @@ async def drivers(request: Request,
 
     if not serverStatus(db):
         alert = {"type": "general",
-                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -1279,20 +1281,39 @@ async def drivers(request: Request,
     if not userData:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-    token_payload = tokenDecoder(c_user)
-
-    user_id = int(token_payload["sub"])
-
     usuario = db.query(Usuario).filter(
-        Usuario.id_usuario == user_id).first()
+        Usuario.id_usuario == UUID).first()
 
-    conductores = db.query(Usuario).filter(
-        Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+    resultado_paginado = obtener_usuarios_paginados(
+        db=db,
+        page=page,
+        per_page=per_page,
+        empresa_id=usuario.empresa_id,
+        rol="Conductor"
+    )
+
+    conductores = resultado_paginado["usuarios"]
+    total_paginas = resultado_paginado["total_paginas"]
+
     for conductor in conductores:
         if conductor.foto:
             conductor.foto = convertIMG(conductor.foto)
 
-    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores, "alert": alert})
+    visible_pages = 10
+
+    
+    start_page = max(1, page - (visible_pages // 2))
+    end_page = min(total_paginas, start_page + visible_pages - 1)
+
+    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, 
+                                                                "usuarios": conductores, 
+                                                                "alert": alert, 
+                                                                "total_paginas": total_paginas, 
+                                                                "page": page, 
+                                                                "per_page": per_page ,
+                                                                "start_page": start_page,
+                                                                "end_page": end_page
+                                                                })
 
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
@@ -1354,6 +1375,8 @@ async def search(request: Request,
                      "message": "No se encontraron resultados."}
             request.session["alert"] = alert
             return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+        
+    
 
     return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
 
