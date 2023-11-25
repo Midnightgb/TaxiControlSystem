@@ -102,7 +102,6 @@ function getCookieExpiration(name) {
   return null;
 }
 
-let showedAlert = false;
 setInterval(() => {
   const myCookie = getCookie("c_user");
   if (myCookie) {
@@ -123,10 +122,6 @@ setInterval(() => {
       // Verificar si está a menos de ciertos minutos de la expiración
       const alertThreshold = 15;
       if (minutesUntilExpiration <= alertThreshold) {
-        if (showedAlert) {
-          return;
-        }
-        showedAlert = true;
         const timerDuration = 300000; // Duración del temporizador en milisegundos
 
         const swalOptions = {
@@ -144,7 +139,6 @@ setInterval(() => {
         const swalAlert = Swal.fire(swalOptions);
         swalAlert.then((result) => {
           if (result.isConfirmed) {
-            showedAlert = false;
             window.location.href = "/renew/token";
           }
           if (result.isDismissed) {
@@ -161,9 +155,14 @@ setInterval(() => {
         }, timerDuration);
         
       }
+      console.log("Checking session");
+      console.log("Cookie: " + myCookie);
+      console.log("Expiration: " + expirationTime);
+      console.log("Minutes until expiration: " + minutesUntilExpiration);
+      console.log("---------------------------");
     }
   }
-}, 300000);
+}, 150000);
 
 let loader = document.getElementById("loader");
 window.addEventListener("load", function () {
