@@ -42,18 +42,18 @@ app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 templates = Jinja2Templates(directory="public/templates")
 
 MONTHS_IN_SPANISH = {
-    'January': 'Ene',
-    'February': 'Feb',
-    'March': 'Mar',
-    'April': 'Abr',
-    'May': 'May',
-    'June': 'Jun',
-    'July': 'Jul',
-    'August': 'Ago',
-    'September': 'Sept',
-    'October': 'Oct',
-    'November': 'Nov',
-    'December': 'Dic'
+    'January': 'Enero',
+    'February': 'Febrero',
+    'March': 'Marzo',
+    'April': 'Abril',
+    'May': 'Mayo',
+    'June': 'Junio',
+    'July': 'Julio',
+    'August': 'Agosto',
+    'September': 'Septiembre',
+    'October': 'Octubre',
+    'November': 'Noviembre',
+    'December': 'Diciembre'
 }
 
 @app.get("/", tags=["routes"])
@@ -1148,13 +1148,7 @@ async def resumen_cuotas_view(
 
 
 @app.post("/summary", response_class=HTMLResponse, tags=["routes"])
-async def resumen_cuotas_post(
-    request: Request,
-    id_conductor: int = Form(...),
-    fecha_inicio: date = Form(None),
-    fecha_fin: date = Form(None),
-    db: Session = Depends(get_database)
-):
+async def resumen_cuotas_post(request: Request, id_conductor: int = Form(...), fecha_inicio: date = Form(None), fecha_fin: date = Form(None), db: Session = Depends(get_database)):
     try:
 
         if not serverStatus(db):
@@ -1305,25 +1299,15 @@ async def drivers(request: Request,
     start_page = max(1, page - (visible_pages // 2))
     end_page = min(total_paginas, start_page + visible_pages - 1)
 
-    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, 
-                                                                "usuarios": conductores, 
-                                                                "alert": alert, 
-                                                                "total_paginas": total_paginas, 
-                                                                "page": page, 
-                                                                "per_page": per_page ,
-                                                                "start_page": start_page,
-                                                                "end_page": end_page
-                                                                })
+    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores, "alert": alert, "total_paginas": total_paginas, "page": page, "per_page": per_page , "start_page": start_page, "end_page": end_page})
 
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
-async def reports(request: Request,
-                  id_usuario: int = Form(...),
-                  db: Session = Depends(get_database)
-                  ):
+async def reports(request: Request, id_usuario: int = Form(...), db: Session = Depends(get_database)):
     #mes actual 
     now = datetime.now()
     current_month = now.strftime("%B")
+    current_month = MONTHS_IN_SPANISH[current_month]
     # Obtener la fecha actual
     today = date.today()
     
@@ -1342,17 +1326,11 @@ async def reports(request: Request,
 
     conductor = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
     taxi_actual = (db.query(Taxi).join(ConductorActual, ConductorActual.id_taxi == Taxi.id_taxi).filter(ConductorActual.id_conductor == id_usuario).first())
-
-    return templates.TemplateResponse(
-        "./Reports/dailyreports.html",
-        {"request": request, "reports": reports, "conductor": conductor, "taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month}
-    )
+    empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == Usuario.empresa_id).first()
+    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports, "conductor": conductor,"taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas})
     
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
-async def search(request: Request,
-                 search: Optional[str] = Form(None),
-                 db: Session = Depends(get_database)
-                 ):
+async def search(request: Request, search: Optional[str] = Form(None), db: Session = Depends(get_database)):
     conductores = None
     if not search:
         conductores = db.query(Usuario).filter(
