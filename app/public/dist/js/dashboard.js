@@ -92,18 +92,21 @@ var options = {
   },
   series: [{
     name: 'Ingresos',
-    data: ingresos
+    data: ingresos,
+    class: 'chart-series'
   }, {
     name: 'Gastos',
     data: gastos
   }],
   xaxis: {
+    name: 'Mes',
     categories: meses
   },
   stroke: {
-    curve: 'smooth'
+    curve: 'smooth',
+    lineCap: 'round'
   },
-  colors: ['#00E396', '#FF4560'],
+  colors: ['#ffb900', '#FF4560'],
   noData: {
     text: 'No hay datos disponibles',
     align: 'center',

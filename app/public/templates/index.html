@@ -65,10 +65,10 @@
                         Balance Diario
                     </p>
                     <p class="text-center text-lg font-bold my-5">
-                        Ingresos: <span id="income">$ {{ '{:,.0f}'.format(db.income.totalToday) }}</span>
+                        Ingresos: <span id="income">$ {{ '{:,}'.format(db.income.totalToday) }}</span>
                     </p>
                     <p class="text-center text-lg font-bold my-5">
-                        Gastos: <span id="expense">$ {{ '{:,.0f}'.format(db.expenses.totalToday) }}</span>
+                        Gastos: <span id="expense">$ {{ '{:,}'.format(db.expenses.totalToday) }}</span>
                     </p>
                 </p>
             </section>
