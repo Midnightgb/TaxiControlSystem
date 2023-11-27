@@ -29,7 +29,7 @@ from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func,extract
 
 
 load_dotenv()
@@ -887,6 +887,23 @@ async def registro_diario(
 
         db.add(nuevo_pago)
         db.commit()
+        
+        conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
+        mes_actual = date.today().month
+        ano_actual = date.today().year
+
+        
+        reporte_existente = db.query(Reporte).filter(
+            Reporte.empresa_id == conductor.empresa_id,
+            extract('month', Reporte.fecha) == mes_actual,
+            extract('year', Reporte.fecha) == ano_actual
+            
+        ).first()
+
+        if reporte_existente:
+            reporte_existente.ingresos += valor
+            db.commit()
+
         db.refresh(nuevo_pago)
         alert = {"type": "success", "message": "Pago registrado exitosamente."}
         # Almacena la alerta en la sesión
@@ -1016,9 +1033,26 @@ async def actualizar_cuota_diaria(
             return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
 
         # Actualizar la cuota diaria para la fecha seleccionada
+        pago_antiguo=pago_existente.valor
         pago_existente.valor = nueva_cuota
         pago_existente.estado = nueva_cuota >= datos_conductor["cuota_diaria_taxi"]
         db.commit()
+
+        conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
+        mes_actual = date.today().month
+        ano_actual = date.today().year
+
+        
+        reporte_existente = db.query(Reporte).filter(
+            Reporte.empresa_id == conductor.empresa_id,
+            extract('month', Reporte.fecha) == mes_actual,
+            extract('year', Reporte.fecha) == ano_actual
+            
+        ).first()
+
+        if reporte_existente:
+            reporte_existente.ingresos +=pago_existente.valor-pago_antiguo
+            db.commit()
 
         alert = {"type": "success",
                  "message": "Cuota diaria actualizada exitosamente."}
