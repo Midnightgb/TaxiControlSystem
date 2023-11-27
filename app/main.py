@@ -1357,7 +1357,7 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
         .filter(Pago.fecha.between(first_day_of_month, last_day_of_month))
         .scalar() or 0  
     )
-        
+    print("Total acumulado: ", total_acumulado)        
     first_day_of_last_month = datetime(today.year, today.month - 1, 1) if today.month > 1 else datetime(today.year - 1, 12, 1)    
     last_day_of_last_month = first_day_of_month - timedelta(days=1)
     

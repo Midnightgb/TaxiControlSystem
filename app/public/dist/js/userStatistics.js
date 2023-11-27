@@ -1,21 +1,25 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Obtener los valores del HTML
-    var currentIncome = parseFloat(document.getElementById('current').innerText.replace('$', '').replace(',', ''));
-    var pastIncome = parseFloat(document.getElementById('past').innerText.replace('$', '').replace(',', ''));
+    var currentIncome = document.getElementById("current").innerText;
+    var currentIncomeValue = parseFloat(currentIncome.replace(/[^\d.-]/g, '')); 
+    console.log(currentIncomeValue);
+    var pastIncome = document.getElementById("past").innerText;
+    var pastIncomeValue = parseFloat(pastIncome.replace(/[^\d.-]/g, '')); 
+    console.log(pastIncomeValue);
 
-    // Obtener el contexto del lienzo
     var ctx = document.getElementById('chartMonthlyIncome').getContext('2d');
 
-    // Crear el gráfico circular
     var myChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Mes Actual', 'Mes Anterior'],
+            
             datasets: [{
-                data: [currentIncome, pastIncome],
+                data: [currentIncomeValue, pastIncomeValue],
                 backgroundColor: ['#65d4f3', '#6577F3'],
-            }]
+            }],
+            labels: ['Mes Actual', 'Mes Anterior'],
+            
         },
+        
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -24,4 +28,6 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         }
     });
+    console.log(currentIncome);
+        console.log(pastIncome);
 });
