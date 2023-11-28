@@ -119,7 +119,7 @@ var options = {
       fontFamily: undefined
     }
   }
-}
+} 
 
 var chart = new ApexCharts(document.querySelector("#chart"), options);
 
