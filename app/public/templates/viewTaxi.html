@@ -48,6 +48,12 @@
                                 </button>
                             </form>
 
+                            <form action="/view/detail/taxi" method="POST">
+                                <input type="hidden" name="id_taxi" value="{{taxi.id_taxi}}">
+                                <button type="submit" class="bg-blue-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
+                                    Detalles
+                                </button>
+                            </form>
                         </div>
                     </div>
                     {% endfor %}

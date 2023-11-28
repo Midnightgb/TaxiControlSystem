@@ -5,7 +5,7 @@ sqlalchemy
 uvicorn
 pymysql
 python-multipart
-bcrypt
+bcrypt  # for password hashing
 python-dotenv
 itsdangerous
 pillow
