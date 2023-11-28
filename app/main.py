@@ -241,6 +241,7 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome, "empresa": empresa, "db": dataDashboard})
 
 
+
 @app.get("/logout", tags=["auth"])
 async def logout(request: Request):
     request.session.pop("triedUser", None)
@@ -1334,20 +1335,50 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
     first_day_of_month = datetime(today.year, today.month, 1)
     last_day_of_month = datetime(today.year, today.month + 1, 1) - timedelta(days=1)
     
-    reports = db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
         
-    # Calcular el total acumulado del mes
+    #  total acumulado del mes
     total_acumulado = (
         db.query(func.sum(Pago.valor))
         .filter(Pago.id_conductor == id_usuario)
         .filter(Pago.fecha.between(first_day_of_month, last_day_of_month))
         .scalar() or 0  
     )
+    print("Total acumulado: ", total_acumulado)        
+    first_day_of_last_month = datetime(today.year, today.month - 1, 1) if today.month > 1 else datetime(today.year - 1, 12, 1)    
+    last_day_of_last_month = first_day_of_month - timedelta(days=1)
+    
+    total_mes_anterior = (
+        db.query(func.sum(Pago.valor))
+        .filter(Pago.id_conductor == id_usuario)
+        .filter(Pago.fecha.between(first_day_of_last_month, last_day_of_last_month))
+        .scalar() or 0
+    )
+    print("Total mes anteior: ", total_mes_anterior)
+    
+    
+    first_day_of_week = today - timedelta(days=today.weekday())
+    last_day_of_week = first_day_of_week + timedelta(days=6)
+
+    # Obtener los pagos de la semana actual
+    weekly_reports = db.query(Pago).filter(
+        Pago.id_conductor == id_usuario,
+        Pago.fecha.between(first_day_of_week, last_day_of_week)
+    ).all()
+
+    reports_week_data = {str(report.fecha): report.valor for report in weekly_reports}
+    # Crear una lista ordenada de los pagos diarios para los últimos 7 días
+    last_seven_days = [(last_day_of_week - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
+
+    # Obtener los pagos diarios para los últimos 7 días
+    daily_reports_data = {day: reports_week_data.get(day, 0) for day in last_seven_days}
+
+
+    reports = db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
 
     conductor = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
     taxi_actual = (db.query(Taxi).join(ConductorActual, ConductorActual.id_taxi == Taxi.id_taxi).filter(ConductorActual.id_conductor == id_usuario).first())
     empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == Usuario.empresa_id).first()
-    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports, "conductor": conductor,"taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas})
+    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports, "conductor": conductor,"taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas,"weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior})
     
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def search(request: Request, search: Optional[str] = Form(None), db: Session = Depends(get_database)):
