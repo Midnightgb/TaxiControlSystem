@@ -1374,7 +1374,6 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
 
 
     reports = db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
-
     conductor = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
     taxi_actual = (db.query(Taxi).join(ConductorActual, ConductorActual.id_taxi == Taxi.id_taxi).filter(ConductorActual.id_conductor == id_usuario).first())
     empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == Usuario.empresa_id).first()
