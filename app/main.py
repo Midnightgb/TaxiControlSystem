@@ -1450,6 +1450,78 @@ async def maintenance(
 
 # ========================================== END OF MAINTENANCEBLOCK ============================================ #
 
+# ========================================== REPORTSTAXIBLOCK ============================================ #
+
+# -- PATH TO REDIRECT TO REPORTSTAXI -- #
+@app.post("/view/detail/taxi", response_class=HTMLResponse, tags=["routes"])
+async def detail_taxi(
+    request: Request,
+    c_user: str = Cookie(None),
+    id_taxi: str = Form(...),
+    db: Session = Depends(get_database)
+):
+
+    print(" ============================================ id_taxi:", id_taxi)
+    print(" ============================================ c_user:", c_user)
+
+    if not serverStatus(db):
+        alert = {"type": "general",
+                "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Validar que el usuario esté logueado
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Validar que el token sea válido
+    token_payload = tokenDecoder(c_user)
+    if not token_payload:
+        alert = {"type": "general",
+                "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    conductorActual = db.query(ConductorActual).filter(ConductorActual.id_taxi == id_taxi).first()
+
+    if not conductorActual:
+        alert = {"type": "error",
+                "message": "No se encontró ningún conductor asignado a este taxi."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
+
+    # obtener los pagos que ha hecho el conductor
+    pagos = db.query(Pago).filter(Pago.id_conductor == conductorActual.id_conductor).all()
+
+    # obtener los mantenimientos que ha hecho el taxi
+    mantenimientos = db.query(Mantenimiento).filter(Mantenimiento.id_taxi == id_taxi).all()
+
+    #obtener informacion del conductor
+    conductor = db.query(Usuario).filter(Usuario.id_usuario == conductorActual.id_conductor).first()
+
+    #obtener informacion del taxi
+    taxi = db.query(Taxi).filter(Taxi.id_taxi == id_taxi).first()
+
+    print ("============================================ conductor:", conductorActual.id_conductor)
+
+    # obtener la sumatoria de los pagos
+    total_pagos = db.query(func.sum(Pago.valor)).filter(Pago.id_conductor == conductorActual.id_conductor).scalar()
+
+    # Obtener la sumatoria de todos los mantenimientos
+    total_mantenimientos = db.query(func.sum(Mantenimiento.costo)).filter(Mantenimiento.id_taxi == id_taxi).scalar()
+
+    if not total_pagos:
+        total_pagos = 0
+
+    if not total_mantenimientos:
+        total_mantenimientos = 0
+    
+    return templates.TemplateResponse(
+        "detailTaxi.html",
+        {"request": request, "pagos": pagos, "mantenimientos": mantenimientos, "conductor": conductor, "taxi": taxi, "total_pagos": total_pagos, "total_mantenimientos": total_mantenimientos}
+    )
+# -- END OF THE ROUTE -- # 
+
 
 
 
