@@ -1431,6 +1431,11 @@ async def maintenance(
         request.session["alert"] = alert
         return RedirectResponse(url="/maintenance", status_code=status.HTTP_303_SEE_OTHER)
 
+    if costo <= 0:
+        alert = {"type": "error", "message": "El costo del mantenimiento debe ser mayor a 0."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/maintenance", status_code=status.HTTP_303_SEE_OTHER)
+
     # Continuar con el registro del mantenimiento
     nuevo_mantenimiento = Mantenimiento(
         id_taxi=taxi.id_taxi,

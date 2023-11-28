@@ -22,6 +22,16 @@
         {% endblock %}
 
         <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
+
+            <div class="flex justify-end">
+                <form action="/update/taxi/path" method="POST">
+                    <input type="hidden" name="id_taxi" value="{{taxi.id_taxi}}">
+                    <button type="submit" class="bg-blue-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
+                        Editar Taxi
+                    </button>
+                </form>
+            </div>
+
             <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5">
                 <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200">
                     <p class="text-center text-lg font-bold my-5">
@@ -71,7 +81,6 @@
                         <p class="text-center text-lg font-bold my-5">
                             Gastos:  $ {{ '{:,.0f}'.format(total_mantenimientos) }}
                         </p>
-                        
                 </section>
 
 
