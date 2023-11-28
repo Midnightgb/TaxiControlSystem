@@ -99,6 +99,11 @@
         }
     })
     </script>
+    {% if alert %}
+    <p id="alert-type" style="display: none;">{{ alert.type }}</p>
+    <p id="alert-message" style="display: none;">{{ alert.message }}</p>
+    <script src="{{ url_for('static', path='js/alert.js')}}"></script>
+    {% endif %}
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
 </body>
 </html>

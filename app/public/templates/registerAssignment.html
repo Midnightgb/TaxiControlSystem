@@ -17,7 +17,7 @@
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
-    <main class="p-6 mx-auto max-w-screen-xl">
+    <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
         <div class="container mx-auto bg-white p-8 shadow-md rounded-lg">
             <a href="/home" class="inline-block text-sm text-blue-500">⬅️ Volver a casa</a>
             <h1 class="text-3xl font-bold my-6">Asignacion de Taxis</h1>
@@ -61,29 +61,7 @@
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>
-    <script>
-        let alertType = document.getElementById("alert-type").innerText;
-        let alertMessage = document.getElementById("alert-message").innerText;
-        let backgroundColor = alertType == "success" ? "#1f1f1f" : "#ff0028";
-        let textColor = "#fff"
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-            background: backgroundColor,
-            color: textColor,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
-        Toast.fire({
-            icon: alertType,
-            title: alertMessage
-        });
-    </script>
+    <script src="{{ url_for('static', path='js/alert.js')}}"></script>
     {% endif %}
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
 </body>

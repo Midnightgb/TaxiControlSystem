@@ -18,6 +18,7 @@ parts/
 sdist/
 var/
 wheels/
+node_modules/
 
 # Environments
 .env

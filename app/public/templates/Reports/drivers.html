@@ -10,9 +10,13 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/loader.css')}}">
 </head>
 
 <body>
+    {% block loader %}
+    {% include 'components/loader.html' %}
+    {% endblock %}
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
@@ -37,7 +41,7 @@
 
                         <div class="flex mt-4 justify-center items-center ">
                             {% if usuario.foto: %}
-                            <img src="{{ usuario.foto }} " height="90px" width="90px" class="card-img-top" />
+                            <img src="{{ usuario.foto }} " height="90px" width="90px" class="card-img-top rounded-full" />
                             {% else %}
                             <img src="{{ url_for('static', path='assets/imgs/imagenPerfil.png')}}" width="90px">
                             {% endif %}
@@ -118,29 +122,7 @@
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>
-    <script>
-        let alertType = document.getElementById("alert-type").innerText;
-        let alertMessage = document.getElementById("alert-message").innerText;
-        let backgroundColor = "#1f1f1f";
-        let textColor = "#fff"
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-            background: backgroundColor,
-            color: textColor,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
-        Toast.fire({
-            icon: alertType,
-            title: alertMessage
-        });
-    </script>
+    <script src="{{ url_for('static', path='js/alert.js')}}"></script>
     {% endif %}
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
 </body>

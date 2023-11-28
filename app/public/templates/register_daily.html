@@ -17,7 +17,7 @@
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
-    <main class="p-6 mx-auto max-w-7xl">
+    <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
         <div class="container">
             <h1 class="text-2xl font-bold mb-4">Registro Diario Cuota</h1>
             <form action="/register/daily" method="POST">
@@ -37,12 +37,6 @@
                     <input type="number" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         name="valor" id="valor" required>
                 </div>
-                {% if alert %}
-                <div class="alert alert-{{ alert.type }} alert-dismissible fade show" role="alert">
-                    {{ alert.message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endif %}
                 <button type="submit"
                     class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Registrar Cuota
@@ -51,6 +45,11 @@
         </div>
     </main>
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
+    {% if alert %}
+    <p id="alert-type" style="display: none;">{{ alert.type }}</p>
+    <p id="alert-message" style="display: none;">{{ alert.message }}</p>
+    <script src="{{ url_for('static', path='js/alert.js')}}"></script>
+    {% endif %}
 </body>
 
 </html>
