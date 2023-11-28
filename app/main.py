@@ -1299,6 +1299,12 @@ async def drivers(request: Request,
     usuario = db.query(Usuario).filter(
         Usuario.id_usuario == UUID).first()
 
+    if per_page < 1:
+        per_page = 4
+
+    if page < 1:
+        page = 1
+
     resultado_paginado = obtener_usuarios_paginados(
         db=db,
         page=page,
@@ -1538,6 +1544,22 @@ async def maintenance(
 
     db.add(nuevo_mantenimiento)
     db.commit()
+    
+    
+    mes_actual = date.today().month
+    ano_actual = date.today().year
+
+    
+    reporte_existente = db.query(Reporte).filter(
+        Reporte.empresa_id == taxi.empresa_id,
+        extract('month', Reporte.fecha) == mes_actual,
+        extract('year', Reporte.fecha) == ano_actual
+        
+    ).first()
+
+    if reporte_existente:
+        reporte_existente.gastos += costo
+        db.commit()
     db.refresh(nuevo_mantenimiento)
     alert = {"type": "success", "message": "Mantenimiento registrado exitosamente."}
     request.session["alert"] = alert
