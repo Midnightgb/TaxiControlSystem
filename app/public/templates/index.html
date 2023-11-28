@@ -21,18 +21,23 @@
     {% include 'components/nav.html' %}
     {% endblock %}
     <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
-        <section class="text-center sm:text-left">
-            <p class="text-right font-bold my-5">
-                <h1 class="text-2xl font-bold">Bienvenido {{welcome.name}}.</h1>
-                <i class='bx bx-calendar'></i>
-                {{welcome.day}}
-            </p>
+        <section class="text-center sm:text-left bg-slate-300 rounded-xl p-5 shadow-lg">
+            <div class="flex flex-col sm:flex-row items-center">
+                <div class="flex-shrink-0">
+                    <img class="rounded-full shadow-lg w-32 h-32 mx-auto sm:mx-0"
+                        src="{{ url_for('static', path='assets/imgs/user-1.jpg')}}" alt="Logo">
+                </div>
+                <div class="mt-4 sm:mt-0 sm:ml-4 text-center sm:text-left">
+                    <h1 class="text-2xl font-bold">Bienvenido {{welcome.name}}.</h1>
+                    <p class="text-xl font-semibold">Hoy es {{welcome.day}}</p>
+                </div>
+            </div>
         </section>
         <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5">
             <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200">
                 <p class="text-center text-lg font-bold my-5">
-                    <i class='bx'><img
-                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" /></i>
+                    <i class='bx'>
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" /></i>
                     <p class="text-center text-lg font-bold my-5">
                         Conductores: {{db.drivers}}
                     </p>
@@ -40,7 +45,8 @@
                         Asistentes: {{db.assistants}}
                     </p>
                     <p class="text-center text-lg font-bold my-5">
-                        <a href="{{ url_for('drivers') }}" class="text-blue-500 underline hover:text-blue-800 ease-in duration-200">Ver conductores</a>
+                        <a href="{{ url_for('drivers') }}"
+                            class="text-blue-500 underline hover:text-blue-800 ease-in duration-200">Ver conductores</a>
                     </p>
                 </p>
             </section>
@@ -52,14 +58,16 @@
                         Vehículos: {{db.cars}}
                     </p>
                     <p class="text-center text-lg font-bold my-5">
-                        <a href="{{ url_for('taxis') }}" class="text-blue-500 underline hover:text-blue-800 ease-in duration-200">Ver vehículos</a>
+                        <a href="{{ url_for('taxis') }}"
+                            class="text-blue-500 underline hover:text-blue-800 ease-in duration-200">Ver vehículos</a>
                     </p>
                 </p>
             </section>
             <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200">
                 <p class="text-center text-lg font-bold my-5">
                     <i class='bx'>
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAADFElEQVRYR+2X8VEVQQzGoQK1g7MDrMBnBWAFPioQK/CsQDrwqACowOsAqIBnBdqB5sds3uRyye3e+4thzEyGZTebfPmS3b13fPTM5PiZ4Tl6MYA2wiz6XvS1aFeY3slf1VsZj2srsIYhAm9FP4meNAb6I3bfRC8b7ZtLBhvfVwDx8WHti+hNDVgLQxfi5Gspjfojc5xfiTImINIVpZSwCatWYKtfAlUD9KM4tkBwOhQgtYRJ5nMBqbajDD5kG5cA4YwyWUcfG4H4eNcycWYm6SlKOJMMEJthRynHAcxQHi+9TFBSZKkknm2Sm/VUBAgQP0X1JI0yzpjBFjCwiQyi5wFonbJMkdwbbxsBsqVi09uAGQWylTXfuOwhARLxgu2daFcWZoxGgB6XNhQA1mlGyDtZuA8WSYLyITOWPCDKRDA1jtih0bVEagcbON+YZHYyZn8kNmlOHPufxAPqZU4bNDsJ1hn9MpiIlOS3+T87NDapSRy/wTZdeApKQO0bGICJtcIpJhYCO/t7yQOiXHq6sh7wxxeGfolSMpS+iXrHgrZMTvrIA7LlyLLvxDN2SwIgGM7YawZE/bUc3BGgjwQWYUrZzMBlLGP/12zaE3NIyWxweoEEYO1VAbgxBoOMo4vSsgyL+9PoAXFDq8OsqRdrVQDqSQtv4xKDWMgomja1PY5ZdukdUgLYE5QB6sU2vF5qF+PsrRFH/pTdyNxDKRnsUg7tQ9Zg2otNalKJ2tPhLz4c+/coKyHsUAp/BXgGJ69By+MasQQomMJ5JPQFyezcIvvsl0TT44oPSynO900XRLe3+yDrBPFAdJstNwzO3srsrbG04uxSNPzCk/letOUD7ULs7Bco/vA7kQwQRv5VrzEVkPc0RZnwtTUGaYJLgNjvTxSloCRDFt3NbwoYe6Nz8uiv8BWoAYqYYg5ngOLXKSBRmNBbGyCnov5pgRkSCsHguAUQdvQUtHeNzHgzAABk1jPesBWQ7vONWcOnQGAzZcU6WQtI98IY5eAXKqyhBFQdZXwlumsFoo4PBVRj5uD1/4Bq1P0DP0C/JUXiHVAAAAAASUVORK5CYII=" />
+                        <img
+                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAADFElEQVRYR+2X8VEVQQzGoQK1g7MDrMBnBWAFPioQK/CsQDrwqACowOsAqIBnBdqB5sds3uRyye3e+4thzEyGZTebfPmS3b13fPTM5PiZ4Tl6MYA2wiz6XvS1aFeY3slf1VsZj2srsIYhAm9FP4meNAb6I3bfRC8b7ZtLBhvfVwDx8WHti+hNDVgLQxfi5Gspjfojc5xfiTImINIVpZSwCatWYKtfAlUD9KM4tkBwOhQgtYRJ5nMBqbajDD5kG5cA4YwyWUcfG4H4eNcycWYm6SlKOJMMEJthRynHAcxQHi+9TFBSZKkknm2Sm/VUBAgQP0X1JI0yzpjBFjCwiQyi5wFonbJMkdwbbxsBsqVi09uAGQWylTXfuOwhARLxgu2daFcWZoxGgB6XNhQA1mlGyDtZuA8WSYLyITOWPCDKRDA1jtih0bVEagcbON+YZHYyZn8kNmlOHPufxAPqZU4bNDsJ1hn9MpiIlOS3+T87NDapSRy/wTZdeApKQO0bGICJtcIpJhYCO/t7yQOiXHq6sh7wxxeGfolSMpS+iXrHgrZMTvrIA7LlyLLvxDN2SwIgGM7YawZE/bUc3BGgjwQWYUrZzMBlLGP/12zaE3NIyWxweoEEYO1VAbgxBoOMo4vSsgyL+9PoAXFDq8OsqRdrVQDqSQtv4xKDWMgomja1PY5ZdukdUgLYE5QB6sU2vF5qF+PsrRFH/pTdyNxDKRnsUg7tQ9Zg2otNalKJ2tPhLz4c+/coKyHsUAp/BXgGJ69By+MasQQomMJ5JPQFyezcIvvsl0TT44oPSynO900XRLe3+yDrBPFAdJstNwzO3srsrbG04uxSNPzCk/letOUD7ULs7Bco/vA7kQwQRv5VrzEVkPc0RZnwtTUGaYJLgNjvTxSloCRDFt3NbwoYe6Nz8uiv8BWoAYqYYg5ngOLXKSBRmNBbGyCnov5pgRkSCsHguAUQdvQUtHeNzHgzAABk1jPesBWQ7vONWcOnQGAzZcU6WQtI98IY5eAXKqyhBFQdZXwlumsFoo4PBVRj5uD1/4Bq1P0DP0C/JUXiHVAAAAAASUVORK5CYII=" />
                     </i>
                     <p class="text-center text-lg font-bold my-5 underline">
                         Balance Diario
@@ -101,6 +109,7 @@
     <script>
         var reports = JSON.parse('{{ db.reports | tojson | safe }}');
     </script>
+    <script src="../dist/js/app.js"></script>
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="{{ url_for('static', path='js/dashboard.js')}}"></script>
