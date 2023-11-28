@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session, joinedload
 import bcrypt
 import os
 from dotenv import load_dotenv
-from datetime import date
+from datetime import date, datetime, timedelta
 import calendar
 from collections import defaultdict
 
@@ -29,7 +29,7 @@ from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from sqlalchemy import or_
+from sqlalchemy import or_, func,extract
 
 
 load_dotenv()
@@ -42,18 +42,18 @@ app.mount("/static", StaticFiles(directory="public/dist"), name="static")
 templates = Jinja2Templates(directory="public/templates")
 
 MONTHS_IN_SPANISH = {
-    'January': 'Ene',
-    'February': 'Feb',
-    'March': 'Mar',
-    'April': 'Abr',
-    'May': 'May',
-    'June': 'Jun',
-    'July': 'Jul',
-    'August': 'Ago',
-    'September': 'Sept',
-    'October': 'Oct',
-    'November': 'Nov',
-    'December': 'Dic'
+    'January': 'Enero',
+    'February': 'Febrero',
+    'March': 'Marzo',
+    'April': 'Abril',
+    'May': 'Mayo',
+    'June': 'Junio',
+    'July': 'Julio',
+    'August': 'Agosto',
+    'September': 'Septiembre',
+    'October': 'Octubre',
+    'November': 'Noviembre',
+    'December': 'Diciembre'
 }
 
 @app.get("/", tags=["routes"])
@@ -847,6 +847,11 @@ async def registro_diario(
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
+    if valor < 0:
+        alert = {"type": "error", "message": "El valor no puede ser negativo."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+    
     datos_conductor = getDriverData(id_conductor, db)
 
     if not datos_conductor:
@@ -882,6 +887,23 @@ async def registro_diario(
 
         db.add(nuevo_pago)
         db.commit()
+        
+        conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
+        mes_actual = date.today().month
+        ano_actual = date.today().year
+
+        
+        reporte_existente = db.query(Reporte).filter(
+            Reporte.empresa_id == conductor.empresa_id,
+            extract('month', Reporte.fecha) == mes_actual,
+            extract('year', Reporte.fecha) == ano_actual
+            
+        ).first()
+
+        if reporte_existente:
+            reporte_existente.ingresos += valor
+            db.commit()
+
         db.refresh(nuevo_pago)
         alert = {"type": "success", "message": "Pago registrado exitosamente."}
         # Almacena la alerta en la sesión
@@ -1002,11 +1024,35 @@ async def actualizar_cuota_diaria(
             # Almacena la alerta en la sesión
             request.session["alert"] = alert
             return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
+        
+        if nueva_cuota < pago_existente.valor:
+            alert = {"type": "error",
+                     "message": "El valor no puede ser menor a la cuota registrada."}
+            # Almacena la alerta en la sesión
+            request.session["alert"] = alert
+            return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
 
         # Actualizar la cuota diaria para la fecha seleccionada
+        pago_antiguo=pago_existente.valor
         pago_existente.valor = nueva_cuota
         pago_existente.estado = nueva_cuota >= datos_conductor["cuota_diaria_taxi"]
         db.commit()
+
+        conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
+        mes_actual = date.today().month
+        ano_actual = date.today().year
+
+        
+        reporte_existente = db.query(Reporte).filter(
+            Reporte.empresa_id == conductor.empresa_id,
+            extract('month', Reporte.fecha) == mes_actual,
+            extract('year', Reporte.fecha) == ano_actual
+            
+        ).first()
+
+        if reporte_existente:
+            reporte_existente.ingresos +=pago_existente.valor-pago_antiguo
+            db.commit()
 
         alert = {"type": "success",
                  "message": "Cuota diaria actualizada exitosamente."}
@@ -1110,11 +1156,6 @@ async def resumen_cuotas_view(
                 conductor = db.query(Usuario).filter(
                     Usuario.id_usuario == id_conductor).first()
 
-        if not cuotas_diarias:
-            alert = {
-                "type": "error", "message": "No se encontraron pagos registrados para este conductor."}
-            request.session["alert"] = alert
-
         # Renderiza el template con los resultados
         return templates.TemplateResponse("summary.html", {
             "request": request,
@@ -1141,13 +1182,7 @@ async def resumen_cuotas_view(
 
 
 @app.post("/summary", response_class=HTMLResponse, tags=["routes"])
-async def resumen_cuotas_post(
-    request: Request,
-    id_conductor: int = Form(...),
-    fecha_inicio: date = Form(None),
-    fecha_fin: date = Form(None),
-    db: Session = Depends(get_database)
-):
+async def resumen_cuotas_post(request: Request, id_conductor: int = Form(...), fecha_inicio: date = Form(None), fecha_fin: date = Form(None), db: Session = Depends(get_database)):
     try:
 
         if not serverStatus(db):
@@ -1220,7 +1255,8 @@ async def resumen_cuotas_post(
 
         if not cuotas_diarias:
             alert = {
-                "type": "error", "message": "No se encontraron pagos registrados para este conductor."}
+                "type": "error", 
+                "message": "No se encontraron resultados para la búsqueda del conductor " + conductor.nombre + " " + conductor.apellido + "en la fecha inicio {0} y fecha fin {1}".format(fecha_inicio, fecha_fin)}
             request.session["alert"] = alert
 
         return templates.TemplateResponse("summary.html", {
@@ -1249,9 +1285,11 @@ async def resumen_cuotas_post(
 
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
-                  c_user: str = Cookie(None),
-                  db: Session = Depends(get_database)
-                  ):
+                    c_user: str = Cookie(None),
+                    db: Session = Depends(get_database),
+                    page: int = 1,
+                    per_page: int = 8
+                    ):
     alert = request.session.pop("alert", None)
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
@@ -1262,7 +1300,7 @@ async def drivers(request: Request,
 
     if not serverStatus(db):
         alert = {"type": "general",
-                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -1271,37 +1309,62 @@ async def drivers(request: Request,
     if not userData:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
-    token_payload = tokenDecoder(c_user)
-
-    user_id = int(token_payload["sub"])
-
     usuario = db.query(Usuario).filter(
-        Usuario.id_usuario == user_id).first()
+        Usuario.id_usuario == UUID).first()
 
-    conductores = db.query(Usuario).filter(
-        Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).all()
+    resultado_paginado = obtener_usuarios_paginados(
+        db=db,
+        page=page,
+        per_page=per_page,
+        empresa_id=usuario.empresa_id,
+        rol="Conductor"
+    )
+
+    conductores = resultado_paginado["usuarios"]
+    total_paginas = resultado_paginado["total_paginas"]
+
     for conductor in conductores:
         if conductor.foto:
             conductor.foto = convertIMG(conductor.foto)
 
-    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores, "alert": alert})
+    visible_pages = 10
+
+    
+    start_page = max(1, page - (visible_pages // 2))
+    end_page = min(total_paginas, start_page + visible_pages - 1)
+
+    return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores, "alert": alert, "total_paginas": total_paginas, "page": page, "per_page": per_page , "start_page": start_page, "end_page": end_page})
 
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
-async def reports(request: Request,
-                  id_usuario: int = Form(...),
-                  db: Session = Depends(get_database)
-                  ):
+async def reports(request: Request, id_usuario: int = Form(...), db: Session = Depends(get_database)):
+    #mes actual 
+    now = datetime.now()
+    current_month = now.strftime("%B")
+    current_month = MONTHS_IN_SPANISH[current_month]
+    # Obtener la fecha actual
+    today = date.today()
+    
+    first_day_of_month = datetime(today.year, today.month, 1)
+    last_day_of_month = datetime(today.year, today.month + 1, 1) - timedelta(days=1)
+    
     reports = db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
+        
+    # Calcular el total acumulado del mes
+    total_acumulado = (
+        db.query(func.sum(Pago.valor))
+        .filter(Pago.id_conductor == id_usuario)
+        .filter(Pago.fecha.between(first_day_of_month, last_day_of_month))
+        .scalar() or 0  
+    )
 
-    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports})
-
-
+    conductor = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
+    taxi_actual = (db.query(Taxi).join(ConductorActual, ConductorActual.id_taxi == Taxi.id_taxi).filter(ConductorActual.id_conductor == id_usuario).first())
+    empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == Usuario.empresa_id).first()
+    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports, "conductor": conductor,"taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas})
+    
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
-async def search(request: Request,
-                 search: Optional[str] = Form(None),
-                 db: Session = Depends(get_database)
-                 ):
+async def search(request: Request, search: Optional[str] = Form(None), db: Session = Depends(get_database)):
     conductores = None
     if not search:
         conductores = db.query(Usuario).filter(
@@ -1324,6 +1387,8 @@ async def search(request: Request,
                      "message": "No se encontraron resultados."}
             request.session["alert"] = alert
             return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+        
+    
 
     return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores})
 

@@ -7,10 +7,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind/output.css')}}"> -->
+    <!-- tabla links -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link
+        href="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-1.13.6/af-2.6.0/b-2.4.2/b-html5-2.4.2/b-print-2.4.2/kt-2.10.0/r-2.5.0/sr-1.3.0/datatables.min.css"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 
 <body>
@@ -21,50 +31,278 @@
         <div class="relative">
             <div class="flex flex-wrap">
                 <div class="container mx-auto flex flex-wrap justify-center items-center columns-2 mt-4">
-                    <h1 class="text-4xl font-bold">Registros</h1>
+                    <h1 class="text-4xl font-bold mt-4 mb-5">Registros del Conductor: {{ conductor.nombre }}
+                        {{ conductor.apellido }}</h1>
                 </div>
-                <div class="container  justify-center col-start-1 col-end-7 ">
-                    {% if reports is not none %}
-                    <table class="table-fixed hover:table-fixed border border-slate-100 ">
-                        <thead>
-                            <tr>
-                                <th class="border border-slate-600 px-6 py-2  px-4 py-2">ID</th>
-                                <th class="border border-slate-600 px-6 py-2  px-4 py-2">Valor</th>
-                                <th class="border border-slate-600 px-6 py-2  px-4 py-2">Estado</th>
-                                <th class="border border-slate-600 px-6 py-2  px-4 py-2">Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for reporte in reports %}
-                            <tr>
-                                <td class="border border-slate-600  px-6 py-2">{{ reporte.id_pago }}</td>
-                                <td class="border border-slate-600  px-6 py-2">{{ reporte.valor }}</td>
-                                <td class="border border-slate-600  px-6 py-2">{{ reporte.estado }}</td>
-                                <td class="border border-slate-600  px-6 py-2">{{ reporte.fecha }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                    {% if reports is none %}
-                    <div class="text-center mt-4">
-                        <h2 class="text-2xl">No hay reportes registrados</h2>
+                <div class="container">
+                    <div class="row">
+                        <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5 mt-5">
+                            <section class="bg-zinc-100 rounded-lg shadow-xl">
+                                <p class="text-center text-lg font-bold my-5">
+                                    <i class='bx'><img
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" /></i>
+                                    <p class="text-center focus-within:first-letter: text-lg font-bold my-2">
+                                        Nombre: <a class="underline decoration-sky-500/30">{{ conductor.nombre }}
+                                            {{ conductor.apellido }} </a>
+                                        <br>
+
+                                    </p>
+                                    <p class="text-center text-lg font-bold my-2">
+                                        Cedula: {{ '{:,}'.format(conductor.cedula)  | replace(',', '.') }}
+                                    </p>
+                                    <p class="text-center text-lg font-bold my-2">
+                                        Correo: {{ conductor.correo }}
+                                    </p>
+                                </p>
+                            </section>
+                            <section class="bg-zinc-100 rounded-lg shadow-xl">
+                                <p class="text-center text-lg font-bold my-5">
+                                    <i class='bx'><img
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAB3klEQVRYR+1Xi1HDMAxtN4ANwgawQdkANoAJgAkoEwAT0A1gA7IBbNBsABvAez07pypOFH9ayl10p8vPkp+fZMmZzw5M5geGZzYBsiIyMVSCoQpObqALKO+PLKeB7w3evUGfobzvFStkp7B8TwQRmvQbL8+hn32ILEAEQ2ZKChk6SQFEdj6cIVd2Da2hvI+VCxi8CiOyRF8dGWJoidH3zuIJ17tYFGr8I55v3buVW2AUoDVGV87iElcmZY5oxo9jGNLGjHlKqPSccpHBsPWFrHS4PDAzbH2ASofLAzLDFgLExONK9iEPmITRaEUD2icYD2JrB2tAuyiEFtPcLO2O04B+LOsdfW9xWIBqt91ZaXOFTLCHVU6DqTMESCYcO/xXBqIGtmducXTzAr0K5fIQIBZDOvKincTg061HL3BUyNhMV2LWnITnwmSH1812FCA6YQ/jlU3WN8YYZuRYNmcytYCyzrFIehkFKHXiFLv/AygncVOYoU0NZeffiN5lpc/QFkh/Em3PWqHmunRJLJ2xJpUQfwL1vjon0bGAho66MUB1azK7PZ2HGPpTQPoIstWNY+gIjNUM+drULUjCmGWdvz8VlGD4t0nWSohcbA2H7AaNdFwqFCXAbnxMgCwqfwEYYmAlIDYHNAAAAABJRU5ErkJggg==" /></i>
+                                    {% if taxi_actual: %}
+                                    <p class="text-center text-lg font-bold my-1">
+                                        Marca: {{ taxi_actual.marca }}
+                                    </p>
+                                    <p class="text-center text-lg font-bold my-1">
+                                        Modelo: {{ taxi_actual.modelo }}
+                                    </p>
+                                    <p class="text-center text-lg font-bold my-1">
+                                        Vehiculo: {{ taxi_actual.placa }}
+                                    </p>
+                                    <p class="text-center text-lg font-bold my-1">
+                                        Matricula: {{ taxi_actual.matricula }}
+                                    </p>
+                                    {% else %}
+                                    <p class="text-center text-lg font-bold my-1">
+                                        No tiene vehiculo asignado
+                                    </p>
+                                    {% endif %}
+                                </p>
+                            </section>
+                            <section class="bg-zinc-100 rounded-lg shadow-xl">
+                                <p class="text-center text-lg font-bold my-5">
+                                    <i class='bx'><img
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAADFElEQVRYR+2X8VEVQQzGoQK1g7MDrMBnBWAFPioQK/CsQDrwqACowOsAqIBnBdqB5sds3uRyye3e+4thzEyGZTebfPmS3b13fPTM5PiZ4Tl6MYA2wiz6XvS1aFeY3slf1VsZj2srsIYhAm9FP4meNAb6I3bfRC8b7ZtLBhvfVwDx8WHti+hNDVgLQxfi5Gspjfojc5xfiTImINIVpZSwCatWYKtfAlUD9KM4tkBwOhQgtYRJ5nMBqbajDD5kG5cA4YwyWUcfG4H4eNcycWYm6SlKOJMMEJthRynHAcxQHi+9TFBSZKkknm2Sm/VUBAgQP0X1JI0yzpjBFjCwiQyi5wFonbJMkdwbbxsBsqVi09uAGQWylTXfuOwhARLxgu2daFcWZoxGgB6XNhQA1mlGyDtZuA8WSYLyITOWPCDKRDA1jtih0bVEagcbON+YZHYyZn8kNmlOHPufxAPqZU4bNDsJ1hn9MpiIlOS3+T87NDapSRy/wTZdeApKQO0bGICJtcIpJhYCO/t7yQOiXHq6sh7wxxeGfolSMpS+iXrHgrZMTvrIA7LlyLLvxDN2SwIgGM7YawZE/bUc3BGgjwQWYUrZzMBlLGP/12zaE3NIyWxweoEEYO1VAbgxBoOMo4vSsgyL+9PoAXFDq8OsqRdrVQDqSQtv4xKDWMgomja1PY5ZdukdUgLYE5QB6sU2vF5qF+PsrRFH/pTdyNxDKRnsUg7tQ9Zg2otNalKJ2tPhLz4c+/coKyHsUAp/BXgGJ69By+MasQQomMJ5JPQFyezcIvvsl0TT44oPSynO900XRLe3+yDrBPFAdJstNwzO3srsrbG04uxSNPzCk/letOUD7ULs7Bco/vA7kQwQRv5VrzEVkPc0RZnwtTUGaYJLgNjvTxSloCRDFt3NbwoYe6Nz8uiv8BWoAYqYYg5ngOLXKSBRmNBbGyCnov5pgRkSCsHguAUQdvQUtHeNzHgzAABk1jPesBWQ7vONWcOnQGAzZcU6WQtI98IY5eAXKqyhBFQdZXwlumsFoo4PBVRj5uD1/4Bq1P0DP0C/JUXiHVAAAAAASUVORK5CYII=" /></i>
+                                    {% if taxi_actual: %}
+
+                                    <p class="text-center text-lg font-bold my-1">
+                                        Cuota Diaria: $ {{ '{:,.0f}'.format(taxi_actual.cuota_diaria) }}
+                                    </p>
+                                    {% else %}
+                                    <p class="text-center text-lg font-bold my-1">
+                                        No tiene un cuota en estos momentos.
+                                    </p>
+                                    {% endif %}
+                                    <p class="text-center text-lg font-bold my-1">
+                                        Mes Actual: {{ current_month }}
+                                        <p class="text-center text-lg font-bold my-1">
+                                            fecha: {{today}}
+                                        </p>
+                                    </p>
+                                    <p class="text-center text-lg font-bold my-1">
+                                        Total Acumulado: $ {{ '{:,.0f}'.format(total_acumulado) }}
+                                    </p>
+                                </p>
+                            </section>
+                        </article>
+
                     </div>
-                    {% endif %}
-                    {% endif %}
+
+                </div>
+                <div class="container justify-center col-start-1 col-end-7 ">
+                    <div class="table-responsive">
+                        {% if reports is not none %}
+                        <table class="table table-striped
+                        table-hover	
+                        table-borderless
+                        table-success
+                        align-middle responsive " id="dataUsers" class="display">
+                            <thead>
+                                <tr>
+                                    <th class="">ID</th>
+                                    <th class="">Valor Pagado</th>
+                                    <th class="">Estado</th>
+                                    <th class="">Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reporte in reports %}
+                                <tr>
+                                    <td class="">{{ reporte.id_pago }}</td>
+                                    <td class="">$ {{ '{:,.0f}'.format(reporte.valor) }}</td>
+                                    <td class="">
+                                        <p>
+                                            {% if reporte.estado == 1 %}
+                                            <span
+                                                class="bg-green-500 text-white py-1 px-3 rounded-full text-xs">Pagado</span>
+                                            {% else %}
+                                            <span
+                                                class="bg-red-500 text-white py-1 px-3 rounded-full text-xs">Pendiente</span>
+                                            {% endif %}
+                                        </p>
+                                    </td>
+                                    <td class="">{{ reporte.fecha }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        {% if reports is none %}
+                        <div class="text-center mt-4">
+                            <h2 class="text-2xl">No hay reportes registrados</h2>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </main>
-    <footer>
-        <!-- place footer here -->
-    </footer>
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>
     <script src="{{ url_for('static', path='js/alert.js')}}"></script>
     {% endif %}
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            var table = $('#dataUsers').DataTable({
+                select: true,
+                destroy: true,
+                columnDefs: [{
+                        targets: [3],
+                        orderable: false
+                    },
+                    {
+                        targets: [3],
+                        orderable: false
+                    }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json',
+                    "searchPlaceholder": "Busqueda en tabla",
+                },
+                pagingType: 'full_numbers',
+                dom: '<"top"Bfrtip>rt<"bottom"lp><"clear">',
+                buttons: [{
+                        extend: 'copy',
+                        title: 'Reporte del Conductor: {{ conductor.nombre }} {{ conductor.apellido }}',
+                        exportOptions: {
+                            columns: [0, 1, 2, 3]
+                        },
+
+                        text: 'Copiar',
+                        messageTop: 'Fecha del Reporte: {{ today }}, de la Empresa: {{ empresas.nombre }} con el taxi {{ taxi_actual.marca }} con modelo: {{ taxi_actual.modelo }} y placa {{ taxi_actual.placa  }}',
+                        messageBottom: null
+
+                    },
+                    {
+                        extend: 'excel',
+                        title: 'Reporte del Conductor: {{ conductor.nombre }} {{ conductor.apellido }}',
+                    },
+                    {
+                        extend: 'pdf',
+                        title: 'Reporte del Conductor: {{ conductor.nombre }} {{ conductor.apellido }}',
+                        customize: function (doc) {
+                            doc.content.splice(0, {
+
+                                fontSize: 16,
+                                alignment: 'center',
+                                margin: [0, 10, 0, 10]
+                            });
+
+                            doc.content[1].table.widths = ['auto', 'auto', 'auto', 'auto'];
+                            doc.content[1].table.body.unshift([{
+                                text: 'Conductor: {{ conductor.nombre }} {{ conductor.apellido }}',
+                                colSpan: 4,
+                                alignment: 'center',
+                                fillColor: '#ddd',
+                                fontSize: 14
+                            }, {}, {}, {}]);
+                            doc.content[1].table.body.unshift([{
+                                text: 'Fecha: {{ today }}',
+                                colSpan: 4,
+                                alignment: 'center',
+                                fillColor: '#ddd',
+                                fontSize: 14
+                            }, {}, {}, {}]);
+                            doc.content[1].table.body.unshift([{
+                                text: 'Empresa: {{empresas.nombre}}',
+                                colSpan: 4,
+                                alignment: 'center',
+                                fillColor: '#ddd',
+                                fontSize: 14
+                            }, {}, {}, {}]);
+                            var objLayout = {};
+                            objLayout['hLineWidth'] = function (i) {
+                                return .5;
+                            };
+                            objLayout['vLineWidth'] = function (i) {
+                                return .5;
+                            };
+                            objLayout['hLineColor'] = function (i) {
+                                return '#aaa';
+                            };
+                            objLayout['vLineColor'] = function (i) {
+                                return '#aaa';
+                            };
+                            objLayout['paddingLeft'] = function (i) {
+                                return 4;
+                            };
+                            objLayout['paddingRight'] = function (i) {
+                                return 4;
+                            };
+                            doc.content[1].layout = objLayout;
+                            doc.pageMargins = [100, 20, 100, 20];
+                            doc.defaultStyle.fontSize = 10;
+                            doc.styles.tableHeader.fontSize = 10;
+                            doc.styles.tableFooter.fontSize = 10;
+                            doc.content[1].margin = [100, 0, 100, 0];
+                            doc.content[1].table.widths = ['auto', 'auto', 'auto', 'auto'];
+                            doc.styles.tableHeader.fontSize = 10;
+                            doc.styles.tableFooter.fontSize = 10;
+                            doc.content[1].margin = [100, 0, 100, 0];
+                            doc.content[1].table.widths = ['auto', 'auto', 'auto', 'auto'];
+                            doc.styles.tableHeader.fontSize = 10;
+                            doc.styles.tableFooter.fontSize = 10;
+                            doc.content[1].margin = [100, 0, 100, 0];
+                            doc.content[1].table.widths = ['auto', 'auto', 'auto', 'auto'];
+                        }
+                    },
+                    {
+                        extend: 'csv',
+                        title: 'Reporte del Conductor: {{ conductor.nombre }} {{ conductor.apellido }}',
+                        customize: function (csv) {
+                            var rows = csv.split('\n');
+
+                            rows.splice(0, 0,
+                                'Conductor: {{ conductor.nombre }} {{ conductor.apellido }}',
+                                'Fecha: {{ today }}',
+                                'Empresa: {{empresas.nombre}}',
+                                '');
+
+                            var formattedCsv = rows.join('\r\n');
+
+
+                            return formattedCsv;
+                        }
+                    },
+                ],
+                stateSave: true,
+                "stripeClasses": [],
+                "lengthMenu": [5, 10, 20, 50],
+                "pageLength": 10
+            });
+        });
+    </script>
 </body>
 
 </html>
