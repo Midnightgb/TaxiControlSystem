@@ -54,6 +54,29 @@
                                         Correo: {{ conductor.correo }}
                                     </p>
                                 </p>
+                                <div class="text-center">
+                                    <form action="/update/user/path" method="POST">
+                                        <input type="hidden" name="id_usuario" value="{{usuario.id_usuario}}">
+                                        <button type="submit"
+                                            class="inline-flex items-center justify-center gap-2.5 rounded-full bg-primary py-4 px-10 text-center font-medium text-emerald-600 hover:bg-opacity-90 lg:px-8 xl:px-10">
+                                            <span>
+                                                <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20"
+                                                    fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <g clip-path="url(#clip0_182_46495)">
+                                                        <path taxi d="M18.875 11.4375C18.3125 10.8438 17.5625 10.5312 16.75 10.5312C16.125 10.5312 15.5625 10.7188 15.0625 11.0938C15 11.125 14.9688 11.1562 14.9062 11.2188C14.8438 11.1875 14.8125 11.125 14.75 11.0938C14.25 10.7188 13.6875 10.5312 13.0625 10.5312C12.9062 10.5312 12.7812 10.5312 12.6562 10.5625C11.7188 9.5 10.5625 8.75 9.3125 8.40625C10.625 7.75 11.5312 6.40625 11.5312 4.875C11.5312 2.6875 9.75 0.9375 7.59375 0.9375C5.40625 0.9375 3.65625 2.71875 3.65625 4.875C3.65625 6.4375 4.5625 7.78125 5.875 8.40625C4.5625 8.78125 3.40625 9.53125 2.4375 10.6562C1.125 12.2188 0.375 14.4062 0.3125 16.7812C0.3125 17.0312 0.4375 17.25 0.65625 17.3438C1.5 17.75 4.4375 19.0938 7.59375 19.0938C9.28125 19.0938 10.8438 18.8125 10.9062 18.8125C11.25 18.75 11.4688 18.4375 11.4062 18.0938C11.343
+                                                            fill="" />
+                                                    </g>
+                                                    <defs>
+                                                        <clipPath id=" clip0_182_46495">
+                                                            <rect width="20" height="20" fill="white" />
+                                                            </clipPath>
+                                                            </defs>
+                                                </svg>
+                                            </span>
+                                            Editar Conductor
+                                        </button>
+                                    </form>
+                                </div>
                             </section>
                             <section class="bg-zinc-100 rounded-lg shadow-xl">
                                 <p class="text-center text-lg font-bold my-5">
@@ -78,6 +101,18 @@
                                     </p>
                                     {% endif %}
                                 </p>
+                                <div class="text-center">
+                                    <form action="/update/taxi/path" method="POST">
+                                        <input type="hidden" name="id_taxi" value="{{ taxi_actual.id_taxi }}">
+                                        <button type="submit"
+                                            class="inline-flex items-center justify-center gap-2.5 rounded-full bg-primary py-4 px-10 text-center font-medium text-emerald-600 hover:bg-opacity-90 lg:px-8 xl:px-10">
+                                            <span>
+                                                <img width="20" height="20" viewBox="0 0 20 20" src="https://img.icons8.com/fluency/48/taxi.png" alt="taxi"/>
+                                            </span>
+                                            Editar Taxi
+                                        </button>
+                                    </form>
+                                </div>
                             </section>
                             <section class="bg-zinc-100 rounded-lg shadow-xl">
                                 <p class="text-center text-lg font-bold my-5">
@@ -158,49 +193,61 @@
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div class="col-span-1 md:col-span-1 h-full bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-5">
-                    <div class="mb-3 justify-center gap-4 sm:flex">
-                            <h4 class="text-xl font-bold">
-                                Ingresos Mensuales
-                            </h4>
-                    </div>
-                    <div class="mb-3 justify-between gap-4 sm:flex">
-                        <canvas id="chartMonthlyIncome" class="mx-auto flex justify-center"></canvas>
-                    </div>
-                    <div class="mb-2">
-                        <div id="chartThree" class="mx-auto flex justify-center"></div>
-                    </div>
-                    <div class="-mx-4 flex flex-wrap items-center justify-center gap-y-3">
-                        <div class="w-full px-4 sm:w-1/2">
-                            <div class="flex w-full items-center">
-                                <p class="flex w-full justify-between text-sm font-medium text-black">
-                                    <span> Ingresos mes actual </span>
-                                    <span id="current" class="text-green-500 font-bold">$
-                                        {{ '{:,.0f}'.format(total_acumulado) }}</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="w-full px-4 sm:w-1/2">
-                            <div class="flex w-full items-center">
-                                <p class="flex w-full justify-between text-sm font-medium text-black">
-                                    <span> Ingresos mes anterior </span>
-                                    <span id="past" class="text-red-500 font-bold">$
-                                        {{ '{:,.0f}'.format(total_mes_anterior) }}</span>
-                                </p>
-                            </div>
+            <div
+                class="col-span-1 md:col-span-1 h-full bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-5">
+                {% if total_acumulado > 0 or total_mes_anterior > 0 %}
+                <div class="mb-3 justify-center gap-4 sm:flex">
+                    <h4 class="text-xl font-bold">
+                        Ingresos Mensuales
+                    </h4>
+                </div>
+                <div class="mb-3 justify-between gap-4 sm:flex">
+                    <canvas id="chartMonthlyIncome" class="mx-auto flex justify-center"></canvas>
+                </div>
+                <div class="mb-2">
+                    <div id="chartThree" class="mx-auto flex justify-center"></div>
+                </div>
+                <div class="-mx-4 flex flex-wrap items-center justify-center gap-y-3">
+                    <div class="w-full px-4 sm:w-1/2">
+                        <div class="flex w-full items-center">
+                            <p class="flex w-full justify-between text-sm font-medium text-black">
+                                <span> Ingresos mes actual </span>
+                                <span id="current" class="text-green-500 font-bold">
+                                    ${{ '{:,.0f}'.format(total_acumulado) }}
+                                </span>
+                            </p>
                         </div>
                     </div>
+                    <div class="w-full px-4 sm:w-1/2">
+                        <div class="flex w-full items-center">
+                            <p class="flex w-full justify-between text-sm font-medium text-black">
+                                <span> Ingresos mes anterior </span>
+                                <span id="past" class="text-red-500 font-bold">
+                                    ${{ '{:,.0f}'.format(total_mes_anterior) }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="-mx-4 flex flex-wrap items-center justify-center gap-y-60">
+                    <p class="text-2xl text-center text-black mb-5">
+                        No hay nada que mostrar
+                    </p>
+                </div>
+                {% endif %}
             </div>
-            <div class="col-span-1 md:col-span-1 h-full bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 px-5 py-2">
-                    <section id="chartWeek">
-                        <p class="text-center text-2xl font-bold my-5 underline">
-                            Balance semanal
-                            <i class='bx bx-dollar-circle ms-10'></i>
-                        </p>
-                    </section>
+            <div
+                class="col-span-1 md:col-span-1 h-full bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 px-5 py-2">
+                <section id="chartWeek">
+                    <p class="text-center text-2xl font-bold my-5 underline">
+                        Balance semanal
+                        <i class='bx bx-dollar-circle ms-10'></i>
+                    </p>
+                </section>
             </div>
         </div>
-        
+
     </main>
 
     {% if alert %}

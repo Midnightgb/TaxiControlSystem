@@ -1371,11 +1371,11 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
 
 
     reports = db.query(Pago).filter(Pago.id_conductor == id_usuario).all()
-
     conductor = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
     taxi_actual = (db.query(Taxi).join(ConductorActual, ConductorActual.id_taxi == Taxi.id_taxi).filter(ConductorActual.id_conductor == id_usuario).first())
     empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == Usuario.empresa_id).first()
-    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports, "conductor": conductor,"taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas,"weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior})
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
+    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports, "conductor": conductor,"taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas,"weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior, "usuario": usuario})
     
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def search(request: Request, search: Optional[str] = Form(None), db: Session = Depends(get_database)):

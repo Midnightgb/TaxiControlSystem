@@ -1,33 +1,47 @@
 document.addEventListener("DOMContentLoaded", function () {
-    var currentIncome = document.getElementById("current").innerText;
-    var currentIncomeValue = parseFloat(currentIncome.replace(/[^\d.-]/g, '')); 
-    console.log(currentIncomeValue);
-    var pastIncome = document.getElementById("past").innerText;
-    var pastIncomeValue = parseFloat(pastIncome.replace(/[^\d.-]/g, '')); 
-    console.log(pastIncomeValue);
+    const currentIncomeElement = document.getElementById("current");
+    const pastIncomeElement = document.getElementById("past");
 
-    var ctx = document.getElementById('chartMonthlyIncome').getContext('2d');
+    if (currentIncomeElement && pastIncomeElement) {
+        const currentIncome = currentIncomeElement.innerText;
+        const currentIncomeValue = parseFloat(currentIncome.replace(/[^\d.-]/g, '')) || 0;
+        console.log(currentIncomeValue);
 
-    var myChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            
-            datasets: [{
-                data: [currentIncomeValue, pastIncomeValue],
-                backgroundColor: ['#65d4f3', '#6577F3'],
-            }],
-            labels: ['Mes Actual', 'Mes Anterior'],
-            
-        },
+        const pastIncome = pastIncomeElement.innerText;
+        const pastIncomeValue = parseFloat(pastIncome.replace(/[^\d.-]/g, '')) || 0;
+        console.log(pastIncomeValue);
+
+        const ctx = document.getElementById('chartMonthlyIncome').getContext('2d');
+
+        let backgroundColor = ['#65d4f3', '#6577F3'];
         
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            legend: {
-                position: 'bottom',
+        const myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [currentIncomeValue, pastIncomeValue],
+                    backgroundColor: backgroundColor,
+                }],
+                labels: ['Mes Actual', 'Mes Anterior'],
             },
-        }
-    });
-    console.log(currentIncome);
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: {
+                    position: 'bottom',
+                },
+            }
+        });
+
+        console.log(currentIncome);
         console.log(pastIncome);
+
+        if (currentIncomeValue == 0 && pastIncomeValue == 0) {
+            document.getElementById("chartMonthlyIncome").style.display = "none";
+            document.getElementById("noData").style.display = "block";
+        }
+
+    } else {
+        console.log("No se encontraron los elementos");
+    }
 });
