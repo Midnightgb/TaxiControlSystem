@@ -574,11 +574,12 @@ async def create_taxi(
 async def taxis(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
     return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
+
 @app.get("/view/taxi", response_class=HTMLResponse, tags=["routes"])
-async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database), page: int = 1,taxi_page: int = 8 ):
     user_id = None
 
-    if not c_user:
+    if not c_user: 
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     token_payload = tokenDecoder(c_user)
@@ -590,15 +591,20 @@ async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = 
 
     if not usuario:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    taxis_paginados=obtener_taxis_paginados(db, page, taxi_page, usuario.empresa_id)
+    taxis = taxis_paginados["taxis"]
+    total_paginas = taxis_paginados["total_paginas"]
 
-    taxis = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).all()
-
+    start_page = max((page - 1) * taxi_page, 0)
+    end_page = start_page + taxi_page
     alert = request.session.pop("alert", None)
 
     if not taxis:
+        print("no hay taxis")
         return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": [], "alert": alert, "no_taxis_message": "No hay taxis disponibles."})
 
-    return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": taxis, "alert": alert})
+    return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": taxis, "alert": alert,"page":page,"taxi_page":taxi_page,"start_page":start_page,"end_page":end_page,"total_paginas":total_paginas})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO REDIRECT TO TAXI UPDATE -- #
