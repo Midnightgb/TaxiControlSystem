@@ -839,6 +839,65 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
                  "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+@app.post("/daily/register", response_class=HTMLResponse, tags=["routes"])
+async def registro_diario_view(request: Request,id_usuario:int=Form(...), c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    user_id = None
+
+    try:
+        if not serverStatus(db):
+            alert = {"type": "general",
+                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+        if not c_user:
+            alert = {"type": "general",
+                     "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+        token_payload = tokenDecoder(c_user)
+
+        if not token_payload:
+            alert = {"type": "general",
+                     "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+        user_id = int(token_payload["sub"])
+        usuario = db.query(Usuario).filter(
+            Usuario.id_usuario == user_id).first()
+        if not usuario:
+            raise HTTPException(
+                status_code=401, detail="Usuario no encontrado.")
+
+        empresas = db.query(Empresa).filter(
+            Empresa.id_empresa == usuario.empresa_id).first()
+        if not empresas:
+            alert = {"type": "error",
+                     "message": "Error al obtener información de la empresa."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+
+        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
+            Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
+        taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
+            Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+
+        # Recuperar la alerta de la sesión
+        alert = request.session.pop("alert", None)
+        return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores, "taxis": taxisAssigned,"id_usuario":id_usuario})
+    except HTTPException as e:
+        alert = {"type": "general", "message": str(e.detail)}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    except Exception as e:
+        alert = {"type": "general",
+                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 # -- MODULO 2 actualizar registro diario-- #
 
 @app.post("/register/daily", tags=["payments"])
@@ -880,7 +939,7 @@ async def registro_diario(
         alert = {"type": "error",
                  "message": "Este conductor ya tiene un pago registrado para el día de hoy."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
     else:
         estado = valor >= cuota_diaria_taxi
 
@@ -918,6 +977,7 @@ async def registro_diario(
 
     # Redirige a la vista de registro diario
     return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+
 
 @app.get("/update/daily", response_class=HTMLResponse, tags=["routes"])
 async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
