@@ -73,7 +73,7 @@
                         Balance Diario
                     </p>
                     <p class="text-center text-lg font-bold my-5">
-                        Ingresos: <span id="income">$ {{ '{:,}'.format(db.income.totalToday)  | replace(',', '.') }} </span><img src="{{db.income.src}}" class="ms-3 inline-block w-7" />
+                        Ingresos: <span id="income">$ {{ '{:,}'.format(db.income.totalToday)  | replace(',', '.') }} </span><img src="{{db.income.src}}" class="inline-block w-7 md:w-5 lg:w-7" />
                     </p>
                     <p class="text-center text-lg font-bold my-5 me-10">
                         Gastos: <span id="expense">$ {{ '{:,}'.format(db.expenses.totalToday)  | replace(',', '.') }}</span>
