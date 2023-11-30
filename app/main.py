@@ -573,7 +573,11 @@ async def taxis(request: Request, c_user: str = Cookie(None), db: Session = Depe
 
 
 @app.get("/view/taxi", response_class=HTMLResponse, tags=["routes"])
-async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database), page: int = 1,taxi_page: int = 8 ):
+async def view_taxi(request: Request, 
+                    c_user: str = Cookie(None), 
+                    db: Session = Depends(get_database), 
+                    page: int = 1,
+                    taxi_page: int = 8 ):
     user_id = None
 
     if not c_user: 
@@ -582,6 +586,11 @@ async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = 
     token_payload = tokenDecoder(c_user)
 
     user_id = int(token_payload["sub"])
+    if page < 1:
+        page = 1
+
+    if taxi_page < 1:
+        taxi_page = 8
 
     usuario = db.query(Usuario).filter(
         Usuario.id_usuario == user_id).first()
@@ -592,9 +601,13 @@ async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = 
     taxis_paginados=obtener_taxis_paginados(db, page, taxi_page, usuario.empresa_id)
     taxis = taxis_paginados["taxis"]
     total_paginas = taxis_paginados["total_paginas"]
+    visible_pages = 10
 
-    start_page = max((page - 1) * taxi_page, 0)
-    end_page = start_page + taxi_page
+    start_page = max(1, page - (visible_pages // 2))
+    end_page = min(total_paginas, start_page + visible_pages - 1)
+
+    
+
     alert = request.session.pop("alert", None)
 
     if not taxis:

@@ -57,13 +57,14 @@
                         <div class="flex flex-wrap justify-normal">
                             <label for="filas" class="p-3">Numero de filas:</label>
                             <select name="filas" id="filas" onchange="cambiarNumeroFilas(this)">
-                                <option value="" disabled>...</option>
-                                <option value="4" {% if page == 4 %}selected{% endif %}>4</option>
-                                <option value="8" {% if page == 8 %}selected{% endif %}>8</option>
-                                <option value="12" {% if page == 12 %}selected{% endif %}>12</option>
+                                <option selected value="" disabled>...</option>
+                                <option value="4" {% if taxi_page == 4 %}selected{% endif %}>4</option>
+                                <option value="8" {% if taxi_page == 8 %}selected{% endif %}>8</option>
+                                <option value="12" {% if taxi_page == 12 %}selected{% endif %}>12</option>
                             </select>
                         </div>
                         {% if total_paginas %}
+                        
                         <div class="flex flex-wrap mt-5 justify-around">
                             
                             {% if total_paginas > 1 %}
@@ -71,14 +72,14 @@
                             <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm">
                                 {% if page > 1 %}
                                 <a class="page-link relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0"
-                                    href="?page={{ 1 }}&per_page={{ taxi_page }}">
+                                    href="?page={{ 1 }}&taxi_page={{ taxi_page }}">
                                     <span class="sr-only">Pagina 1</span>
                                     <i class='bx bx-chevrons-left'></i>
                                 </a>
                                 {% endif %}
                                 {% if page > 1 %}
                                 <a class="page-link relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0"
-                                    href="?page={{ page - 1 }}&per_page={{ taxi_page }}">
+                                    href="?page={{ page - 1 }}&taxi_page={{ taxi_page }}">
                                     <span class="sr-only">Anterior</span>
                                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                         <path fill-rule="evenodd"
@@ -89,11 +90,11 @@
                                 {% endif %}
                                 {% for p in range(start_page, end_page + 1) %}
                                 <a class="page-link page-item {% if p == page %}active{% endif %} relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0 {% if p == page %}bg-blue-400 text-white{% endif %}"
-                                    href="?page={{ p }}&per_page={{ taxi_page }}">{{ p }}</a>
+                                    href="?page={{ p }}&taxi_page={{ taxi_page }}">{{ p }}</a>
                                 {% endfor %}
                                 {% if page < total_paginas %}
                                 <a class="page-link relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0"
-                                    href="?page={{ page + 1 }}&per_page={{ taxi_page }}">
+                                    href="?page={{ page + 1 }}&taxi_page={{ taxi_page }}">
                                     <span class="sr-only">Siguiente</span>
                                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                         <path fill-rule="evenodd"
@@ -104,7 +105,7 @@
                                 {% endif %}
                                 {% if page < total_paginas %}
                                 <a class="page-link relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0"
-                                    href="?page={{ total_paginas}}&per_page={{ taxi_page }}">
+                                    href="?page={{ total_paginas}}&taxi_page={{ taxi_page }}">
                                     <span class="sr-only">Ultima Pagina</span>
                                     <i class='bx bx-chevrons-right'></i>
                                 </a>
@@ -174,8 +175,8 @@
             var selectedValue = selectElement.value;
             
             
-            // Reemplaza la URL actual con la nueva URL que incluye el número de filas seleccionado
-            window.location.href = `?page=${1}&per_page=${selectedValue}`;
+            
+            window.location.href = `?page=${1}&taxi_page=${selectedValue}`;
         }
     
         function obtenerParametroUrl(parametro) {
