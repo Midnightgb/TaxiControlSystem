@@ -224,16 +224,8 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     for report in monthlyReports:
         report.fecha = report.fecha.strftime("%m/%d/%Y, %H:%M:%S")
         report.month = int(report.fecha.split(",")[0].split("/")[0])
-        print("mes reporte", report.month)
-        print("mes actual", date.today().month)
         dataDashboard["reports"]["data"][report.month]["income"] += report.ingresos
         dataDashboard["reports"]["data"][report.month]["expenses"] += report.gastos
-        print("gastos")
-        print(report.fecha)
-        print(report.ingresos)
-        print(report.gastos)
-        print(report.month)
-        print("#####")
     
     dateToday = date.today()
     dateToday = dateToday.strftime("%d/%m/%Y")

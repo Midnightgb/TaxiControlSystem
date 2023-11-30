@@ -36,7 +36,8 @@
             <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-lg font-bold my-5">
                     <i class='bx'>
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" /></i>
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" />
+                    </i>
                     <p class="text-center text-lg font-bold my-5">
                         Conductores: {{db.drivers}}
                     </p>
@@ -72,10 +73,10 @@
                         Balance Diario
                     </p>
                     <p class="text-center text-lg font-bold my-5">
-                        Ingresos: <span id="income">$ {{ '{:,}'.format(db.income.totalToday) }} </span><img src="{{db.income.src}}" class="ms-3 inline-block w-7" />
+                        Ingresos: <span id="income">$ {{ '{:,}'.format(db.income.totalToday)  | replace(',', '.') }} </span><img src="{{db.income.src}}" class="ms-3 inline-block w-7" />
                     </p>
                     <p class="text-center text-lg font-bold my-5">
-                        Gastos: <span id="expense">$ {{ '{:,}'.format(db.expenses.totalToday) }}</span>
+                        Gastos: <span id="expense">$ {{ '{:,}'.format(db.expenses.totalToday)  | replace(',', '.') }}</span>
                     </p>
                 </p>
             </section>
@@ -83,23 +84,130 @@
 
         <article class="grid grid-cols-1 md:grid-cols-2 gap-6 -z-50">
             <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
-                <p class="text-center text-2xl font-bold my-5 underline">
+                <p class="text-center text-xl font-bold my-5 underline">
                     Balance Mensual
                     <i class='bx bx-dollar-circle ms-10'></i>
                 </p>
                 <div id="chart"></div>
             </section>
-            <!--                <div class="bg-zinc-100 rounded-lg">
-                <div>
-                    Gastos: $580.000
-                </div>
-            </div>
-            <div class="bg-zinc-100 rounded-lg">03</div>
-            <div class="bg-zinc-100 rounded-lg">04</div>
-            <div class="bg-zinc-100 rounded-lg">05</div>
-            <div class="bg-zinc-100 rounded-lg">06</div>
-            <div class="bg-zinc-100 rounded-lg">07</div>
-            <div class="bg-zinc-100 rounded-lg">08</div> -->
+            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
+                <p class="text-center text-xl font-bold my-5 underline">
+                    Historial de eventos
+                    <i class='bx bx-history ms-10'></i>
+                </p>
+                <div class="overflow-auto" style="max-height: 270px">
+                    <table class="table-auto w-full">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2">Fecha</th>
+                                <th class="px-4 py-2">Evento</th>
+                                <th class="px-4 py-2">Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                            <tr>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                                <td class="border px-4 py-2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+            </section>
         </article>
     </main>
 
