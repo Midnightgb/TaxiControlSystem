@@ -16,27 +16,26 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>  
 </head>
 
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-black">
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
     <main class="p-6 mx-auto max-w-screen-xl">
-        <div class="container mx-auto bg-white p-8 shadow-md rounded-lg">
-            <a href="/home" class="inline-block text-sm text-blue-500">⬅️ Volver a casa</a>
-            <h1 class="text-3xl font-bold my-6">Registro Del Mantenimiento</h1>
-            <form action="/maintenance" method="POST">
+        <div class="container mx-auto bg-zinc-100 p-8 shadow-md rounded-lg">
 
-                <div class="mb-4">
-                    <label for="empresa_id" class="block text-sm font-medium text-gray-600">Empresa:</label>
-                    <select class="form-select mt-1 block w-full rounded-md border border-gray-300
-                        focus:outline-none focus:border-blue-500" name="empresa_id" id="empresa_id" required>
-                        <option value="{{ empresa.id_empresa }}">{{ empresa.nombre }}</option>
-                    </select>
+            <a href="/home" class="inline-block font-bold text-sm text-blue-500">⬅️ Volver a casa</a>
+            <h1 class="text-3xl font-bold my-4 flex items-center justify-center">Registro Del Mantenimiento</h1>
+            
+            <form action="/maintenance" method="POST"  class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div class=" col-span-2">
+                    <!-- Cambiando de select a input oculto -->
+                    <input type="hidden" name="empresa_id" value="{% if empresas %}{{ empresas[0].id_empresa }}{% endif %}">
                 </div>
                 
-                <div class="mb-4">
-                    <label for="taxis" class="block text-sm font-medium text-gray-600">Taxis:</label>
-                    <select class="form-select mt-1 block w-full rounded-md border border-gray-300
+                <div class="mb-2 ">
+                    <label for="taxis" class="block text-sm font-bold text-black">Taxis:</label>
+                    <select class="form-select mt-1 block w-full rounded-md border border-black
                         focus:outline-none focus:border-blue-500  js-example-basic-single" name="placa" id="placa" required>
                         <option value="" disabled selected>Seleccione una placa</option>
                         {% for taxi in taxis %}
@@ -45,26 +44,28 @@
                     </select>
                 </div>
 
-                <div class="mb-4">
-                    <label for="fecha" class="block text-sm font-medium text-gray-600">Fecha:</label>
-                    <input type="date" name="fecha" id="fecha" class="form-input mt-1 block w-full rounded-md border border-gray-300
+                <div class="mb-2">
+                    <label for="fecha" class="block text-sm font-bold text-black">Fecha:</label>
+                    <input type="date" name="fecha" id="fecha" class="form-input mt-1 block w-full rounded-md border border-black
                         focus:outline-none focus:border-blue-500" required>
                 </div>
 
-                <div class="mb-4">
-                    <label for="descripcion" class="block text-sm font-medium text-gray-600">Descripcion:</label>
-                    <textarea name="descripcion" id="descripcion" cols="30" rows="5" class="form-input mt-1 block w-full rounded-md border border-gray-300
+                <div class="mb-2 col-span-2">
+                    <label for="descripcion" class="block text-sm font-bold text-black">Descripcion:</label>
+                    <textarea name="descripcion" id="descripcion" cols="30" rows="5" class="form-input mt-1 block w-full rounded-md border border-black
                         focus:outline-none focus:border-blue-500" required></textarea>
                 </div>
 
-                <div class="mb-4">
-                    <label for="costo" class="block text-sm font-medium text-gray-600">costo:</label>
-                    <input type="number" name="costo" id="costo" class="form-input mt-1 block w-full rounded-md border border-gray-300
+                <div class="mb-2 col-span-2">
+                    <label for="costo" class="block text-sm font-bold text-black">Costo:</label>
+                    <input type="number" name="costo" id="costo" class="form-input mt-1 block w-full rounded-md border border-black
                         focus:outline-none focus:border-blue-500" required>
                 </div>
 
-                <button type="submit"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Registrar Taxi</button>
+                <div class=" col-span-2 text-center">
+                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Registrar Taxi</button>
+                </div>
+
             </form>
         </div>
     </main>

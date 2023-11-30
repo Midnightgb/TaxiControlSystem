@@ -21,7 +21,7 @@
         <div class=" container mx-auto flex flex-wrap">
             <div class="top-0 left-0 right-0">
                 <div class="mx-auto flex flex-wrap justify-center items-end columns-2 mt-4">
-                    <h1 class="text-4xl font-bold text-gray-600">TAXIS</h1>
+                    <h1 class="text-4xl font-bold text-black">TAXIS</h1>
                 </div>
                 <form id="formSearch" class="flex flex-wrap mx-20 justify-end items-end space-x-4 " action="/driver/search"
                     method="POST">
@@ -33,11 +33,11 @@
                 {% if taxis: %}
                 <div class="flex flex-wrap justify-center mt-4">
                     {% for taxi in taxis %}
-                    <div class="bg-white shadow-md my-4 mx-2 p-6  justify-end items-end " style="width: 19rem;" data-drivers="{{taxi.placa}}">
+                    <div class="bg-zinc-100 shadow-md my-4 mx-2 p-6  justify-end items-end " style="width: 19rem;" data-drivers="{{taxi.placa}}">
 
 
                         <div class="relative mt-4 justify-center items-center columns-1 ">
-                            <h5 class="text-xl font-semibold my-2 mx-10 w-25 ">{{ taxi.modelo }}
+                            <h5 class="text-xl font-bold my-2 mx-10 w-25 ">{{ taxi.modelo }}
                                 {{ taxi.marca }}</h5>
                             <p class="text-gray-600 my-2 w-25 mx-10">{{taxi.placa}}</p>
 

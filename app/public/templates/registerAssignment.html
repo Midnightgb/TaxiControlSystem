@@ -13,20 +13,22 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
 </head>
 
-<body class="font-sans antialiased bg-gray-100">
+<body class="font-sans antialiased bg-black">
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
     <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
-        <div class="container mx-auto bg-white p-8 shadow-md rounded-lg">
-            <a href="/home" class="inline-block text-sm text-blue-500">⬅️ Volver a casa</a>
-            <h1 class="text-3xl font-bold my-6">Asignacion de Taxis</h1>
+        <div class="container mx-auto bg-zinc-100 p-8 shadow-md rounded-lg">
+
+            <a href="/home" class="font-bold text-sm text-blue-500">⬅️ Volver a casa</a>
+            <h1 class="text-3xl font-bold my-6 flex items-center justify-center">Asignacion De Taxis</h1>
+
             <form action="/register/assignment" method="POST">
 
                 <label for="id_conductor"
-                    class="block text-sm font-medium text-gray-600 mb-2">ELIJA UN CONDUCTOR:</label>
+                    class="block text-sm font-bold text-black mb-2">ELIJA UN CONDUCTOR:</label>
                 <select name="id_conductor" id="id_conductor"
-                    class="form-select mt-1 block w-full rounded-md border border-gray-300 focus:outline-none focus:border-blue-500"
+                    class="form-select mt-1 block w-full rounded-md border border-black focus:outline-none focus:border-blue-500"
                     required>
                     <option value="" disabled selected>Seleccione un conductor</option>
                     {% if conductores %}
@@ -37,24 +39,27 @@
                     <option value="" disabled>No hay conductores disponibles</option>
                     {% endif %}
                 </select>
+                
+                <div class="">
+                    <label for="id_taxi" class="block text-sm font-bold text-black mt-4 mb-2">ELIJA UN TAXI:</label>
+                    <select name="id_taxi" id="id_taxi"
+                        class="form-select mt-1 block w-full rounded-md border border-black focus:outline-none focus:border-blue-500"
+                        required>
+                        <option value="" disabled selected>Seleccione un taxi</option>
+                        {% if taxis %}
+                        {% for taxi in taxis %}
+                        <option value="{{ taxi.id_taxi }}">{{ taxi.placa }} - {{ taxi.modelo }} - {{ taxi.marca }}</option>
+                        {% endfor %}
+                        {% else %}
+                        <option value="" disabled>No hay taxis disponibles</option>
+                        {% endif %}
+                    </select>
+                </div>
 
-                <label for="id_taxi"
-                    class="block text-sm font-medium text-gray-600 mt-4 mb-2">ELIJA UN TAXI:</label>
-                <select name="id_taxi" id="id_taxi"
-                    class="form-select mt-1 block w-full rounded-md border border-gray-300 focus:outline-none focus:border-blue-500"
-                    required>
-                    <option value="" disabled selected>Seleccione un taxi</option>
-                    {% if taxis %}
-                    {% for taxi in taxis %}
-                    <option value="{{ taxi.id_taxi }}">{{ taxi.placa }} - {{ taxi.modelo }} - {{ taxi.marca }}</option>
-                    {% endfor %}
-                    {% else %}
-                    <option value="" disabled>No hay taxis disponibles</option>
-                    {% endif %}
-                </select>
+                <div class="mb-4 col-span-2 text-center mt-12">
+                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Registrar Taxi</button>
+                </div>
 
-                <button type="submit"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">Asignar Taxi</button>
             </form>
         </div>
     </main>

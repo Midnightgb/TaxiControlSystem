@@ -42,7 +42,7 @@
                             Conductor Actual
                         </p>
                         <p class="text-center text-lg font-bold my-5">
-                            Cedula: {{conductor.cedula}}
+                            Cedula:{{ '{:,}'.format(conductor.cedula) }}
                         </p>
                         <p class="text-center text-lg font-bold my-5">
                             Nombre: {{conductor.nombre}} {{conductor.apellido}}

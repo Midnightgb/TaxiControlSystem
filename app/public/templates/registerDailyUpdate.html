@@ -17,18 +17,16 @@
     {% include 'components/nav.html' %}
     {% endblock %}
     <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
-        <div class="container">
-            {% for empresa in empresas %}
-            <h1 class="text-center text-2xl font-bold mt-4">{{ empresa.nombre }}</h1>
-            {% endfor %}
-            <div>
-                <p class="text-center text-xl font-bold mt-4">Actualizar Couta Diaria</p>
-            </div>
+        <div class="container mx-auto bg-zinc-100 p-8 shadow-md rounded-lg">
+
+            <a href="/home" class="font-bold  text-sm text-blue-500">⬅️ Volver a casa</a>
+            <h1 class="text-3xl font-bold text-center mt-4">Actualizar Couta Diaria</h1>
     
             <form action="/update/daily" method="POST">
+
                 <div class="mb-3">
-                    <label for="id_conductor" class="block text-sm font-medium text-gray-700">Conductor</label>
-                    <select class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                    <label for="id_conductor" class="block text-sm font-bold text-black">Conductor</label>
+                    <select class="block appearance-none w-full bg-white border border-black hover:border-black px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
                         name="id_conductor" id="id_conductor" required>
                         <option value="" disabled selected>Seleccione un conductor</option>
                         {% for conductor in conductores %}
@@ -37,21 +35,24 @@
                         {% endfor %}
                     </select>
                 </div>
+
                 <div class="mb-3">
-                    <label for="fecha_seleccionada" class="block text-sm font-medium text-gray-700">Fecha Seleccionada</label>
-                    <input type="date" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                    <label for="fecha_seleccionada" class="block text-sm font-bold text-black">Fecha Seleccionada</label>
+                    <input type="date" class="block appearance-none w-full bg-white border border-black hover:border-black px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
                         name="fecha_seleccionada" id="fecha_seleccionada" required>
                 </div>
+
                 <div class="mb-3">
-                    <label for="nueva_cuota" class="block text-sm font-medium text-gray-700">Nueva Cuota</label>
-                    <input type="number" class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                    <label for="nueva_cuota" class="block text-sm font-bold text-black">Nueva Cuota</label>
+                    <input type="number" class="block appearance-none w-full bg-white border border-black hover:border-black px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
                         name="nueva_cuota" id="nueva_cuota" required>
-                </div>    
+                </div>
+
                 <!-- Botón de envío -->
-                <button type="submit"
-                    class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    Actualizar Cuota
-                </button>
+                <div class=" col-span-2 text-center">
+                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar Cuota</button>
+                </div>
+                
             </form>
         </div>
     </main>
