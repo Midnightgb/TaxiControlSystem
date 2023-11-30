@@ -65,7 +65,7 @@
                         <div class="flex flex-wrap justify-normal ">
                             <label for="filas" class="p-3">Numero de filas:</label>
                             <select name="filas" id="filas" onchange="cambiarNumeroFilas(this)">
-                                <option  selected value="" disable>...</option>
+                                <option  selected value="" disabled>...</option>
                                 <option value="4" {% if per_page == 4 %}selected{% endif %} >4</option>
                                 <option value="8" {% if per_page == 8 %}selected{% endif %}>8</option>
                                 <option value="12" {% if per_page == 12 %}selected{% endif %}>12</option>
@@ -139,6 +139,7 @@
     </footer>
 
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
+    
     <script>
         const formSearch = document.getElementById('formSearch');
         const search = document.getElementById('search');

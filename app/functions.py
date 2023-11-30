@@ -163,3 +163,22 @@ def obtener_usuarios_paginados(
     ).offset(offset).limit(per_page).all()
 
     return {"usuarios": usuarios_paginados, "total_paginas": total_paginas}
+
+def obtener_taxis_paginados(db: Session, page: int = 1, tax_page: int = 8, empresa_id: int = None) -> List[Taxi]:
+    offset = (page - 1) * tax_page
+
+    
+    total_taxis = db.query(func.count(Taxi.id_taxi)).filter(
+        Taxi.empresa_id == empresa_id
+    ).scalar()
+
+    
+    total_paginas = (total_taxis + tax_page - 1) // tax_page
+
+    
+    taxis_paginados = db.query(Taxi).filter(
+        Taxi.empresa_id == empresa_id
+    ).offset(offset).limit(tax_page).all()
+
+    return {"taxis": taxis_paginados, "total_paginas": total_paginas}
+
