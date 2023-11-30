@@ -10,8 +10,12 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='lib/jsCalendar_v1.4.4/source/jsCalendar.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='lib/jsCalendar_v1.4.4/themes/jsCalendar.clean.css')}}">
+    <script type="text/javascript" src="{{ url_for('static', path='lib/jsCalendar_v1.4.4/source/jsCalendar.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='lib/jsCalendar_v1.4.4/extensions/jsCalendar.datepicker.min.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('static', path='lib/jsCalendar_v1.4.4/source/jsCalendar.lang.es.js')}}"></script>
 </head>
-
 <body>
     {% block nav %}
     {% include 'components/nav.html' %}
