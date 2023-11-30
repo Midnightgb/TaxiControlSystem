@@ -34,110 +34,104 @@
                 </form>
 
                 {% if usuarios: %}
-                <div class="flex flex-wrap justify-center">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {% for usuario in usuarios %}
-                    <div class="bg-white shadow-md my-4 mx-2 p-6  justify-end items-end " style="width: 18rem;"
-                        data-drivers="{{usuario.nombre}}">
-
-                        <div class="flex mt-4 justify-center items-center ">
-                            {% if usuario.foto: %}
-                            <img src="{{ usuario.foto }} " height="90px" width="90px"
-                                class="card-img-top rounded-full" />
-                            {% else %}
-                            <img src="{{ url_for('static', path='assets/imgs/imagenPerfil.png')}}" width="90px">
-                            {% endif %}
-                        </div>
-
-                        <div class="mt-4 text-center justify-center items-center columns-1 ">
-                            <h5 class="text-xl  font-semibold my-2 mx-10 w-25 ">{{ usuario.nombre }}
-                                {{ usuario.apellido }}</h5>
-                            <p class="text-gray-600 my-2 w-25 mx-10 ">{{usuario.correo}}</p>
-                            <form action="/reports/driver/{{usuario.nombre}} {{ usuario.apellido }}" method="POST">
-                                <input type="hidden" name="id_usuario" value="{{usuario.id_usuario}}">
-                                <button type="submit" class="text-white px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
-                                    Ver informes
-                                </button>
-                            </form>
+                    <div class="bg-white shadow-md my-4 mx-2 p-6 justify-end items-end" style="width: 18rem; height: 25rem; min-height: 20rem; overflow: hidden;">
+                        <div class="flex flex-col h-full">
+                            <div class="flex mt-4 justify-center items-center">
+                                {% if usuario.foto %}
+                                <img src="{{ usuario.foto }}" height="90px" width="90px" class="card-img-top rounded-full" />
+                                {% else %}
+                                <img src="{{ url_for('static', path='assets/imgs/imagenPerfil.png')}}" width="90px">
+                                {% endif %}
+                            </div>
+                
+                            <div class="mt-4 text-center justify-center items-center">
+                                <h5 class="text-xl font-semibold my-2 mx-10 w-25">{{ usuario.nombre }} {{ usuario.apellido }}</h5>
+                                <p class="text-gray-600 my-2 w-25 mx-10">{{ usuario.correo }}</p>
+                                <form action="/reports/driver/{{ usuario.nombre }} {{ usuario.apellido }}" method="POST">
+                                    <input type="hidden" name="id_usuario" value="{{ usuario.id_usuario }}">
+                                    <button type="submit" class="text-white px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
+                                        Ver informes
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-                <div class="flex flex-wrap mt-5 justify-around ">
-                    <div class="flex flex-wrap justify-normal ">
-                        <label for="filas" class="p-3">Numero de filas:</label>
-                        <select name="filas" id="filas" onchange="cambiarNumeroFilas(this)">
-                            <option  selected value="" disable>...</option>
-                            <option value="4" {% if per_page == 4 %}selected{% endif %} >4</option>
-                            <option value="8" {% if per_page == 8 %}selected{% endif %}>8</option>
-                            <option value="12" {% if per_page == 12 %}selected{% endif %}>12</option>
-                        </select>
-                    </div>
-                        {%if total_paginas %}
-                        <div class="flex flex-wrap justify-end ">
-                            {% if total_paginas > 1 %}
-                            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm">
-                                {% if page > 1 %}
-                                
-                                <a class="page-link  relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200  focus:z-20 focus:outline-offset-0" href="?page={{  1 }}&per_page={{ per_page }}">
-                                    <span class="sr-only">Pagina 1</span>
-                                    <i class='bx bx-chevrons-left'></i>
-                                </a>
-                                
-                                {% endif %}
-                                
-                                
-                                {% if page > 1 %}
-                                
-                                <a class="page-link  relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200  focus:z-20 focus:outline-offset-0" href="?page={{ page - 1 }}&per_page={{ per_page }}">
-                                    <span class="sr-only">Anterior</span>
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                                
-                                {% endif %}
-                                
-                                {% for p in range(start_page, end_page + 1) %}
-                                
-                                <a class="page-link page-item {% if p == page %}active{% endif %} relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0 {% if p == page %}bg-blue-400 text-white{% endif %}"
-                                href="?page={{ p }}&per_page={{ per_page }}">{{ p }}</a>
-                                
-                                {% endfor %}
-                                {% if page < total_paginas %}
-                                
-                                    <a class="page-link  relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0" href="?page={{ page + 1 }}&per_page={{ per_page }}">
-                                        <span class="sr-only">Siguiente</span>
+                
+                    <div class="flex flex-wrap mt-5 justify-around ">
+                        <div class="flex flex-wrap justify-normal ">
+                            <label for="filas" class="p-3">Numero de filas:</label>
+                            <select name="filas" id="filas" onchange="cambiarNumeroFilas(this)">
+                                <option  selected value="" disable>...</option>
+                                <option value="4" {% if per_page == 4 %}selected{% endif %} >4</option>
+                                <option value="8" {% if per_page == 8 %}selected{% endif %}>8</option>
+                                <option value="12" {% if per_page == 12 %}selected{% endif %}>12</option>
+                            </select>
+                        </div>
+                            {%if total_paginas %}
+                            <div class="flex flex-wrap justify-end ">
+                                {% if total_paginas > 1 %}
+                                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm">
+                                    {% if page > 1 %}
+                                    
+                                    <a class="page-link  relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200  focus:z-20 focus:outline-offset-0" href="?page={{  1 }}&per_page={{ per_page }}">
+                                        <span class="sr-only">Pagina 1</span>
+                                        <i class='bx bx-chevrons-left'></i>
+                                    </a>
+                                    
+                                    {% endif %}
+                                    
+                                    
+                                    {% if page > 1 %}
+                                    
+                                    <a class="page-link  relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200  focus:z-20 focus:outline-offset-0" href="?page={{ page - 1 }}&per_page={{ per_page }}">
+                                        <span class="sr-only">Anterior</span>
                                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
                                         </svg>
                                     </a>
-                                
+                                    
+                                    {% endif %}
+                                    
+                                    {% for p in range(start_page, end_page + 1) %}
+                                    
+                                    <a class="page-link page-item {% if p == page %}active{% endif %} relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0 {% if p == page %}bg-blue-400 text-white{% endif %}"
+                                    href="?page={{ p }}&per_page={{ per_page }}">{{ p }}</a>
+                                    
+                                    {% endfor %}
+                                    {% if page < total_paginas %}
+                                        
+                                        <a class="page-link  relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0" href="?page={{ page + 1 }}&per_page={{ per_page }}">
+                                            <span class="sr-only">Siguiente</span>
+                                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                            </svg>
+                                        </a>
+                                        
+                                    {% endif %}
+                                    {% if page < total_paginas %}
+                                        <a class="page-link  relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0" href="?page={{ total_paginas}}&per_page={{ per_page }}">
+                                            <span class="sr-only">Ultima Pagina</span>
+                                            <i class='bx bx-chevrons-right' ></i>
+                                        </a>
+                                    {% endif %}
+                                    
+                                </nav>
                                 {% endif %}
-                                {% if page < total_paginas %}
-                                
-                                    <a class="page-link  relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0" href="?page={{ total_paginas}}&per_page={{ per_page }}">
-                                        <span class="sr-only">Ultima Pagina</span>
-                                        <i class='bx bx-chevrons-right' ></i>
-                                    </a>
-                                
-                                {% endif %}
-                                
-                            </nav>
+                            </div>
                             {% endif %}
-                        </div>
-                        {% endif %}
-                </div>
-                
+                    </div>
                 {% else %}
-                {% if usuarios is none %}
-                <div class="text-center mt-4">
-                    <h2 class="text-2xl">No hay conductores registrados</h2>
-                </div>
-                {% endif %}
-
+                    {% if usuarios is none %}
+                    <div class="text-center mt-4">
+                        <h2 class="text-2xl">No hay conductores registrados</h2>
+                    </div>
+                    {% endif %}
                 {% endif %}
             </div>
-
         </div>
     </main>
     <footer>
