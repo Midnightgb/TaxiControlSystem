@@ -1,5 +1,4 @@
-</html>
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -21,7 +20,7 @@
     {% include 'components/nav.html' %}
     {% endblock %}
     <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
-        <section class="text-center sm:text-left bg-slate-300 rounded-xl p-5 shadow-lg">
+        <section class="text-center sm:text-left bg-slate-300 rounded-xl p-5 shadow-lg border border-slate-400">
             <div class="flex flex-col sm:flex-row items-center">
                 <div class="flex-shrink-0">
                     <img class="rounded-full shadow-lg w-32 h-32 mx-auto sm:mx-0"
@@ -34,7 +33,7 @@
             </div>
         </section>
         <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5">
-            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200">
+            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-lg font-bold my-5">
                     <i class='bx'>
                         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" /></i>
@@ -50,7 +49,7 @@
                     </p>
                 </p>
             </section>
-            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200">
+            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-lg font-bold my-5">
                     <i class='bx'><img
                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAB3klEQVRYR+1Xi1HDMAxtN4ANwgawQdkANoAJgAkoEwAT0A1gA7IBbNBsABvAez07pypOFH9ayl10p8vPkp+fZMmZzw5M5geGZzYBsiIyMVSCoQpObqALKO+PLKeB7w3evUGfobzvFStkp7B8TwQRmvQbL8+hn32ILEAEQ2ZKChk6SQFEdj6cIVd2Da2hvI+VCxi8CiOyRF8dGWJoidH3zuIJ17tYFGr8I55v3buVW2AUoDVGV87iElcmZY5oxo9jGNLGjHlKqPSccpHBsPWFrHS4PDAzbH2ASofLAzLDFgLExONK9iEPmITRaEUD2icYD2JrB2tAuyiEFtPcLO2O04B+LOsdfW9xWIBqt91ZaXOFTLCHVU6DqTMESCYcO/xXBqIGtmducXTzAr0K5fIQIBZDOvKincTg061HL3BUyNhMV2LWnITnwmSH1812FCA6YQ/jlU3WN8YYZuRYNmcytYCyzrFIehkFKHXiFLv/AygncVOYoU0NZeffiN5lpc/QFkh/Em3PWqHmunRJLJ2xJpUQfwL1vjon0bGAho66MUB1azK7PZ2HGPpTQPoIstWNY+gIjNUM+drULUjCmGWdvz8VlGD4t0nWSohcbA2H7AaNdFwqFCXAbnxMgCwqfwEYYmAlIDYHNAAAAABJRU5ErkJggg==" /></i>
@@ -63,7 +62,7 @@
                     </p>
                 </p>
             </section>
-            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200">
+            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-lg font-bold my-5">
                     <i class='bx'>
                         <img
@@ -73,7 +72,7 @@
                         Balance Diario
                     </p>
                     <p class="text-center text-lg font-bold my-5">
-                        Ingresos: <span id="income">$ {{ '{:,}'.format(db.income.totalToday) }}</span>
+                        Ingresos: <span id="income">$ {{ '{:,}'.format(db.income.totalToday) }} </span><img src="{{db.income.src}}" class="ms-3 inline-block w-7" />
                     </p>
                     <p class="text-center text-lg font-bold my-5">
                         Gastos: <span id="expense">$ {{ '{:,}'.format(db.expenses.totalToday) }}</span>
@@ -82,12 +81,13 @@
             </section>
         </article>
 
-        <article class="grid grid-cols-1 md:grid-cols-2 gap-6 -z-10">
-            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200" id="chart">
+        <article class="grid grid-cols-1 md:grid-cols-2 gap-6 -z-50">
+            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-2xl font-bold my-5 underline">
                     Balance Mensual
                     <i class='bx bx-dollar-circle ms-10'></i>
                 </p>
+                <div id="chart"></div>
             </section>
             <!--                <div class="bg-zinc-100 rounded-lg">
                 <div>
