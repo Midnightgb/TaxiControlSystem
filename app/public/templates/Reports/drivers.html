@@ -48,26 +48,16 @@
                             {% endif %}
                         </div>
 
-                        <div class=" mt-4 justify-center items-center columns-1 ">
+                        <div class="mt-4 justify-center items-center columns-1 ">
                             <h5 class="text-xl font-semibold my-2 mx-10 w-25 ">{{ usuario.nombre }}
                                 {{ usuario.apellido }}</h5>
                             <p class="text-gray-600 my-2 w-25 mx-10">{{usuario.correo}}</p>
                             <form action="/reports/driver/{{usuario.nombre}} {{ usuario.apellido }}" method="POST">
                                 <input type="hidden" name="id_usuario" value="{{usuario.id_usuario}}">
-                                <button type="submit"
-                                    class="bg-blue-500 text-white px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">Ver
-                                    informes
+                                <button type="submit" class="text-white px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
+                                    Ver informes
                                 </button>
                             </form>
-
-                            <form action="/update/user/path" method="POST">
-                                <input type="hidden" name="id_usuario" value="{{usuario.id_usuario}}">
-                                <button type="submit"
-                                    class="bg-blue-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
-                                    Editar
-                                </button>
-                            </form>
-
                         </div>
                     </div>
                     {% endfor %}
