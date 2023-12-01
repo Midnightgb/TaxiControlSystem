@@ -18,9 +18,11 @@
     {% include 'components/nav.html' %}
     {% endblock %}
     <main class="p-6 mx-auto max-w-screen-xl">
-        <div class="container mx-auto bg-white p-8 shadow-md rounded-lg">
-            <a href="/home" class="inline-block text-sm text-blue-500">⬅️ Volver a casa</a>
-            <h1  class="text-3xl font-bold my-6">Actualizar de Taxi</h1>
+        <div class="container mx-auto bg-zinc-100 p-8 shadow-md rounded-lg">
+
+            <a href="/home" class="font-bold  text-sm text-blue-500">⬅️ Volver a casa</a>
+            <h1 class="text-3xl font-bold flex items-center justify-center">Actualizar Taxi</h1>
+
             <form action="/update/taxi" method="POST">
 
                 <div class="mb-4">

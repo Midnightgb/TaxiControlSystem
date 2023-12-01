@@ -600,8 +600,19 @@ async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = 
     if not taxis:
         print("no hay taxis")
         return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": [], "alert": alert, "no_taxis_message": "No hay taxis disponibles."})
+    
+    #Obtener la empresa del usuario
+    empresa = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
 
-    return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": taxis, "alert": alert,"page":page,"taxi_page":taxi_page,"start_page":start_page,"end_page":end_page,"total_paginas":total_paginas})
+    #Obtener los taxis sin asignar
+    taxisNotAssigned = db.query(Taxi).filter(Taxi.empresa_id == empresa.id_empresa).filter(
+        ~Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+    
+    #obtener los taxis asignados
+    taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == empresa.id_empresa).filter(
+        Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+
+    return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": taxis,"taxisNotAssigned":taxisNotAssigned ,"taxisAssigned":taxisAssigned,"alert": alert,"page":page,"taxi_page":taxi_page,"start_page":start_page,"end_page":end_page,"total_paginas":total_paginas})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO REDIRECT TO TAXI UPDATE -- #
@@ -641,7 +652,9 @@ async def update_taxi(
         request.session["alert"] = alert
         return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
-    return templates.TemplateResponse("updateTaxi.html", {"request": request, "taxi": taxi, "empresa": empresa})
+    
+
+    return templates.TemplateResponse("updateTaxi.html", {"request": request, "taxi": taxi, "empresa": empresa })
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE UPDATE OF A TAXI -- #
@@ -703,8 +716,13 @@ async def update_taxi(
 # ========================================== assignmentBLOCK ============================================ #
 
 # -- PATH TO REDIRECT TO assignment CREATION -- #
-@app.get("/register/assignment", response_class=HTMLResponse, tags=["create"])
-async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+@app.post("/register/assignment", response_class=HTMLResponse, tags=["create"])
+async def create(
+    request: Request,
+    c_user: str = Cookie(None), 
+    db: Session = Depends(get_database),
+    id_taxi: int = Form(...)
+    ):
     user_id = None
 
     if not c_user:
@@ -721,11 +739,12 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 
     driversNotAssigned = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
         ~Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
-    taxisNotAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
-        ~Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+    
+    #obtener la informacion del taxi por el id del taxi
+    taxiInfo = db.query(Taxi).filter(Taxi.id_taxi == id_taxi).first()
 
     alert = request.session.pop("alert", None)
-    return templates.TemplateResponse("registerAssignment.html", {"request": request, "conductores": driversNotAssigned, "taxis": taxisNotAssigned, "alert": alert})
+    return templates.TemplateResponse("registerAssignment.html", {"request": request, "conductores": driversNotAssigned, "taxiInfo": taxiInfo, "alert": alert})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW assignment -- #
@@ -1342,7 +1361,7 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
     today = date.today()
     
     first_day_of_month = datetime(today.year, today.month, 1)
-    last_day_of_month = datetime(today.year, today.month + 1, 1) - timedelta(days=1)
+    last_day_of_month = datetime(today.year, today.month, 1) - timedelta(days=1)
     
         
     #  total acumulado del mes
