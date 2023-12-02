@@ -304,7 +304,7 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 
     empresa = db.query(Empresa).filter(
         Empresa.id_empresa == usuario.empresa_id).first()
-
+    
     if not empresa:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     alert = request.session.pop("alert", None)
