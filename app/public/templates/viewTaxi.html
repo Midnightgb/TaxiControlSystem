@@ -53,86 +53,24 @@
                                         {{ taxisA.marca }}</h5>
                                     <p class="text-gray-600 my-2 w-25 mx-10">{{taxisA.placa}}</p>
 
-                            <form action="/view/detail/taxi" method="POST">
-                                <input type="hidden" name="id_taxi" value="{{taxisA.id_taxi}}">
-                                <button type="submit"
-                                    class="bg-blue-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
-                                    Detalles
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                    <div class="flex flex-wrap mt-5 justify-around">
-                        <div class="flex flex-wrap justify-normal">
-                            <label for="filas" class="p-3">Numero de filas:</label>
-                            <select name="filas" id="filas" onchange="cambiarNumeroFilas(this)">
-                                <option selected value="" disabled>...</option>
-                                <option value="4" {% if taxi_page == 4 %}selected{% endif %}>4</option>
-                                <option value="8" {% if taxi_page == 8 %}selected{% endif %}>8</option>
-                                <option value="12" {% if taxi_page == 12 %}selected{% endif %}>12</option>
-                            </select>
-                        </div>
-                        {% if total_paginas %}
-                        
-                        <div class="flex flex-wrap mt-5 justify-around">
-                            
-                            {% if total_paginas > 1 %}
-                            
-                            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm">
-                                {% if page > 1 %}
-                                <a class="page-link relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0"
-                                    href="?page={{ 1 }}&taxi_page={{ taxi_page }}">
-                                    <span class="sr-only">Pagina 1</span>
-                                    <i class='bx bx-chevrons-left'></i>
-                                </a>
-                                {% endif %}
-                                {% if page > 1 %}
-                                <a class="page-link relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0"
-                                    href="?page={{ page - 1 }}&taxi_page={{ taxi_page }}">
-                                    <span class="sr-only">Anterior</span>
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd"
-                                            d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                                {% endif %}
-                                {% for p in range(start_page, end_page + 1) %}
-                                <a class="page-link page-item {% if p == page %}active{% endif %} relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0 {% if p == page %}bg-blue-400 text-white{% endif %}"
-                                    href="?page={{ p }}&taxi_page={{ taxi_page }}">{{ p }}</a>
-                                {% endfor %}
-                                {% if page < total_paginas %}
-                                <a class="page-link relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0"
-                                    href="?page={{ page + 1 }}&taxi_page={{ taxi_page }}">
-                                    <span class="sr-only">Siguiente</span>
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd"
-                                            d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </a>
-                                {% endif %}
-                                {% if page < total_paginas %}
-                                <a class="page-link relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-blue-200 focus:z-20 focus:outline-offset-0"
-                                    href="?page={{ total_paginas}}&taxi_page={{ taxi_page }}">
-                                    <span class="sr-only">Ultima Pagina</span>
-                                    <i class='bx bx-chevrons-right'></i>
-                                </a>
-                                {% endif %}
-                            </nav>
-                            {% endif %}
-                        </div>
-                        {% endif %}
+                                    <form action="/view/detail/taxi" method="POST">
+                                        <input type="hidden" name="id_taxi" value="{{taxisA.id_taxi}}">
+                                        <button type="submit"
+                                            class="bg-blue-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
+                                            Detalles
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        {% else %}
+                
+                            <div class="text-center mt-4">
+                                <h2 class="text-2xl">No hay taxis registrados</h2>
+                            </div>
                     </div>
 
-                
-                {% else %}
-                {% if taxis is none %}
-                <div class="text-center mt-4">
-                    <h2 class="text-2xl">No hay taxis registrados</h2>
-                </div>
                 {% endif %}
                     
 
