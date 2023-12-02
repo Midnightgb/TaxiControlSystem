@@ -13,13 +13,11 @@
 
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/loader.css')}}">
-    <!-- <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind/output.css')}}">  -->
-    <!-- tabla links -->
+    <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind/output.css')}}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link
         href="https://cdn.datatables.net/v/bs5/jszip-3.10.1/dt-1.13.6/af-2.6.0/b-2.4.2/b-html5-2.4.2/b-print-2.4.2/kt-2.10.0/r-2.5.0/sr-1.3.0/datatables.min.css"
         rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
@@ -39,11 +37,13 @@
                     <h1 class="text-4xl font-bold mt-4 mb-5">Registros del Conductor: {{ conductor.nombre }}
                         {{ conductor.apellido }}</h1>
                 </div>
-                <div class="container mx-auto flex flex-wrap justify-end items-end mt-4"> 
-                <form action="/daily/register" method="POST">
-                    <input type="hidden" name="id_usuario" value="{{ usuario.id_usuario}}">
-                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Agregar Reporte</button>
-                </form>
+                <div class="container mx-auto flex flex-wrap justify-end items-end mt-4">
+                    <form action="/daily/register" method="POST">
+                        <input type="hidden" name="id_usuario" value="{{ usuario.id_usuario}}">
+                        <button type="submit"
+                            class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Agregar
+                            Reporte</button>
+                    </form>
                 </div>
                 <div class="container">
                     <div class="row">
@@ -66,20 +66,21 @@
                                         Correo: {{ conductor.correo }}
                                     </p>
                                 </p>
-                                <div class="text-center justify-center">
-                                    <form action="/update/user/path" method="POST">
-                                        <input type="hidden" name="id_usuario" value="{{usuario.id_usuario}}">
-                                        <button type="submit" data-te-ripple-init data-te-ripple-color="light"
-                                            class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]">
-                                            <span class="mr-2">Editar Usuario</span>
-                                            <span class="items-center">
-                                                <img width="20" height="20" viewBox="0 0 20 20"
-                                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVR4nO2Zz0oCURSHP4xcBa2Dcteilymx1FeIiNr0Dv2xXdA+EluUb5C9hqbZMggpKFsUoTcGThvBEufMnFvcD34gMuDvk3PHex0IBAKaZIEyUANawJukJe+V5BovWQe6gPsld0ABj5gBjicoPpoKkMEDpin/nUMfxsbFTN6qfFbmOa7AvdXCLiuUd5KihcCFokDVQqCtKNCyEOgrCvT/usCLhcCtokDTQqCmKHBuIVBSFNiwEJgFOgrlu5Y71IKCwBrGVGKUP8ADoi3x0ZQ70QwekZ9wTXR8GJufFnZR9jZN+bHry+uq3G2iawKBQMrkgDrwqrh9GJfoM66AJc3yzykUdyN50pKoG5R3kksNgTTGxiV50HHGic3AsPwgfn3oGQr0NAQahgINDYFtQ4EdDYE54MGg/CMwjxKrwDDF8sMkDvq7KQrskeA/0q8J33XyJMyinK4+FYt/AGfAAimSk8P8JA/2xqUN7MuXYsoKsAWcAjciFY3Du6QnT3OugRNgE1i2Lh0I8A/4AsVC6ighJMgVAAAAAElFTkSuQmCC"
-                                                    alt="Usuario">
-                                            </span>
-                                        </button>
-                                    </form>
+
+                                <div class="text-center mb-3">
+                                    <button type="submit" data-te-ripple-init data-te-ripple-color="light"
+                                        class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
+                                        id="openModalButton">
+                                        <span class="mr-2">Editar Usuario</span>
+
+                                        <span class="items-center">
+                                            <img width="20" height="20" viewBox="0 0 20 20"
+                                                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVR4nO2Zz0oCURSHP4xcBa2Dcteilymx1FeIiNr0Dv2xXdA+EluUb5C9hqbZMggpKFsUoTcGThvBEufMnFvcD34gMuDvk3PHex0IBAKaZIEyUANawJukJe+V5BovWQe6gPsld0ABj5gBjicoPpoKkMEDpin/nUMfxsbFTN6qfFbmOa7AvdXCLiuUd5KihcCFokDVQqCtKNCyEOgrCvT/usCLhcCtokDTQqCmKHBuIVBSFNiwEJgFOgrlu5Y71IKCwBrGVGKUP8ADoi3x0ZQ70QwekZ9wTXR8GJufFnZR9jZN+bHry+uq3G2iawKBQMrkgDrwqrh9GJfoM66AJc3yzykUdyN50pKoG5R3kksNgTTGxiV50HHGic3AsPwgfn3oGQr0NAQahgINDYFtQ4EdDYE54MGg/CMwjxKrwDDF8sMkDvq7KQrskeA/0q8J33XyJMyinK4+FYt/AGfAAimSk8P8JA/2xqUN7MuXYsoKsAWcAjciFY3Du6QnT3OugRNgE1i2Lh0I8A/4AsVC6ighJMgVAAAAAElFTkSuQmCC"
+                                                alt="Usuario">
+                                        </span>
+                                    </button>
                                 </div>
+
                             </section>
 
                             <section
@@ -106,21 +107,19 @@
                                     </p>
                                     {% endif %}
                                 </p>
-                                <div class="text-center">
-                                    <form action="/update/taxi/path" method="POST">
-                                        <input type="hidden" name="id_taxi" value="{{ taxi_actual.id_taxi }}">
-                                        <button type="submit" data-te-ripple-init data-te-ripple-color="light"
-                                            class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]">
-                                            <span class="mr-2">Editar Taxi</span>
+                                <div class="text-center mb-3">
+                                    <button type="submit" data-te-ripple-init data-te-ripple-color="light"
+                                        class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
+                                        id="openModalButton2">
+                                        <span class="mr-2">Editar Taxi</span>
 
-                                            <span class="items-center">
-                                                <span>
-                                                    <img width="20" height="20" viewBox="0 0 20 20"
-                                                        src="https://img.icons8.com/fluency/48/taxi.png" alt="taxi" />
-                                                </span>
+                                        <span class="items-center">
+                                            <span>
+                                                <img width="20" height="20" viewBox="0 0 20 20"
+                                                    src="https://img.icons8.com/fluency/48/taxi.png" alt="taxi" />
                                             </span>
-                                        </button>
-                                    </form>
+                                        </span>
+                                    </button>
                                 </div>
                             </section>
                             <section
@@ -184,13 +183,13 @@
                                             {% else %}
                                             <span
                                                 class="bg-red-500 text-white py-1 px-3 rounded-full text-xs">Pendiente</span>
-                                                {% if reporte.estado == 0 %}
-                                                <button class="drop-shadow-lg">
-                                                    <a href="" class="font-bold p-1 rounded">
-                                                        <i class='bx bx-edit' ></i>
-                                                    </a>
-                                                </button>
-                                                {%endif%}
+                                            {% if reporte.estado == 0 %}
+                                            <button class="drop-shadow-lg">
+                                                <a href="" class="font-bold p-1 rounded">
+                                                    <i class='bx bx-edit'></i>
+                                                </a>
+                                            </button>
+                                            {%endif%}
                                             {% endif %}
                                         </p>
                                     </td>
@@ -266,6 +265,168 @@
             </section>
         </article>
     </main>
+
+    <!-- Modal -->
+    <div id="myModal"
+        class="modal fixed hidden inset-0 overflow-y-auto items-center flex justify-center backdrop-blur-sm bg-white/30 ">
+        <div class="modal-overlay  inset-0 bg-black opacity-30"></div>
+
+        <div
+            class="modal-container mx-auto p-8 bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 - border border-zinc-300">
+
+            <h1 class="text-3xl font-bold text-center mt-4">Actualizar Usuario</h1>
+
+            <form action="/update/user" method="POST" enctype="multipart/form-data"
+                class="grid grid-cols-1 md:grid-cols-2 gap-8" id="updateUserForm1">
+
+                <div class="2 col-span-2">
+                    <!-- Cambiando de select a input oculto -->
+                    <input type="hidden" name="empresa_id" value="{{ conductor.empresa_id }}">
+                </div>
+
+                <div class="mb-4">
+                    <label for="rol" class="block text-sm font-bold text-black">Tipo de Usuario:</label>
+                    <select
+                        class="block appearance-none w-full bg-white border border-black hover:border-black px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                        name="rol" id="rol" required>
+                        <option value="" disabled>Seleccione rol</option>
+                        {% if conductor and conductor.rol == "Administrador" %}
+                        <option value="Administrador" selected>Administrador</option>
+                        <option value="Secretaria">Secretaria</option>
+                        {% else %}
+                        <option value="Conductor" selected>Conductor</option>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="2">
+                    <label for="cedula" class="block text-sm font-bold text-black">CEDULA:</label>
+                    <input type="number"
+                        class="appearance-none block w-full bg-white-200 text-white-700 border border-black rounded py-2 mb-1 leading-tight focus:outline-none focus:bg-white"
+                        name="cedula" id="cedula" value="{{ conductor.cedula }}" readonly required>
+                </div>
+
+                <div class="2">
+                    <label for="nombre" class="block text-sm font-bold text-black">NOMBRES:</label>
+                    <input type="text"
+                        class="appearance-none block w-full bg-white-200 text-white-700 border border-black rounded py-2 mb-1 leading-tight focus:outline-none focus:bg-white"
+                        name="nombre" id="nombre" value="{{ conductor.nombre }}" required>
+                </div>
+
+                <div class="2">
+                    <label for="apellido" class="block text-sm font-bold text-black">APELLIDOS:</label>
+                    <input type="text"
+                        class="appearance-none block w-full bg-white-200 text-white-700 border border-black rounded py-2 mb-1 leading-tight focus:outline-none focus:bg-white"
+                        name="apellido" id="apellido" value="{{ conductor.apellido }}" required>
+                </div>
+
+                <div class="2 col-span-2">
+                    <label for="correo" class="block text-sm font-bold text-black">Correo Electrónico:</label>
+                    <input type="email"
+                        class="appearance-none block w-full bg-white-200 text-white-700 border border-black rounded py-2 mb-1 leading-tight focus:outline-none focus:bg-white"
+                        name="correo" id="correo" value="{{ conductor.correo }}" required>
+                </div>
+
+                <div class="2  text-center">
+                    <button type="button" class=" bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                        id="closeModalButton"> Cerrar Modal</button>
+                </div>
+
+                <div class="2  text-center">
+                    <button type="submit"
+                        class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar
+                        Usuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- MODAL PARA Taxis -->
+    <div id="myModal2"
+        class="modal fixed hidden inset-0 overflow-y-auto flex items-center justify-center backdrop-blur-sm bg-white/30 ease-in duration-200">
+        <div class="modal-overlay  inset-0 bg-black opacity-30"></div>
+
+        <div
+            class="modal-container mx-auto p-8 bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 border border-zinc-300">
+
+            <h1 class="text-3xl font-bold text-center mt-4">Actualizar Taxi</h1>
+
+            <form action="/update/taxi" method="POST" enctype="multipart/form-data"
+                class="grid grid-cols-1 md:grid-cols-2 gap-8" id="updateTaxiForm">
+
+                <div class="2 col-span-2">
+                    <!-- Cambiando de select a input oculto -->
+                    <input type="hidden" name="empresa_id" value="{{ conductor.empresa_id }}">
+                </div>
+
+                <div class="mb-2">
+                    <label for="placa" class="block text-sm font-bold text-black">PLACA:</label>
+                    <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="placa" id="placa"
+                        value="{{ taxi_actual.placa }}" required readonly>
+                </div>
+
+                <div class="mb-2">
+                    <label for="modelo" class="block text-sm font-bold text-black">MODELO:</label>
+                    <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="modelo" id="modelo"
+                        value="{{ taxi_actual.modelo }}" required>
+                </div>
+
+                <div class="mb-2">
+                    <label for="marca" class="block text-sm font-bold text-black">MARCA:</label>
+                    <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="marca" id="marca"
+                        value="{{ taxi_actual.marca }}" required>
+                </div>
+
+                <div class="mb-2">
+                    <label for="matricula" class="block text-sm font-bold text-black">MATRICULA:</label>
+                    <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="matricula" id="matricula"
+                        value="{{ taxi_actual.matricula }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="tipo_combustible" class="block text-sm font-bold text-black">TIPO DE
+                        COMBUSTIBLE:</label>
+                    <select class="form-select mt-1 block w-full py-2 rounded-md border border-black
+                        focus:outline-none focus:border-blue-500" name="tipo_combustible" id="tipo_combustible">
+                        <option value="" disabled>Seleccione tipo de combustible</option>
+                        <option value="Gasolina" {% if tipo_combustible_taxi == 'Gasolina' %}selected{% endif %}>
+                            Gasolina</option>
+                        <option value="Gas" {% if tipo_combustible_taxi == 'Gas' %}selected{% endif %}>Gas</option>
+                        <option value="Ambos" {% if tipo_combustible_taxi == 'Ambos' %}selected{% endif %}>GASOLINA
+                            Y
+                            GAS</option>
+                    </select>
+                </div>
+
+                <div class="mb-2">
+                    <label for="cuota_diaria" class="block text-sm font-bold text-black">CUOTA DIARIA:</label>
+                    <input type="number" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="cuota_diaria" id="cuota_diaria"
+                        value="{{taxi_actual.cuota_diaria }}" required>
+                </div>
+
+                <div class="2  text-center">
+                    <button type="button" class=" bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                        id="closeModalButton2"> Cerrar Modal</button>
+                </div>
+
+                <div class="2  text-center">
+                    <button type="submit"
+                        class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar
+                        Taxi</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', path='js/reportsDrivers.js')}}"></script>
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>
