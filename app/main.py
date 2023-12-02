@@ -41,6 +41,42 @@ MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
 
 app = FastAPI()
 
+# ========================================== WEBSOCKET ============================================ #
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+
+manager = ConnectionManager()
+
+
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await manager.send_personal_message(f"You wrote: {data}", websocket)
+            await manager.broadcast(f"Client #{client_id} says: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        await manager.broadcast(f"Client #{client_id} left the chat")
+# ========================================== END OF WEBSOCKET ============================================ #
 
 websocket_connections = set()
 async def websocket_endpoint(websocket: WebSocket, client_type: str, client_id: str, client_company_id: int):
@@ -140,6 +176,14 @@ async def login_post(
                  "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
+    if role == Rol.Secretaria:
+        admin_id =  1 # Aquí va el id del admin
+        print(admin_id)
+        # enviar la notificación al admin usando el WebSocket
+        print("Enviando notificación al admin...")
+        print("LLamando a la función...")
+
 
     if usuario.contrasena == None:
         alert = {"type": "pass", "message": "La contraseña que ingresaste es incorrecta.",
@@ -1578,9 +1622,8 @@ async def pruebas(request: Request, c_user: str = Cookie(None), db: Session = De
 
     if not token_payload:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    alert = {"type": "error", "message": "si funca."}
 
-    return templates.TemplateResponse("./pr.html", {"request": request, "alert": alert})
+    return templates.TemplateResponse("./pr.html", {"request": request})
 
 @app.get("/404-NotFound", response_class=HTMLResponse, tags=["routes"])
 async def not_found(request: Request, c_user: str = Cookie(None)):
@@ -1788,5 +1831,3 @@ async def detail_taxi(
         {"request": request, "pagos": pagos, "mantenimientos": mantenimientos, "conductor": conductor, "taxi": taxi, "total_pagos": total_pagos, "total_mantenimientos": total_mantenimientos}
     )
 # -- END OF THE ROUTE -- # 
-
-

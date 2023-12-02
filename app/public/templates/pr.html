@@ -19,8 +19,32 @@
     {% endblock %}
     <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
         <div class="container">
-            <h1 class="text-2xl font-bold mb-4">Registro Diario Cuota</h1>
-            
+            <h1>WebSocket Chat</h1>
+            <h2>Your ID: <span id="ws-id"></span></h2>
+            <form action="" onsubmit="sendMessage(event)">
+                <input type="text" id="messageText" autocomplete="off" class="bg-slate-400 p-2 rounded-lg text-black" placeholder="Enter message">
+                <button>Send</button>
+            </form>
+            <ul id='messages'>
+            </ul>
+            <script>
+                var client_id = Date.now()
+                document.querySelector("#ws-id").textContent = client_id;
+                var ws = new WebSocket(`wss://50e8-191-98-69-115.ngrok-free.app/ws/${client_id}`);
+                ws.onmessage = function(event) {
+                    var messages = document.getElementById('messages')
+                    var message = document.createElement('li')
+                    var content = document.createTextNode(event.data)
+                    message.appendChild(content)
+                    messages.appendChild(message)
+                };
+                function sendMessage(event) {
+                    var input = document.getElementById("messageText")
+                    ws.send(input.value)
+                    input.value = ''
+                    event.preventDefault()
+                }
+            </script>
         </div>
     </main>
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
