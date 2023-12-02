@@ -1023,6 +1023,7 @@ async def actualizar_cuota_diaria(
             # Almacena la alerta en la sesión
             request.session["alert"] = alert
             return RedirectResponse(url="/update/daily", status_code=status.HTTP_303_SEE_OTHER)
+        print("nueva cuota", nueva_cuota)
 
         # Actualizar la cuota diaria para la fecha seleccionada
         pago_antiguo=pago_existente.valor
@@ -1342,8 +1343,7 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
     today = date.today()
     
     first_day_of_month = datetime(today.year, today.month, 1)
-    last_day_of_month = datetime(today.year, today.month + 1, 1) - timedelta(days=1)
-    
+    last_day_of_month = calendar.monthrange(today.year, today.month)[1]         
         
     #  total acumulado del mes
     total_acumulado = (
@@ -1648,8 +1648,5 @@ async def detail_taxi(
         {"request": request, "pagos": pagos, "mantenimientos": mantenimientos, "conductor": conductor, "taxi": taxi, "total_pagos": total_pagos, "total_mantenimientos": total_mantenimientos}
     )
 # -- END OF THE ROUTE -- # 
-
-
-
 
 

@@ -43,10 +43,12 @@
                         <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5 mt-5">
                             <section class="bg-zinc-100 rounded-lg shadow-xl p-3">
                                 <p class="text-center text-lg font-bold my-5">
-                                    <i class='bx'><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" />
+                                    <i class='bx'><img
+                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" />
                                     </i>
                                     <p class="text-center focus-within:first-letter: text-lg font-bold my-2">
-                                        Nombre: <a class="underline decoration-sky-500/30">{{ conductor.nombre }} {{ conductor.apellido }} </a>
+                                        Nombre: <a class="underline decoration-sky-500/30">{{ conductor.nombre }}
+                                            {{ conductor.apellido }} </a>
                                         <br>
                                     </p>
                                     <p class="text-center text-lg font-bold my-2">
@@ -71,7 +73,7 @@
                                     </form>
                                 </div>
                             </section>
-                            
+
                             <section class="bg-zinc-100 rounded-lg shadow-xl p-3">
                                 <p class="text-center text-lg font-bold my-5">
                                     <i class='bx'><img
@@ -156,6 +158,7 @@
                                     <th class="">Valor Pagado</th>
                                     <th class="">Estado</th>
                                     <th class="">Fecha</th>
+                                    <th class="">Actualizar cuota</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -167,7 +170,8 @@
                                         <p>
                                             {% if reporte.estado == 1 %}
                                             <span
-                                                class="bg-green-500 text-white py-1 px-3 rounded-full text-xs">Pagado</span>
+                                                class="bg-green-500 text-white py-1 px-3 rounded-full text-xs">Pagado
+                                            </span>
                                             {% else %}
                                             <span
                                                 class="bg-red-500 text-white py-1 px-3 rounded-full text-xs">Pendiente</span>
@@ -175,6 +179,16 @@
                                         </p>
                                     </td>
                                     <td class="">{{ reporte.fecha }}</td>
+                                    <td>
+                                        {% if reporte.estado == 0 %}
+                                        <button>
+                                            <a href=""
+                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                                Actualizar
+                                            </a>
+                                        </button>  
+                                        {%endif%} 
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -247,7 +261,6 @@
         </div>
 
     </main>
-
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>
@@ -318,8 +331,6 @@
         var chartWeek = new ApexCharts(document.getElementById("chartWeek"), chartOptionsWeek);
         chartWeek.render();
     </script>
-
-
     <script>
         $(document).ready(function () {
             var table = $('#dataUsers').DataTable({
@@ -451,6 +462,7 @@
             });
         });
     </script>
+
 </body>
 
 </html>
