@@ -643,14 +643,7 @@ async def view_taxi(request: Request,
     if not usuario:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     
-    taxis_paginados=obtener_taxis_paginados(db, page, taxi_page, usuario.empresa_id)
-    taxis = taxis_paginados["taxis"]
-    total_paginas = taxis_paginados["total_paginas"]
-    visible_pages = 10
-
-    start_page = max(1, page - (visible_pages // 2))
-    end_page = min(total_paginas, start_page + visible_pages - 1)
-
+    
     
 
     alert = request.session.pop("alert", None)
@@ -659,18 +652,28 @@ async def view_taxi(request: Request,
         print("no hay taxis")
         return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": [], "alert": alert, "no_taxis_message": "No hay taxis disponibles."})
     
-    #Obtener la empresa del usuario
-    empresa = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+    taxis_not_assigned_result = obtener_taxis_paginados(
+    db, page, taxi_page, usuario.empresa_id, assigned=False)
 
-    #Obtener los taxis sin asignar
-    taxisNotAssigned = db.query(Taxi).filter(Taxi.empresa_id == empresa.id_empresa).filter(
-        ~Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+    taxisNotAssigned = taxis_not_assigned_result["taxis"]
+
+    # Obtener los taxis asignados paginados
+    taxis_assigned_result = obtener_taxis_paginados(
+        db, page, taxi_page, usuario.empresa_id, assigned=True)
     
-    #obtener los taxis asignados
-    taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == empresa.id_empresa).filter(
-        Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+    taxisAssigned = taxis_assigned_result["taxis"]
 
-    return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": taxis,"taxisNotAssigned":taxisNotAssigned ,"taxisAssigned":taxisAssigned,"alert": alert,"page":page,"taxi_page":taxi_page,"start_page":start_page,"end_page":end_page,"total_paginas":total_paginas})
+    
+    total_paginas_taxis_not_assigned = taxis_not_assigned_result["total_paginas"]
+    total_paginas_taxis_assigned = taxis_assigned_result["total_paginas"]
+
+    total_paginas = max(total_paginas_taxis_not_assigned, total_paginas_taxis_assigned)
+    visible_pages = 10
+
+    start_page = max(1, page - (visible_pages // 2))
+    end_page = min(total_paginas, start_page + visible_pages - 1)
+
+    return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxisNotAssigned":taxisNotAssigned ,"taxisAssigned":taxisAssigned,"alert": alert,"page":page,"taxi_page":taxi_page,"start_page":start_page,"end_page":end_page,"total_paginas":total_paginas})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO REDIRECT TO TAXI UPDATE -- #
