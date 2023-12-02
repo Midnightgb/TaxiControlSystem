@@ -170,15 +170,13 @@ window.addEventListener("load", function () {
     loader.style.display = "none";
   }, 1000);
 });
+
 let pruebasBtn = document.getElementById("pruebasBtn");
 let pruebas = document.getElementById("pruebas");
 pruebasBtn.addEventListener("click", function () {
-  console.log("click boton pruebas");
   if (pruebas.classList.contains("hidden")) {
-    console.log("se quita hidden");
     pruebas.classList.remove("hidden");
   } else {
-    console.log("se agrega hidden");
     pruebas.classList.add("hidden");
   }
 });
