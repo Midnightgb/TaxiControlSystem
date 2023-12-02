@@ -1342,7 +1342,7 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
     today = date.today()
     
     first_day_of_month = datetime(today.year, today.month, 1)
-    last_day_of_month = datetime(today.year, today.month + 1, 1) - timedelta(days=1)
+    last_day_of_month = datetime(today.year, today.month, 1) - timedelta(days=1)
     
         
     #  total acumulado del mes

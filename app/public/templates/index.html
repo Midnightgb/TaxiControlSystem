@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="../dist/css/style.css">
+    <link rel="stylesheet" href="../dist/css/tailwind/output.css">
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind/output.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/loader.css')}}">
@@ -31,7 +33,7 @@
                     <p class="text-xl font-semibold">Hoy es {{welcome.day}}</p>
                 </div>
             </div>
-        </section>
+        </section>           
         <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5">
             <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-lg font-bold my-5">
@@ -84,17 +86,11 @@
 
         <article class="grid grid-cols-1 md:grid-cols-2 gap-6 -z-50">
             <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
-                <p class="text-center text-xl font-bold my-5 underline">
-                    Balance Mensual
-                    <i class='bx bx-dollar-circle ms-10'></i>
-                </p>
+                <p class="text-center text-xl font-bold my-5 underline">Balance Mensual<i class='bx bx-dollar-circle ms-7'></i></p>
                 <div id="chart"></div>
             </section>
             <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
-                <p class="text-center text-xl font-bold my-5 underline">
-                    Historial de eventos
-                    <i class='bx bx-history ms-10'></i>
-                </p>
+                <p class="text-center text-xl font-bold my-5 underline">Historial de eventos<i class='bx bx-history ms-7'></i></p>
                 <div class="overflow-auto max-h-72 md:max-h-60 lg:max-h-80 border border-red-600 md:border-violet-700 lg:border-green-600">
                     <!-- add a timeline -->
                     <ul class="timeline-widget">
