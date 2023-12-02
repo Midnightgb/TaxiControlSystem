@@ -806,20 +806,27 @@ async def create(
 @app.post("/create/assignment", response_class=HTMLResponse)
 async def create_assignment(
     request: Request,
-    id_conductor: int = Form(...),
-    id_taxi: int = Form(...),
+    id_conductor: int = Form(None),
+    id_taxi: int = Form(None),
     db: Session = Depends(get_database)
 ):
+
     if not serverStatus(db):
         alert = {"type": "general",
-                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+                "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Validar si ambos campos se han llenado
+    if id_conductor is None or id_taxi is None:
+        alert = {"type": "error","message": "Por favor, complete todos los campos antes de continuar."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar si el conductor ya está asignado a un taxi
     if db.query(ConductorActual).filter(ConductorActual.id_conductor == id_conductor).first():
         alert = {"type": "error",
-                 "message": "El conductor ya está asignado a un taxi."}
+                "message": "El conductor ya está asignado a un taxi."}
         request.session["alert"] = alert
         return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -836,6 +843,7 @@ async def create_assignment(
     request.session["alert"] = alert
 
     return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
+
 # -- END OF THE ROUTE -- #
 
 # ========================================== END OF assignmentBLOCK ============================================ #
