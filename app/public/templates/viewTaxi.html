@@ -80,13 +80,12 @@
                     <p class="text-gray-600 my-2 w-25 mx-10">{{taxiNA.placa}}</p>
 
                     <!-- Botón adicional para taxis no asignados -->
-                    <form action="/register/assignment" method="POST">
-                        <input type="hidden" name="id_taxi" value="{{taxiNA.id_taxi}}">
-                        <button type="submit"
-                            class="bg-green-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-green-600 duration-300 w-30 mx-10">
-                            Asignar Conductor
-                        </button>
-                    </form>
+                    
+                    <button type="submit"
+                        class="bg-green-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 hover:bg-green-600 duration-300 w-30 mx-10 " onclick="prueba()" >
+                        Asignar Conductor
+                    </button>
+
                 </div>
             </div>
             {% endfor %}
@@ -153,10 +152,29 @@
         </div>
 
         </div>
+
+        <div id="myModal" class="modal fixed hidden inset-0 overflow-y-auto items-center flex justify-center backdrop-blur-sm bg-white/30 ">
+            <div class="modal-overlay  inset-0 bg-black opacity-30"></div>
+
+            <div class="modal-container mx-auto p-8 bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 - border border-zinc-300">
+                
+                <h1 class="text-3xl font-bold text-center mt-4">Actualizar Usuario</h1>
+
+                <form action="/create/assignment" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-8" id="createAssignmentForm">
+
+                    <div class="text-center">
+                        <button type="button" class=" bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" id="closeModalButton"> Cerrar Modal</button>
+                    </div>
+
+                    <div class="  text-center">
+                        <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
     </main>
-    <footer>
-        <!-- place footer here -->
-    </footer>
 
     <script>
         const formSearch = document.getElementById('formSearch');
@@ -190,6 +208,117 @@
             }
         })
     </script>
+
+    <script>
+
+        function openModal() {
+            const modal = document.getElementById("myModal");
+            modal.classList.remove("hidden");
+        }
+
+        function closeModal() {
+            const modal = document.getElementById("myModal");
+            modal.classList.add("hidden");
+        }
+
+        function getInfoDrivers(id_taxi) {
+            Swal.fire({
+                title: 'Asignar Conductor',
+                html: `<form id="formAssignDriver" action="/assign/driver" method="POST">
+                        <input type="hidden" name="id_taxi" value="${id_taxi}">
+                        <div class="mb-3">
+                            <label for="id_driver" class="form-label">Conductor</label>
+                            <select name="id_driver" id="id_driver" class="form-select">
+                                <option selected disabled>...</option>
+                                {% for driver in drivers %}
+                                <option value="{{ driver.id_driver }}">{{ driver.nombre }} {{ driver.apellido }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>`,
+                showCancelButton: true,
+                confirmButtonText: 'Asignar',
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    const id_driver = Swal.getPopup().querySelector('#id_driver').value;
+                    if (!id_driver ) {
+                        Swal.showValidationMessage('Todos los campos son obligatorios');
+                    } else {
+                        return fetch('/assign/driver', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    id_taxi,
+                                    id_driver,
+                                })
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(response.statusText)
+                                }
+                                return response.json()
+                            })
+                            .catch(error => {
+                                Swal.showValidationMessage(
+                                    `Request failed: ${error}`
+                                )
+                            })
+                    }
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Conductor asignado correctamente',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.href = '/view/taxi';
+                    })
+                }
+            })
+        }
+
+        async function prueba() {
+            openModal();
+            try {
+                
+                const response = await fetch('/drivers/Na', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+
+                const contentType = response.headers.get('Content-Type');
+                
+                  if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    console.log(data);
+                } else {
+                    console.error('La respuesta no es JSON:', await response.text());
+                }
+                
+            } catch (error) {
+                console.error('Error en la solicitud:', error);
+            }
+        }
+
+
+
+
+
+
+    </script>
+
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>

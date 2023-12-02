@@ -15,7 +15,8 @@ from fastapi import (
     BackgroundTasks
 )
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 import bcrypt
@@ -28,7 +29,7 @@ from collections import defaultdict
 from functions import *
 from models import *
 import json
-
+import base64   
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -1788,5 +1789,54 @@ async def detail_taxi(
         {"request": request, "pagos": pagos, "mantenimientos": mantenimientos, "conductor": conductor, "taxi": taxi, "total_pagos": total_pagos, "total_mantenimientos": total_mantenimientos}
     )
 # -- END OF THE ROUTE -- # 
+
+@app.get("/drivers/Na", tags=["routes"])
+async def driversNa(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    print(" ============================================ ENTRO A LA FUNCION")
+
+    if not serverStatus(db):
+        alert = {"type": "general","message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Validar que el usuario esté logueado
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Validar que el token sea válido
+    token_payload = tokenDecoder(c_user)
+
+    if not token_payload:
+        alert = {"type": "general","message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    #obtener el usuario logueado
+    user_id = int(token_payload["sub"])
+
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+
+    driversNotAssigned = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
+        ~Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
+    
+    print(" =========================================== driversNotAssigned:", driversNotAssigned)
+
+    # Convertir campos binarios a base64
+    for driver in driversNotAssigned:
+        for field, value in driver.__dict__.items():
+            if isinstance(value, bytes):
+                setattr(driver, field, base64.b64encode(value).decode('utf-8'))
+
+    # Convertir la lista de objetos SQLAlchemy a un formato que puede ser serializado a JSON
+    drivers_not_assigned_jsonable = jsonable_encoder(driversNotAssigned)
+
+    # Crear un diccionario con una clave "conductores" y la lista de conductores como valor
+    response_content = {"conductores": drivers_not_assigned_jsonable}
+
+    print("Contenido JSON:", response_content)
+
+    # Devolver los datos en formato JSON
+    return JSONResponse(content=response_content, media_type="application/json")
+
 
 
