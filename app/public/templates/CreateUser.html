@@ -30,7 +30,7 @@
 
                 <div class="2 col-span-2">
                     <!-- Cambiando de select a input oculto -->
-                    <input type="hidden" name="empresa_id" value="{% if empresas %}{{ empresas[0].id_empresa }}{% endif %}">
+                    <input type="hidden" name="empresa_id" value="{{ usuario.empresa_id }}" >
                 </div>
 
                 <div class="2">

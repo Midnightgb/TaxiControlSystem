@@ -23,76 +23,236 @@
 
         <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
 
-            <div class="flex justify-end">
-                <form action="/update/taxi/path" method="POST">
-                    <input type="hidden" name="id_taxi" value="{{taxi.id_taxi}}">
-                    <button type="submit" class="bg-blue-500 text-white mt-2 px-4 py-2 rounded transition ease-in-out delay-150 bg-blue-500 hover:-translate-y-1 hover:scale-110 hover:bg-indigo-500 duration-300 w-30 mx-10">
-                        Editar Taxi
-                    </button>
-                </form>
-            </div>
-
             <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5">
-                <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200">
+                <section
+                    class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200  border border-zinc-300">
                     <p class="text-center text-lg font-bold my-5">
                         <i class='bx'><img
                                 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" /></i>
-                        
-                        <p  class="text-center text-lg font-bold my-5 underline" >
+
+                        <p class="text-center text-lg font-bold my-5 underline">
                             Conductor Actual
                         </p>
                         <p class="text-center text-lg font-bold my-5">
-                            Cedula:{{ '{:,}'.format(conductor.cedula) }}
+                            Cedula:{{ '{:,}'.format(conductor.cedula)  | replace(',', '.') }}
                         </p>
                         <p class="text-center text-lg font-bold my-5">
                             Nombre: {{conductor.nombre}} {{conductor.apellido}}
                         </p>
                     </p>
+
+                    <div class="text-center mb-3">
+                        <button type="submit" data-te-ripple-init data-te-ripple-color="light"
+                            class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]" id="openModalButton">
+                            <span class="mr-2">Editar Usuario</span>
+
+                            <span class="items-center">
+                                <img width="20" height="20" viewBox="0 0 20 20"
+                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVR4nO2Zz0oCURSHP4xcBa2Dcteilymx1FeIiNr0Dv2xXdA+EluUb5C9hqbZMggpKFsUoTcGThvBEufMnFvcD34gMuDvk3PHex0IBAKaZIEyUANawJukJe+V5BovWQe6gPsld0ABj5gBjicoPpoKkMEDpin/nUMfxsbFTN6qfFbmOa7AvdXCLiuUd5KihcCFokDVQqCtKNCyEOgrCvT/usCLhcCtokDTQqCmKHBuIVBSFNiwEJgFOgrlu5Y71IKCwBrGVGKUP8ADoi3x0ZQ70QwekZ9wTXR8GJufFnZR9jZN+bHry+uq3G2iawKBQMrkgDrwqrh9GJfoM66AJc3yzykUdyN50pKoG5R3kksNgTTGxiV50HHGic3AsPwgfn3oGQr0NAQahgINDYFtQ4EdDYE54MGg/CMwjxKrwDDF8sMkDvq7KQrskeA/0q8J33XyJMyinK4+FYt/AGfAAimSk8P8JA/2xqUN7MuXYsoKsAWcAjciFY3Du6QnT3OugRNgE1i2Lh0I8A/4AsVC6ighJMgVAAAAAElFTkSuQmCC"
+                                    alt="Usuario">
+                            </span>
+                        </button>
+                    </div>
+
                 </section>
-                <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200">
+
+                <section
+                    class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200  border border-zinc-300">
                     <p class="text-center text-lg font-bold my-5">
                         <i class='bx'><img
                                 src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAB3klEQVRYR+1Xi1HDMAxtN4ANwgawQdkANoAJgAkoEwAT0A1gA7IBbNBsABvAez07pypOFH9ayl10p8vPkp+fZMmZzw5M5geGZzYBsiIyMVSCoQpObqALKO+PLKeB7w3evUGfobzvFStkp7B8TwQRmvQbL8+hn32ILEAEQ2ZKChk6SQFEdj6cIVd2Da2hvI+VCxi8CiOyRF8dGWJoidH3zuIJ17tYFGr8I55v3buVW2AUoDVGV87iElcmZY5oxo9jGNLGjHlKqPSccpHBsPWFrHS4PDAzbH2ASofLAzLDFgLExONK9iEPmITRaEUD2icYD2JrB2tAuyiEFtPcLO2O04B+LOsdfW9xWIBqt91ZaXOFTLCHVU6DqTMESCYcO/xXBqIGtmducXTzAr0K5fIQIBZDOvKincTg061HL3BUyNhMV2LWnITnwmSH1812FCA6YQ/jlU3WN8YYZuRYNmcytYCyzrFIehkFKHXiFLv/AygncVOYoU0NZeffiN5lpc/QFkh/Em3PWqHmunRJLJ2xJpUQfwL1vjon0bGAho66MUB1azK7PZ2HGPpTQPoIstWNY+gIjNUM+drULUjCmGWdvz8VlGD4t0nWSohcbA2H7AaNdFwqFCXAbnxMgCwqfwEYYmAlIDYHNAAAAABJRU5ErkJggg==" /></i>
-                        
+
                         <p class="text-center text-lg font-bold my-5 underline">
                             Informacion Del Vehiculo
                         </p>
-                                <p class="text-center text-lg font-bold my-5">
+                        <p class="text-center text-lg font-bold my-5">
                             Placa: {{taxi.placa}}
                         </p>
                         <p class="text-center text-lg font-bold my-5">
                             Modelo - Marca: {{taxi.modelo}} - {{taxi.marca}}
                         </p>
                     </p>
+
+                    <div class="text-center mb-3">
+                        <button type="submit" data-te-ripple-init data-te-ripple-color="light"
+                            class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]" id="openModalButton2">
+                            <span class="mr-2">Editar Taxi</span>
+
+                            <span class="items-center">
+                                <span>
+                                    <img width="20" height="20" viewBox="0 0 20 20"
+                                        src="https://img.icons8.com/fluency/48/taxi.png" alt="taxi" />
+                                </span>
+                            </span>
+                        </button>
+                    </div>
+
                 </section>
 
-                <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200">
+                <section
+                    class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200  border border-zinc-300">
                     <p class="text-center text-lg font-bold my-5">
                         <i class='bx'>
-                            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAADFElEQVRYR+2X8VEVQQzGoQK1g7MDrMBnBWAFPioQK/CsQDrwqACowOsAqIBnBdqB5sds3uRyye3e+4thzEyGZTebfPmS3b13fPTM5PiZ4Tl6MYA2wiz6XvS1aFeY3slf1VsZj2srsIYhAm9FP4meNAb6I3bfRC8b7ZtLBhvfVwDx8WHti+hNDVgLQxfi5Gspjfojc5xfiTImINIVpZSwCatWYKtfAlUD9KM4tkBwOhQgtYRJ5nMBqbajDD5kG5cA4YwyWUcfG4H4eNcycWYm6SlKOJMMEJthRynHAcxQHi+9TFBSZKkknm2Sm/VUBAgQP0X1JI0yzpjBFjCwiQyi5wFonbJMkdwbbxsBsqVi09uAGQWylTXfuOwhARLxgu2daFcWZoxGgB6XNhQA1mlGyDtZuA8WSYLyITOWPCDKRDA1jtih0bVEagcbON+YZHYyZn8kNmlOHPufxAPqZU4bNDsJ1hn9MpiIlOS3+T87NDapSRy/wTZdeApKQO0bGICJtcIpJhYCO/t7yQOiXHq6sh7wxxeGfolSMpS+iXrHgrZMTvrIA7LlyLLvxDN2SwIgGM7YawZE/bUc3BGgjwQWYUrZzMBlLGP/12zaE3NIyWxweoEEYO1VAbgxBoOMo4vSsgyL+9PoAXFDq8OsqRdrVQDqSQtv4xKDWMgomja1PY5ZdukdUgLYE5QB6sU2vF5qF+PsrRFH/pTdyNxDKRnsUg7tQ9Zg2otNalKJ2tPhLz4c+/coKyHsUAp/BXgGJ69By+MasQQomMJ5JPQFyezcIvvsl0TT44oPSynO900XRLe3+yDrBPFAdJstNwzO3srsrbG04uxSNPzCk/letOUD7ULs7Bco/vA7kQwQRv5VrzEVkPc0RZnwtTUGaYJLgNjvTxSloCRDFt3NbwoYe6Nz8uiv8BWoAYqYYg5ngOLXKSBRmNBbGyCnov5pgRkSCsHguAUQdvQUtHeNzHgzAABk1jPesBWQ7vONWcOnQGAzZcU6WQtI98IY5eAXKqyhBFQdZXwlumsFoo4PBVRj5uD1/4Bq1P0DP0C/JUXiHVAAAAAASUVORK5CYII=" />
-                        </i>                    
+                            <img
+                                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAADFElEQVRYR+2X8VEVQQzGoQK1g7MDrMBnBWAFPioQK/CsQDrwqACowOsAqIBnBdqB5sds3uRyye3e+4thzEyGZTebfPmS3b13fPTM5PiZ4Tl6MYA2wiz6XvS1aFeY3slf1VsZj2srsIYhAm9FP4meNAb6I3bfRC8b7ZtLBhvfVwDx8WHti+hNDVgLQxfi5Gspjfojc5xfiTImINIVpZSwCatWYKtfAlUD9KM4tkBwOhQgtYRJ5nMBqbajDD5kG5cA4YwyWUcfG4H4eNcycWYm6SlKOJMMEJthRynHAcxQHi+9TFBSZKkknm2Sm/VUBAgQP0X1JI0yzpjBFjCwiQyi5wFonbJMkdwbbxsBsqVi09uAGQWylTXfuOwhARLxgu2daFcWZoxGgB6XNhQA1mlGyDtZuA8WSYLyITOWPCDKRDA1jtih0bVEagcbON+YZHYyZn8kNmlOHPufxAPqZU4bNDsJ1hn9MpiIlOS3+T87NDapSRy/wTZdeApKQO0bGICJtcIpJhYCO/t7yQOiXHq6sh7wxxeGfolSMpS+iXrHgrZMTvrIA7LlyLLvxDN2SwIgGM7YawZE/bUc3BGgjwQWYUrZzMBlLGP/12zaE3NIyWxweoEEYO1VAbgxBoOMo4vSsgyL+9PoAXFDq8OsqRdrVQDqSQtv4xKDWMgomja1PY5ZdukdUgLYE5QB6sU2vF5qF+PsrRFH/pTdyNxDKRnsUg7tQ9Zg2otNalKJ2tPhLz4c+/coKyHsUAp/BXgGJ69By+MasQQomMJ5JPQFyezcIvvsl0TT44oPSynO900XRLe3+yDrBPFAdJstNwzO3srsrbG04uxSNPzCk/letOUD7ULs7Bco/vA7kQwQRv5VrzEVkPc0RZnwtTUGaYJLgNjvTxSloCRDFt3NbwoYe6Nz8uiv8BWoAYqYYg5ngOLXKSBRmNBbGyCnov5pgRkSCsHguAUQdvQUtHeNzHgzAABk1jPesBWQ7vONWcOnQGAzZcU6WQtI98IY5eAXKqyhBFQdZXwlumsFoo4PBVRj5uD1/4Bq1P0DP0C/JUXiHVAAAAAASUVORK5CYII=" />
+                        </i>
                         <p class="text-center text-lg font-bold my-5 underline">
                             Balance
                         </p>
                         <p class="text-center text-lg font-bold my-5">
-                            Ingresos: $ {{ '{:,.0f}'.format(total_pagos) }}
+                            Ingresos: $ {{ '{:,}'.format(total_pagos)  | replace(',', '.') }}
                         </p>
-                        
+
                         <p class="text-center text-lg font-bold my-5">
-                            Gastos:  $ {{ '{:,.0f}'.format(total_mantenimientos) }}
+                            Gastos: $ {{ '{:,}'.format(total_mantenimientos)  | replace(',', '.') }}
                         </p>
                 </section>
 
 
             </article>
-        
+
         </main>
 
 
+        <!-- Modal -->
+        <div id="myModal" class="modal fixed hidden inset-0 overflow-y-auto flex items-center justify-center backdrop-blur-sm bg-white/30 ">
+            <div class="modal-overlay  inset-0 bg-black opacity-30"></div>
 
+            <div class="modal-container mx-auto p-4 bg-zinc-100 p-8 shadow-md rounded-lg ">
+                
+                <h1 class="text-3xl font-bold text-center mt-4">Actualizar Usuario</h1>
+
+                <form action="/update/user" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-8" id="updateUserForm">
+
+                    <div class="2 col-span-2">
+                        <!-- Cambiando de select a input oculto -->
+                        <input type="hidden" name="empresa_id" value="{{ conductor.empresa_id }}" >
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="rol" class="block text-sm font-bold text-black">Tipo de Usuario:</label>
+                        <select class="block appearance-none w-full bg-white border border-black hover:border-black px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline" name="rol" id="rol" required>
+                            <option value="" disabled>Seleccione rol</option>
+                            {% if conductor and conductor.rol == "Administrador" %}
+                            <option value="Administrador" selected>Administrador</option>
+                            <option value="Secretaria">Secretaria</option>
+                            {% else %}
+                            <option value="Conductor" selected>Conductor</option>
+                            {% endif %}
+                        </select>
+                    </div>
+    
+                    <div class="2">
+                        <label for="cedula" class="block text-sm font-bold text-black">CEDULA:</label>
+                        <input type="number" class="appearance-none block w-full bg-white-200 text-white-700 border border-black rounded py-2 mb-1 leading-tight focus:outline-none focus:bg-white" name="cedula" id="cedula" value="{{ conductor.cedula }}" readonly required>
+                    </div>
+
+                    <div class="2">
+                        <label for="nombre" class="block text-sm font-bold text-black">NOMBRES:</label>
+                        <input type="text" class="appearance-none block w-full bg-white-200 text-white-700 border border-black rounded py-2 mb-1 leading-tight focus:outline-none focus:bg-white" name="nombre" id="nombre" value="{{ conductor.nombre }}" required>
+                    </div>
+    
+                    <div class="2">
+                        <label for="apellido" class="block text-sm font-bold text-black">APELLIDOS:</label>
+                        <input type="text" class="appearance-none block w-full bg-white-200 text-white-700 border border-black rounded py-2 mb-1 leading-tight focus:outline-none focus:bg-white" name="apellido" id="apellido" value="{{ conductor.apellido }}" required>
+                    </div>
+
+                    <div class="2 col-span-2">
+                        <label for="correo" class="block text-sm font-bold text-black">Correo Electrónico:</label>
+                        <input type="email" class="appearance-none block w-full bg-white-200 text-white-700 border border-black rounded py-2 mb-1 leading-tight focus:outline-none focus:bg-white" name="correo" id="correo" value="{{ conductor.correo }}" required>
+                    </div>
+
+                    <div class="2  text-center">
+                        <button type="button" class=" bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" id="closeModalButton"> Cerrar Modal</button>
+                    </div>
+
+                    <div class="2  text-center">
+                        <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar Usuario</button>
+                    </div>
+
+
+                </form>
+
+            </div>
+        </div>
+
+        <!-- MODAL PARA Taxis -->
+        <div id="myModal2" class="modal fixed hidden inset-0 overflow-y-auto flex items-center justify-center backdrop-blur-sm bg-white/30 ">
+            <div class="modal-overlay  inset-0 bg-black opacity-30"></div>
+
+            <div class="modal-container mx-auto p-4 bg-zinc-100 p-8 shadow-md rounded-lg ">
+                
+                <h1 class="text-3xl font-bold text-center mt-4">Actualizar Taxi</h1>
+
+                <form action="/update/taxi" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-8" id="updateTaxiForm">
+
+                    <div class="2 col-span-2">
+                        <!-- Cambiando de select a input oculto -->
+                        <input type="hidden" name="empresa_id" value="{{ conductor.empresa_id }}" >
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="placa" class="block text-sm font-bold text-black">PLACA:</label>
+                        <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="placa" id="placa" value="{{ taxi.placa }}" required readonly>
+                    </div>
+    
+                    <div class="mb-2">
+                        <label for="modelo" class="block text-sm font-bold text-black">MODELO:</label>
+                        <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="modelo" id="modelo" value="{{ taxi.modelo }}" required>
+                    </div>
+    
+                    <div class="mb-2">
+                        <label for="marca" class="block text-sm font-bold text-black">MARCA:</label>
+                        <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="marca" id="marca" value="{{ taxi.marca }}" required>
+                    </div>
+    
+                    <div class="mb-2">
+                        <label for="matricula" class="block text-sm font-bold text-black">MATRICULA:</label>
+                        <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="matricula" id="matricula" value="{{ taxi.matricula }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tipo_combustible" class="block text-sm font-bold text-black">TIPO DE COMBUSTIBLE:</label>
+                        <select class="form-select mt-1 block w-full py-2 rounded-md border border-black
+                        focus:outline-none focus:border-blue-500" name="tipo_combustible" id="tipo_combustible">
+                        <option value="" disabled>Seleccione tipo de combustible</option>
+                            <option value="Gasolina" {% if tipo_combustible_taxi == 'Gasolina' %}selected{% endif %}>
+                                Gasolina</option>
+                            <option value="Gas" {% if tipo_combustible_taxi == 'Gas' %}selected{% endif %}>Gas</option>
+                            <option value="Ambos" {% if tipo_combustible_taxi == 'Ambos' %}selected{% endif %}>GASOLINA Y
+                                GAS</option>
+                        </select>
+                    </div>
+    
+    
+                    <div class="mb-2">
+                        <label for="cuota_diaria" class="block text-sm font-bold text-black">CUOTA DIARIA:</label>
+                        <input type="number" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="cuota_diaria" id="cuota_diaria" value="{{ taxi.cuota_diaria }}" required>
+                    </div>
+
+                    <div class="2  text-center">
+                        <button type="button" class=" bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded" id="closeModalButton2"> Cerrar Modal</button>
+                    </div>
+
+                    <div class="2  text-center">
+                        <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar Txi</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+
+        <script src="{{ url_for('static', path='js/detailTaxi.js')}}"></script>
+        
         <script src="{{ url_for('static', path='js/app.js')}}"></script>
         <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-        <script src="{{ url_for('static', path='js/dashboard.js')}}"></script>
     </body>
 
     </html>

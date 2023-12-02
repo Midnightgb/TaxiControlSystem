@@ -18,48 +18,47 @@
     {% include 'components/nav.html' %}
     {% endblock %}
     <main class="p-6 mx-auto max-w-screen-xl">
-        <div class="container mx-auto bg-white p-8 shadow-md rounded-lg">
-            <a href="/home" class="inline-block text-sm text-blue-500">⬅️ Volver a casa</a>
-            <h1  class="text-3xl font-bold my-6">Actualizar de Taxi</h1>
-            <form action="/update/taxi" method="POST">
+        <div class="container mx-auto bg-zinc-100 p-8 shadow-md rounded-lg">
 
-                <div class="mb-4">
-                    <label for="empresa_id" class="block text-sm font-medium text-gray-600">Empresa:</label>
-                    <select class="form-select mt-1 block w-full rounded-md border border-gray-300
-                    focus:outline-none focus:border-blue-500" name="empresa_id" id="empresa_id" required>
-                        <option selected value="{{ empresa.id_empresa }}">{{ empresa.nombre }}</option>
-                    </select>
+            <a href="/home" class="font-bold  text-sm text-blue-500">⬅️ Volver a casa</a>
+            <h1 class="text-3xl font-bold flex items-center justify-center">Actualizar Taxi</h1>
+
+            <form action="/update/taxi" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div class="mb-2 col-span-2">
+                    <!-- Cambiando de select a input oculto -->
+                    <input type="hidden" name="empresa_id" value="{% if empresas %}{{ empresas[0].id_empresa }}{% endif %}">
                 </div>
 
-                <div class="mb-4">
-                    <label for="placa" class="block text-sm font-medium text-gray-600">PLACA:</label>
-                    <input type="text" class="form-input mt-1 block w-full rounded-md border border-gray-300
-                        focus:outline-none focus:border-blue-500" name="placa" id="placa" value="{{ taxi.placa }}" required>
+                <div class="mb-2">
+                    <label for="placa" class="block text-sm font-bold text-black">PLACA:</label>
+                    <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                        focus:outline-none focus:border-blue-500" name="placa" id="placa" value="{{ taxi.placa }}" required readonly>
                 </div>
 
-                <div class="mb-4">
-                    <label for="modelo" class="block text-sm font-medium text-gray-600">MODELO:</label>
-                    <input type="text" class="form-input mt-1 block w-full rounded-md border border-gray-300
+                <div class="mb-2">
+                    <label for="modelo" class="block text-sm font-bold text-black">MODELO:</label>
+                    <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
                         focus:outline-none focus:border-blue-500" name="modelo" id="modelo" value="{{ taxi.modelo }}" required>
                 </div>
 
-                <div class="mb-4">
-                    <label for="marca" class="block text-sm font-medium text-gray-600">MARCA:</label>
-                    <input type="text" class="form-input mt-1 block w-full rounded-md border border-gray-300
+                <div class="mb-2">
+                    <label for="marca" class="block text-sm font-bold text-black">MARCA:</label>
+                    <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
                         focus:outline-none focus:border-blue-500" name="marca" id="marca" value="{{ taxi.marca }}" required>
                 </div>
 
-                <div class="mb-4">
-                    <label for="matricula" class="block text-sm font-medium text-gray-600">MATRICULA:</label>
-                    <input type="text" class="form-input mt-1 block w-full rounded-md border border-gray-300
+                <div class="mb-2">
+                    <label for="matricula" class="block text-sm font-bold text-black">MATRICULA:</label>
+                    <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
                         focus:outline-none focus:border-blue-500" name="matricula" id="matricula" value="{{ taxi.matricula }}" required>
                 </div>
 
                 <div class="mb-3">
-                    <label for="tipo_combustible" class="block text-sm font-medium text-gray-600">TIPO DE COMBUSTIBLE:</label>
-                    <select class="form-select mt-1 block w-full rounded-md border border-gray-300
+                    <label for="tipo_combustible" class="block text-sm font-bold text-black">TIPO DE COMBUSTIBLE:</label>
+                    <select class="form-select mt-1 block w-full py-2 rounded-md border border-black
                     focus:outline-none focus:border-blue-500" name="tipo_combustible" id="tipo_combustible">
-                        <option value="" disabled>Seleccione tipo de combustible</option>
+                    <option value="" disabled>Seleccione tipo de combustible</option>
                         <option value="Gasolina" {% if tipo_combustible_taxi == 'Gasolina' %}selected{% endif %}>
                             Gasolina</option>
                         <option value="Gas" {% if tipo_combustible_taxi == 'Gas' %}selected{% endif %}>Gas</option>
@@ -69,13 +68,15 @@
                 </div>
 
 
-                <div class="mb-4">
-                    <label for="cuota_diaria" class="block text-sm font-medium text-gray-600">CUOTA DIARIA:</label>
-                    <input type="number" class="form-input mt-1 block w-full rounded-md border border-gray-300
+                <div class="mb-2">
+                    <label for="cuota_diaria" class="block text-sm font-bold text-black">CUOTA DIARIA:</label>
+                    <input type="number" class="form-input mt-1 block w-full py-2 rounded-md border border-black
                         focus:outline-none focus:border-blue-500" name="cuota_diaria" id="cuota_diaria" value="{{ taxi.cuota_diaria }}" required>
                 </div>
 
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar Taxi</button>
+                <div class="mb-2 col-span-2 text-center">
+                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar Taxi</button>
+                </div>
             </form>
         </div>
     </main>

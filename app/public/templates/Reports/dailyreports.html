@@ -30,7 +30,7 @@
     {% block nav %}
     {% include 'components/nav.html' %}
     {% endblock %}
-    
+
     <main style="padding: 1.5rem; margin: 0 auto; max-width: 1300px">
         <div class="relative">
             <div class="flex flex-wrap">
@@ -41,15 +41,13 @@
                 <div class="container">
                     <div class="row">
                         <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5 mt-5">
-                            <section class="bg-zinc-100 rounded-lg shadow-xl">
+                            <section class="bg-zinc-100 rounded-lg shadow-xl p-3">
                                 <p class="text-center text-lg font-bold my-5">
-                                    <i class='bx'><img
-                                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" /></i>
+                                    <i class='bx'><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" />
+                                    </i>
                                     <p class="text-center focus-within:first-letter: text-lg font-bold my-2">
-                                        Nombre: <a class="underline decoration-sky-500/30">{{ conductor.nombre }}
-                                            {{ conductor.apellido }} </a>
+                                        Nombre: <a class="underline decoration-sky-500/30">{{ conductor.nombre }} {{ conductor.apellido }} </a>
                                         <br>
-
                                     </p>
                                     <p class="text-center text-lg font-bold my-2">
                                         Cedula: {{ '{:,}'.format(conductor.cedula)  | replace(',', '.') }}
@@ -58,49 +56,41 @@
                                         Correo: {{ conductor.correo }}
                                     </p>
                                 </p>
-                                <div class="text-center">
+                                <div class="text-center justify-center">
                                     <form action="/update/user/path" method="POST">
                                         <input type="hidden" name="id_usuario" value="{{usuario.id_usuario}}">
-                                        <button type="submit"
-                                            class="inline-flex items-center justify-center gap-2.5 rounded-full bg-primary py-4 px-10 text-center font-medium text-emerald-600 hover:bg-opacity-90 lg:px-8 xl:px-10">
-                                            <span>
-                                                <svg class="fill-current" width="20" height="20" viewBox="0 0 20 20"
-                                                    fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <g clip-path="url(#clip0_182_46495)">
-                                                        <path taxi d="M18.875 11.4375C18.3125 10.8438 17.5625 10.5312 16.75 10.5312C16.125 10.5312 15.5625 10.7188 15.0625 11.0938C15 11.125 14.9688 11.1562 14.9062 11.2188C14.8438 11.1875 14.8125 11.125 14.75 11.0938C14.25 10.7188 13.6875 10.5312 13.0625 10.5312C12.9062 10.5312 12.7812 10.5312 12.6562 10.5625C11.7188 9.5 10.5625 8.75 9.3125 8.40625C10.625 7.75 11.5312 6.40625 11.5312 4.875C11.5312 2.6875 9.75 0.9375 7.59375 0.9375C5.40625 0.9375 3.65625 2.71875 3.65625 4.875C3.65625 6.4375 4.5625 7.78125 5.875 8.40625C4.5625 8.78125 3.40625 9.53125 2.4375 10.6562C1.125 12.2188 0.375 14.4062 0.3125 16.7812C0.3125 17.0312 0.4375 17.25 0.65625 17.3438C1.5 17.75 4.4375 19.0938 7.59375 19.0938C9.28125 19.0938 10.8438 18.8125 10.9062 18.8125C11.25 18.75 11.4688 18.4375 11.4062 18.0938C11.343
-                                                            fill="" />
-                                                    </g>
-                                                    <defs>
-                                                        <clipPath id=" clip0_182_46495">
-                                                            <rect width="20" height="20" fill="white" />
-                                                            </clipPath>
-                                                            </defs>
-                                                </svg>
+                                        <button type="submit" data-te-ripple-init data-te-ripple-color="light"
+                                            class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]">
+                                            <span class="mr-2">Editar Usuario</span>
+                                            <span class="items-center">
+                                                <img width="20" height="20" viewBox="0 0 20 20"
+                                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAABjElEQVR4nO2Zz0oCURSHP4xcBa2Dcteilymx1FeIiNr0Dv2xXdA+EluUb5C9hqbZMggpKFsUoTcGThvBEufMnFvcD34gMuDvk3PHex0IBAKaZIEyUANawJukJe+V5BovWQe6gPsld0ABj5gBjicoPpoKkMEDpin/nUMfxsbFTN6qfFbmOa7AvdXCLiuUd5KihcCFokDVQqCtKNCyEOgrCvT/usCLhcCtokDTQqCmKHBuIVBSFNiwEJgFOgrlu5Y71IKCwBrGVGKUP8ADoi3x0ZQ70QwekZ9wTXR8GJufFnZR9jZN+bHry+uq3G2iawKBQMrkgDrwqrh9GJfoM66AJc3yzykUdyN50pKoG5R3kksNgTTGxiV50HHGic3AsPwgfn3oGQr0NAQahgINDYFtQ4EdDYE54MGg/CMwjxKrwDDF8sMkDvq7KQrskeA/0q8J33XyJMyinK4+FYt/AGfAAimSk8P8JA/2xqUN7MuXYsoKsAWcAjciFY3Du6QnT3OugRNgE1i2Lh0I8A/4AsVC6ighJMgVAAAAAElFTkSuQmCC"
+                                                    alt="Usuario">
                                             </span>
-                                            Editar Conductor
                                         </button>
                                     </form>
                                 </div>
                             </section>
-                            <section class="bg-zinc-100 rounded-lg shadow-xl">
+                            
+                            <section class="bg-zinc-100 rounded-lg shadow-xl p-3">
                                 <p class="text-center text-lg font-bold my-5">
                                     <i class='bx'><img
                                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAB3klEQVRYR+1Xi1HDMAxtN4ANwgawQdkANoAJgAkoEwAT0A1gA7IBbNBsABvAez07pypOFH9ayl10p8vPkp+fZMmZzw5M5geGZzYBsiIyMVSCoQpObqALKO+PLKeB7w3evUGfobzvFStkp7B8TwQRmvQbL8+hn32ILEAEQ2ZKChk6SQFEdj6cIVd2Da2hvI+VCxi8CiOyRF8dGWJoidH3zuIJ17tYFGr8I55v3buVW2AUoDVGV87iElcmZY5oxo9jGNLGjHlKqPSccpHBsPWFrHS4PDAzbH2ASofLAzLDFgLExONK9iEPmITRaEUD2icYD2JrB2tAuyiEFtPcLO2O04B+LOsdfW9xWIBqt91ZaXOFTLCHVU6DqTMESCYcO/xXBqIGtmducXTzAr0K5fIQIBZDOvKincTg061HL3BUyNhMV2LWnITnwmSH1812FCA6YQ/jlU3WN8YYZuRYNmcytYCyzrFIehkFKHXiFLv/AygncVOYoU0NZeffiN5lpc/QFkh/Em3PWqHmunRJLJ2xJpUQfwL1vjon0bGAho66MUB1azK7PZ2HGPpTQPoIstWNY+gIjNUM+drULUjCmGWdvz8VlGD4t0nWSohcbA2H7AaNdFwqFCXAbnxMgCwqfwEYYmAlIDYHNAAAAABJRU5ErkJggg==" /></i>
                                     {% if taxi_actual: %}
-                                    <p class="text-center text-lg font-bold my-1">
+                                    <p class="text-center text-lg font-bold ">
                                         Marca: {{ taxi_actual.marca }}
                                     </p>
-                                    <p class="text-center text-lg font-bold my-1">
+                                    <p class="text-center text-lg font-bold ">
                                         Modelo: {{ taxi_actual.modelo }}
                                     </p>
-                                    <p class="text-center text-lg font-bold my-1">
-                                        Vehiculo: {{ taxi_actual.placa }}
+                                    <p class="text-center text-lg font-bold">
+                                        Placa: {{ taxi_actual.placa }}
                                     </p>
-                                    <p class="text-center text-lg font-bold my-1">
+                                    <p class="text-center text-lg font-bold ">
                                         Matricula: {{ taxi_actual.matricula }}
                                     </p>
                                     {% else %}
-                                    <p class="text-center text-lg font-bold my-1">
+                                    <p class="text-center text-lg font-bold ">
                                         No tiene vehiculo asignado
                                     </p>
                                     {% endif %}
@@ -108,17 +98,21 @@
                                 <div class="text-center">
                                     <form action="/update/taxi/path" method="POST">
                                         <input type="hidden" name="id_taxi" value="{{ taxi_actual.id_taxi }}">
-                                        <button type="submit"
-                                            class="inline-flex items-center justify-center gap-2.5 rounded-full bg-primary py-4 px-10 text-center font-medium text-emerald-600 hover:bg-opacity-90 lg:px-8 xl:px-10">
-                                            <span>
-                                                <img width="20" height="20" viewBox="0 0 20 20" src="https://img.icons8.com/fluency/48/taxi.png" alt="taxi"/>
+                                        <button type="submit" data-te-ripple-init data-te-ripple-color="light"
+                                            class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]">
+                                            <span class="mr-2">Editar Taxi</span>
+
+                                            <span class="items-center">
+                                                <span>
+                                                    <img width="20" height="20" viewBox="0 0 20 20"
+                                                        src="https://img.icons8.com/fluency/48/taxi.png" alt="taxi" />
+                                                </span>
                                             </span>
-                                            Editar Taxi
                                         </button>
                                     </form>
                                 </div>
                             </section>
-                            <section class="bg-zinc-100 rounded-lg shadow-xl">
+                            <section class="bg-zinc-100 rounded-lg shadow-xl p-3">
                                 <p class="text-center text-lg font-bold my-5">
                                     <i class='bx'><img
                                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAADFElEQVRYR+2X8VEVQQzGoQK1g7MDrMBnBWAFPioQK/CsQDrwqACowOsAqIBnBdqB5sds3uRyye3e+4thzEyGZTebfPmS3b13fPTM5PiZ4Tl6MYA2wiz6XvS1aFeY3slf1VsZj2srsIYhAm9FP4meNAb6I3bfRC8b7ZtLBhvfVwDx8WHti+hNDVgLQxfi5Gspjfojc5xfiTImINIVpZSwCatWYKtfAlUD9KM4tkBwOhQgtYRJ5nMBqbajDD5kG5cA4YwyWUcfG4H4eNcycWYm6SlKOJMMEJthRynHAcxQHi+9TFBSZKkknm2Sm/VUBAgQP0X1JI0yzpjBFjCwiQyi5wFonbJMkdwbbxsBsqVi09uAGQWylTXfuOwhARLxgu2daFcWZoxGgB6XNhQA1mlGyDtZuA8WSYLyITOWPCDKRDA1jtih0bVEagcbON+YZHYyZn8kNmlOHPufxAPqZU4bNDsJ1hn9MpiIlOS3+T87NDapSRy/wTZdeApKQO0bGICJtcIpJhYCO/t7yQOiXHq6sh7wxxeGfolSMpS+iXrHgrZMTvrIA7LlyLLvxDN2SwIgGM7YawZE/bUc3BGgjwQWYUrZzMBlLGP/12zaE3NIyWxweoEEYO1VAbgxBoOMo4vSsgyL+9PoAXFDq8OsqRdrVQDqSQtv4xKDWMgomja1PY5ZdukdUgLYE5QB6sU2vF5qF+PsrRFH/pTdyNxDKRnsUg7tQ9Zg2otNalKJ2tPhLz4c+/coKyHsUAp/BXgGJ69By+MasQQomMJ5JPQFyezcIvvsl0TT44oPSynO900XRLe3+yDrBPFAdJstNwzO3srsrbG04uxSNPzCk/letOUD7ULs7Bco/vA7kQwQRv5VrzEVkPc0RZnwtTUGaYJLgNjvTxSloCRDFt3NbwoYe6Nz8uiv8BWoAYqYYg5ngOLXKSBRmNBbGyCnov5pgRkSCsHguAUQdvQUtHeNzHgzAABk1jPesBWQ7vONWcOnQGAzZcU6WQtI98IY5eAXKqyhBFQdZXwlumsFoo4PBVRj5uD1/4Bq1P0DP0C/JUXiHVAAAAAASUVORK5CYII=" /></i>
@@ -307,7 +301,7 @@
                     }
                 }
             },
-            colors: ['#65d4f3', '#6577F3', '#65d4f3', '#6577F3', '#65d4f3', '#6577F3', '#65d4f3'],
+            colors: ['#787aeb', '#6577F3', '#65d4f3', '#6577F3', '#65d4f3', '#6577F3', '#65d4f3'],
             dataLabels: {
                 enabled: true,
                 formatter: function (val) {

@@ -23,7 +23,7 @@
             <a href="/home" class="font-bold text-sm text-blue-500">⬅️ Volver a casa</a>
             <h1 class="text-3xl font-bold my-6 flex items-center justify-center">Asignacion De Taxis</h1>
 
-            <form action="/register/assignment" method="POST">
+            <form action="/create/assignment" method="POST">
 
                 <label for="id_conductor"
                     class="block text-sm font-bold text-black mb-2">ELIJA UN CONDUCTOR:</label>
@@ -40,24 +40,19 @@
                     {% endif %}
                 </select>
                 
-                <div class="">
-                    <label for="id_taxi" class="block text-sm font-bold text-black mt-4 mb-2">ELIJA UN TAXI:</label>
-                    <select name="id_taxi" id="id_taxi"
-                        class="form-select mt-1 block w-full rounded-md border border-black focus:outline-none focus:border-blue-500"
-                        required>
-                        <option value="" disabled selected>Seleccione un taxi</option>
-                        {% if taxis %}
-                        {% for taxi in taxis %}
-                        <option value="{{ taxi.id_taxi }}">{{ taxi.placa }} - {{ taxi.modelo }} - {{ taxi.marca }}</option>
-                        {% endfor %}
-                        {% else %}
-                        <option value="" disabled>No hay taxis disponibles</option>
-                        {% endif %}
-                    </select>
-                </div>
+                <label for="id_taxi" class="block text-sm font-bold text-black mb-2 mt-4">ELIJA UN TAXI:</label>
+                <select name="id_taxi" id="id_taxi"
+                    class="form-select mt-1 block w-full rounded-md border border-black focus:outline-none focus:border-blue-500"
+                    required>
+                    {% if taxiInfo %}
+                    <option value="{{ taxiInfo.id_taxi }}" selected>{{ taxiInfo.placa }}</option>
+                    {% else %}
+                    <option value="" disabled selected>No hay taxis disponibles</option>
+                    {% endif %}
+                </select>
 
                 <div class="mb-4 col-span-2 text-center mt-12">
-                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Registrar Taxi</button>
+                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Registrar Asignacion</button>
                 </div>
 
             </form>

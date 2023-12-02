@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const ctx = document.getElementById('chartMonthlyIncome').getContext('2d');
 
-        let backgroundColor = ['#65d4f3', '#6577F3'];
+        let backgroundColor = ['#787aeb', '#00ebff'];
         
         const myChart = new Chart(ctx, {
             type: 'doughnut',
