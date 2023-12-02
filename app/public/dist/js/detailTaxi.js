@@ -5,6 +5,58 @@ console.log("bandera:", bandera);
 let bandera_2 = sessionStorage.getItem('bandera_2') || 0;
 console.log("bandera:", bandera_2);
 
+
+var diasSemana = [];
+    var pagosDiarios = [];
+
+    var weekdays = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
+    for (var day in reports_week) {
+        if (reports_week.hasOwnProperty(day)) {
+            // Obtener el nombre del día de la semana correspondiente
+            var date = new Date(day);
+            var dayOfWeek = weekdays[date.getDay()];
+
+            diasSemana.push(dayOfWeek);
+            pagosDiarios.push(reports_week[day]);
+        }
+    }
+
+    var chartOptionsWeek = {
+        chart: {
+            type: "bar"
+        },
+        series: [{
+            name: "Pagos Diarios",
+            data: pagosDiarios
+        }],
+        xaxis: {
+            categories: diasSemana
+        },
+        yaxis: {
+            labels: {
+                formatter: function (val) {
+                    return '$' + val.toFixed(0).replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+                }
+            }
+        },
+        colors: ['#787aeb', '#6577F3', '#65d4f3', '#6577F3', '#65d4f3', '#6577F3', '#65d4f3'],
+        dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+                return '$' + val.toFixed(0).replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+            },
+            offsetY: -20,
+            style: {
+                fontSize: '12px',
+                colors: ["#304758"]
+            }
+        }
+    };
+
+    var chartWeek = new ApexCharts(document.getElementById("chartWeek"), chartOptionsWeek);
+    chartWeek.render();
+
 document.addEventListener("DOMContentLoaded", function () {
     const openModalButton = document.getElementById("openModalButton");
     const closeModalButton = document.getElementById("closeModalButton");
@@ -104,10 +156,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    });
+});
 
-    // Ejecutar las alertas después de que la página se ha recargado
-    window.onload = function () {
+// Ejecutar las alertas después de que la página se ha recargado
+window.onload = function () {
     const bandera = sessionStorage.getItem('bandera');
     const bandera_2 = sessionStorage.getItem('bandera_2');
 

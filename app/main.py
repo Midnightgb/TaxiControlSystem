@@ -1880,15 +1880,37 @@ async def detail_taxi(
     # Obtener la sumatoria de todos los mantenimientos
     total_mantenimientos = db.query(func.sum(Mantenimiento.costo)).filter(Mantenimiento.id_taxi == id_taxi).scalar()
 
+    today = date.today()
+
     if not total_pagos:
         total_pagos = 0
 
     if not total_mantenimientos:
         total_mantenimientos = 0
     
+    first_day_of_week = today - timedelta(days=today.weekday())
+    last_day_of_week = first_day_of_week + timedelta(days=6)
+
+    
+
+    # Obtener los pagos de la semana actual
+    weekly_reports = db.query(Pago).filter(
+        Pago.id_conductor == conductorActual.id_conductor,
+        Pago.fecha.between(first_day_of_week, last_day_of_week)
+    ).all()
+
+    reports_week_data = {str(report.fecha): report.valor for report in weekly_reports}
+    # Crear una lista ordenada de los pagos diarios para los últimos 7 días
+    last_seven_days = [(last_day_of_week - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
+
+    # Obtener los pagos diarios para los últimos 7 días
+    daily_reports_data = {day: reports_week_data.get(day, 0) for day in last_seven_days}
+    #consultar manteniminetos que ha tenido el taxi
+    mantenimientos = db.query(Mantenimiento).filter(Mantenimiento.id_taxi == id_taxi).all()
+    
     return templates.TemplateResponse(
         "detailTaxi.html",
-        {"request": request, "pagos": pagos, "mantenimientos": mantenimientos, "conductor": conductor, "taxi": taxi, "total_pagos": total_pagos, "total_mantenimientos": total_mantenimientos}
+        {"request": request, "pagos": pagos, "mantenimientos": mantenimientos, "conductor": conductor, "taxi": taxi, "total_pagos": total_pagos, "total_mantenimientos": total_mantenimientos,"ingresos": daily_reports_data,"mantenimientos": mantenimientos}
     )
 # -- END OF THE ROUTE -- # 
 

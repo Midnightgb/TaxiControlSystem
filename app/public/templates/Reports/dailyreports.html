@@ -272,7 +272,7 @@
             <div
                 class="modal-container mx-auto p-8 bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 - border border-zinc-300">
 
-                <h1 class="text-3xl font-bold text-center mt-4">Actualizar Usuario</h1>
+                <h1 class="text-3xl font-bold text-center mt-4">Registrar pago del conductor {{usuario.nombre}} </h1>
 
                 <form action="/register/daily2" method="POST" enctype="multipart/form-data"
                     class="grid grid-cols-1 md:grid-cols-2 gap-8" id="updateUserForm">
@@ -281,7 +281,7 @@
                         <input type="hidden" name="id_conductor" value="{{ usuario.id_usuario}}">
                     </div>
                     
-                    <div class="">
+                    <div class="col-span-6">
                         <label for="valor" class="block text-sm font-bold text-black">Valor</label>
                         <input type="text" oninput="formatoMoneda(this)" class="mt-1 block w-full py-2 px-3 border border-black bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                         name="valor" id="valor" required>
