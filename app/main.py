@@ -961,6 +961,9 @@ async def registro_diario_view(request: Request,id_usuario:int=Form(...), c_user
                  "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+
+
 # -- MODULO 2 actualizar registro diario-- #
 
 @app.post("/register/daily", tags=["payments"])
@@ -1040,6 +1043,86 @@ async def registro_diario(
 
     # Redirige a la vista de registro diario
     return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/register/daily2", tags=["payments"])
+async def registro_diario(
+    request: Request,
+    id_conductor: int = Form(...),
+    valor: int = Form(...),
+    db: Session = Depends(get_database),
+):
+    if not serverStatus(db):
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    if valor < 0:
+        alert = {"type": "error", "message": "El valor no puede ser negativo."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+    
+    datos_conductor = getDriverData(id_conductor, db)
+
+    if not datos_conductor:
+        alert = {"type": "error",
+                 "message": "El conductor no tiene un taxi asignado."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+
+    cuota_diaria_taxi = datos_conductor["cuota_diaria_taxi"]
+
+    fecha_actual = date.today()
+    pago_existente = db.query(Pago).filter(
+        Pago.id_conductor == id_conductor,
+        Pago.fecha == fecha_actual,
+        Pago.cuota_diaria_registrada == True
+    ).first()
+    if pago_existente:
+        alert = {"type": "error",
+                 "message": "Este conductor ya tiene un pago registrado para el día de hoy."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        estado = valor >= cuota_diaria_taxi
+
+        nuevo_pago = Pago(
+            id_conductor=id_conductor,
+            fecha=fecha_actual,
+            valor=valor,
+            estado=estado,
+            cuota_diaria_registrada=True
+        )
+
+        db.add(nuevo_pago)
+        db.commit()
+        
+        conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
+        mes_actual = date.today().month
+        ano_actual = date.today().year
+
+        
+        reporte_existente = db.query(Reporte).filter(
+            Reporte.empresa_id == conductor.empresa_id,
+            extract('month', Reporte.fecha) == mes_actual,
+            extract('year', Reporte.fecha) == ano_actual
+            
+        ).first()
+
+        if reporte_existente:
+            reporte_existente.ingresos += valor
+            db.commit()
+
+        db.refresh(nuevo_pago)
+        alert = {"type": "success", "message": "Pago registrado exitosamente."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
+        
+        return HTMLResponse(content=str(True), status_code=200)
+    
+    
+
 
 
 @app.get("/update/daily", response_class=HTMLResponse, tags=["routes"])
@@ -1470,7 +1553,24 @@ async def drivers(request: Request,
     return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores, "alert": alert, "total_paginas": total_paginas, "page": page, "per_page": per_page , "start_page": start_page, "end_page": end_page})
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
-async def reports(request: Request, id_usuario: int = Form(...), db: Session = Depends(get_database)):
+async def reports(request: Request, id_usuario: int = Form(...), db: Session = Depends(get_database),c_user: str = Cookie(None),):
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    checkTokenStatus = userStatus(c_user, request)
+    if not checkTokenStatus["status"]:
+        return checkTokenStatus["redirect"]
+
+    if not serverStatus(db):
+        alert = {"type": "general",
+                "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    UUID = checkTokenStatus["userid"]
+    userData = db.query(Usuario).filter(Usuario.id_usuario == UUID).first()
+    if not userData:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     #mes actual 
     now = datetime.now()
     current_month = now.strftime("%B")
