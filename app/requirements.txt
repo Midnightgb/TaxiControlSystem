@@ -9,3 +9,4 @@ bcrypt  # for password hashing
 python-dotenv
 itsdangerous
 pillow
+websockets

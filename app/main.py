@@ -10,6 +10,9 @@ from fastapi import (
     Query,
     Response,
     UploadFile,
+    WebSocket, 
+    WebSocketDisconnect,
+    BackgroundTasks
 )
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -24,6 +27,7 @@ from collections import defaultdict
 
 from functions import *
 from models import *
+import json
 
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
@@ -36,6 +40,31 @@ load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
 
 app = FastAPI()
+
+
+websocket_connections = set()
+async def websocket_endpoint(websocket: WebSocket, client_type: str, client_id: str, client_company_id: int):
+    await websocket.accept()
+    
+    # Agregar la conexión WebSocket al conjunto
+    websocket_connections.add((client_type, client_id, client_company_id, websocket))
+
+    try:
+        while True:
+            # Esperar mensajes desde el cliente
+            data = await websocket.receive_text()
+            message = json.loads(data)
+
+            
+            if client_type == "secretaria":
+                admin_websockets = [(ct, cid, cid_company_id, ws) for ct, cid, cid_company_id, ws in websocket_connections if ct == "admin"]
+                for admin_type, admin_id, admin_company_id, admin_ws in admin_websockets:
+                    if client_company_id == admin_company_id:
+                        await admin_ws.send_text(f"Secretaria {client_id} realizó una acción: {message}")
+    
+    except WebSocketDisconnect:
+        # Eliminar la conexión WebSocket del conjunto cuando se desconecta
+        websocket_connections.remove((client_type, client_id, client_company_id, websocket))
 
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
@@ -275,7 +304,7 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 
     empresa = db.query(Empresa).filter(
         Empresa.id_empresa == usuario.empresa_id).first()
-
+    
     if not empresa:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     alert = request.session.pop("alert", None)
@@ -288,6 +317,7 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 @app.post("/register/user", response_class=HTMLResponse)
 async def CreateUser(
     request: Request,
+    background_tasks: BackgroundTasks,
     cedula: str = Form(...),
     nombre: str = Form(...),
     apellido: str = Form(...),
@@ -298,6 +328,7 @@ async def CreateUser(
     imagen: Optional[UploadFile] = Form(None),
     db: Session = Depends(get_database),
     c_user: str = Cookie(None)
+     
 ):
 
     if not serverStatus(db):
@@ -361,6 +392,24 @@ async def CreateUser(
     )
     db.add(nuevo_usuario)
     db.commit()
+    if usuario.rol == "Secretaria":
+        admin = db.query(Usuario).filter(Usuario.rol == "Administrador", Usuario.empresa_id == usuario.empresa_id).first()
+        if admin:
+            background_tasks.add_task(
+                websocket_endpoint,
+                websocket= None,  
+                client_type="secretaria",
+                client_id=str(usuario.id_usuario),
+                client_company_id=usuario.empresa_id
+            )
+            mensaje = f"Se ha registrado un nuevo conductor, creado Por  ({usuario.nombre} {usuario.apellido}) con el rol de Secretaria."
+            nueva_notificacion = Notificaciones(
+                id_secretaria=usuario.id_usuario,
+                mensaje=mensaje,
+                fecha_envio=datetime.now()
+            )
+            db.add(nueva_notificacion)
+            db.commit()
     db.refresh(nuevo_usuario)
     alert = {"type": "success", "message": "Usuario registrado exitosamente."}
     request.session["alert"] = alert
@@ -569,7 +618,11 @@ async def taxis(request: Request, c_user: str = Cookie(None), db: Session = Depe
 
 
 @app.get("/view/taxi", response_class=HTMLResponse, tags=["routes"])
-async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database), page: int = 1,taxi_page: int = 8 ):
+async def view_taxi(request: Request, 
+                    c_user: str = Cookie(None), 
+                    db: Session = Depends(get_database), 
+                    page: int = 1,
+                    taxi_page: int = 8 ):
     user_id = None
 
     if not c_user: 
@@ -578,6 +631,11 @@ async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = 
     token_payload = tokenDecoder(c_user)
 
     user_id = int(token_payload["sub"])
+    if page < 1:
+        page = 1
+
+    if taxi_page < 1:
+        taxi_page = 8
 
     usuario = db.query(Usuario).filter(
         Usuario.id_usuario == user_id).first()
@@ -588,9 +646,13 @@ async def view_taxi(request: Request, c_user: str = Cookie(None), db: Session = 
     taxis_paginados=obtener_taxis_paginados(db, page, taxi_page, usuario.empresa_id)
     taxis = taxis_paginados["taxis"]
     total_paginas = taxis_paginados["total_paginas"]
+    visible_pages = 10
 
-    start_page = max((page - 1) * taxi_page, 0)
-    end_page = start_page + taxi_page
+    start_page = max(1, page - (visible_pages // 2))
+    end_page = min(total_paginas, start_page + visible_pages - 1)
+
+    
+
     alert = request.session.pop("alert", None)
 
     if not taxis:
@@ -837,6 +899,65 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
                  "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+@app.post("/daily/register", response_class=HTMLResponse, tags=["routes"])
+async def registro_diario_view(request: Request,id_usuario:int=Form(...), c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    user_id = None
+
+    try:
+        if not serverStatus(db):
+            alert = {"type": "general",
+                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+        if not c_user:
+            alert = {"type": "general",
+                     "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+        token_payload = tokenDecoder(c_user)
+
+        if not token_payload:
+            alert = {"type": "general",
+                     "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+        user_id = int(token_payload["sub"])
+        usuario = db.query(Usuario).filter(
+            Usuario.id_usuario == user_id).first()
+        if not usuario:
+            raise HTTPException(
+                status_code=401, detail="Usuario no encontrado.")
+
+        empresas = db.query(Empresa).filter(
+            Empresa.id_empresa == usuario.empresa_id).first()
+        if not empresas:
+            alert = {"type": "error",
+                     "message": "Error al obtener información de la empresa."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+
+        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
+            Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
+        taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
+            Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+
+        # Recuperar la alerta de la sesión
+        alert = request.session.pop("alert", None)
+        return templates.TemplateResponse("register_daily.html", {"request": request, "alert": alert, "conductores": conductores, "taxis": taxisAssigned,"id_usuario":id_usuario})
+    except HTTPException as e:
+        alert = {"type": "general", "message": str(e.detail)}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    except Exception as e:
+        alert = {"type": "general",
+                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 # -- MODULO 2 actualizar registro diario-- #
 
 @app.post("/register/daily", tags=["payments"])
@@ -878,7 +999,7 @@ async def registro_diario(
         alert = {"type": "error",
                  "message": "Este conductor ya tiene un pago registrado para el día de hoy."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
     else:
         estado = valor >= cuota_diaria_taxi
 
@@ -916,6 +1037,7 @@ async def registro_diario(
 
     # Redirige a la vista de registro diario
     return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+
 
 @app.get("/update/daily", response_class=HTMLResponse, tags=["routes"])
 async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
