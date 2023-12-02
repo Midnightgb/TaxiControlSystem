@@ -46,7 +46,7 @@
                         
                         {% for taxisA in taxisAssigned %}
 
-                            <div class="bg-zinc-100 shadow-md my-4 mx-2 p-6  border border-zinc-300  justify-end items-end " style="width: 19rem;" data-drivers="{{taxisA.placa}}">
+                            <div class="bg-zinc-100 shadow-md my-4 mx-2 p-6 justify-end items-end shadow-xl hover:shadow-2xl ease-in duration-200  border border-zinc-300" style="width: 19rem;" data-drivers="{{taxisA.placa}}">
 
                                 <div class="relative mt-4 justify-center items-center columns-1 ">
                                     <h5 class="text-xl font-bold my-2 mx-10 w-25 ">{{ taxisA.modelo }}
@@ -76,7 +76,7 @@
 
                 {% if taxisNotAssigned: %}
                     {% for taxiNA in taxisNotAssigned %}
-                    <div class="bg-zinc-100 shadow-md my-4 mx-2 p-6 justify-end items-end  border border-zinc-300" style="width: 19rem;" data-drivers="{{taxiNA.placa}}">
+                    <div class="bg-zinc-100 shadow-md my-4 mx-2 p-6 justify-end items-end  shadow-xl hover:shadow-2xl ease-in duration-200  border border-zinc-300" style="width: 19rem;" data-drivers="{{taxiNA.placa}}">
                         <div class="relative mt-4 justify-center items-center columns-1">
                             <h5 class="text-xl font-bold my-2 mx-10 w-25">{{ taxiNA.modelo }} {{ taxiNA.marca }}</h5>
                             <p class="text-gray-600 my-2 w-25 mx-10">{{taxiNA.placa}}</p>

@@ -457,14 +457,10 @@ async def update_user(
 
         db.commit()
 
-        alert = {"type": "success", "message": "Usuario actualizado con éxito"}
-        request.session["alert"] = alert
-        return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+        return HTMLResponse(content=str(True), status_code=200)
     else:
-        # Manejar el caso donde el usuario no existe
-        alert = {"type": "error", "message": "Usuario no encontrado"}
-        request.session["alert"] = alert
-
+        # Devuelve el booleano directamente
+        return HTMLResponse(content=str(False), status_code=404)
 # ========================================== END OF USERBLOCK ============================================ #
 
 # ========================================== TAXIBLOCK ============================================ #
@@ -702,14 +698,10 @@ async def update_taxi(
 
         db.commit()
 
-        alert = {"type": "success", "message": "Taxi actualizado con éxito"}
-        request.session["alert"] = alert
-        return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
+        return HTMLResponse(content=str(True), status_code=200)
     else:
-        # Manejar el caso donde el taxi no existe
-        alert = {"type": "error", "message": "Taxi no encontrado"}
-        request.session["alert"] = alert
-        return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
+        # Devuelve el booleano directamente
+        return HTMLResponse(content=str(False), status_code=404)
 # -- END OF THE ROUTE -- #
 # ========================================== END OF TAXIBLOCK ============================================ #
 
@@ -748,7 +740,7 @@ async def create(
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO PROCEED TO THE CREATION OF A NEW assignment -- #
-@app.post("/register/assignment", response_class=HTMLResponse)
+@app.post("/create/assignment", response_class=HTMLResponse)
 async def create_assignment(
     request: Request,
     id_conductor: int = Form(...),
@@ -766,7 +758,7 @@ async def create_assignment(
         alert = {"type": "error",
                  "message": "El conductor ya está asignado a un taxi."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/register/assignment", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
     # Si pasa las validaciones, proceder con la creación de la asignación
     nueva_asignacion = ConductorActual(
@@ -780,7 +772,7 @@ async def create_assignment(
     alert = {"type": "success", "message": "Asignación registrada exitosamente."}
     request.session["alert"] = alert
 
-    return RedirectResponse(url="/register/assignment", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
 # -- END OF THE ROUTE -- #
 
 # ========================================== END OF assignmentBLOCK ============================================ #
@@ -1484,6 +1476,13 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 # -- PATH TO REDIRECT TO maintenance CREATION -- #
 @app.get("/maintenance", response_class=HTMLResponse, tags=["routes"])
 async def maintenance(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+    
+    if not serverStatus(db):
+            alert = {"type": "general",
+                     "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
     if not c_user:
             alert = {"type": "general",
                         "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
