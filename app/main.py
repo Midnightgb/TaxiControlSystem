@@ -10,6 +10,9 @@ from fastapi import (
     Query,
     Response,
     UploadFile,
+    WebSocket, 
+    WebSocketDisconnect,
+    BackgroundTasks
 )
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -24,6 +27,7 @@ from collections import defaultdict
 
 from functions import *
 from models import *
+import json
 
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
@@ -36,6 +40,31 @@ load_dotenv()
 MIDDLEWARE_KEY = os.environ.get("MIDDLEWARE_KEY")
 
 app = FastAPI()
+
+
+websocket_connections = set()
+async def websocket_endpoint(websocket: WebSocket, client_type: str, client_id: str, client_company_id: int):
+    await websocket.accept()
+    
+    # Agregar la conexión WebSocket al conjunto
+    websocket_connections.add((client_type, client_id, client_company_id, websocket))
+
+    try:
+        while True:
+            # Esperar mensajes desde el cliente
+            data = await websocket.receive_text()
+            message = json.loads(data)
+
+            
+            if client_type == "secretaria":
+                admin_websockets = [(ct, cid, cid_company_id, ws) for ct, cid, cid_company_id, ws in websocket_connections if ct == "admin"]
+                for admin_type, admin_id, admin_company_id, admin_ws in admin_websockets:
+                    if client_company_id == admin_company_id:
+                        await admin_ws.send_text(f"Secretaria {client_id} realizó una acción: {message}")
+    
+    except WebSocketDisconnect:
+        # Eliminar la conexión WebSocket del conjunto cuando se desconecta
+        websocket_connections.remove((client_type, client_id, client_company_id, websocket))
 
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
@@ -288,6 +317,7 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 @app.post("/register/user", response_class=HTMLResponse)
 async def CreateUser(
     request: Request,
+    background_tasks: BackgroundTasks,
     cedula: str = Form(...),
     nombre: str = Form(...),
     apellido: str = Form(...),
@@ -298,6 +328,7 @@ async def CreateUser(
     imagen: Optional[UploadFile] = Form(None),
     db: Session = Depends(get_database),
     c_user: str = Cookie(None)
+     
 ):
 
     if not serverStatus(db):
@@ -361,6 +392,24 @@ async def CreateUser(
     )
     db.add(nuevo_usuario)
     db.commit()
+    if usuario.rol == "Secretaria":
+        admin = db.query(Usuario).filter(Usuario.rol == "Administrador", Usuario.empresa_id == usuario.empresa_id).first()
+        if admin:
+            background_tasks.add_task(
+                websocket_endpoint,
+                websocket= None,  
+                client_type="secretaria",
+                client_id=str(usuario.id_usuario),
+                client_company_id=usuario.empresa_id
+            )
+            mensaje = f"Se ha registrado un nuevo conductor, creado Por  ({usuario.nombre} {usuario.apellido}) con el rol de Secretaria."
+            nueva_notificacion = Notificaciones(
+                id_secretaria=usuario.id_usuario,
+                mensaje=mensaje,
+                fecha_envio=datetime.now()
+            )
+            db.add(nueva_notificacion)
+            db.commit()
     db.refresh(nuevo_usuario)
     alert = {"type": "success", "message": "Usuario registrado exitosamente."}
     request.session["alert"] = alert
