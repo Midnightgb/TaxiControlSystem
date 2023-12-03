@@ -85,6 +85,21 @@ MONTHS_IN_SPANISH = {
     'December': 'Diciembre'
 }
 
+MONTHS_IN_SPANISH_NUMBERS = {
+    '01': '01',
+    '02': '02',
+    '03': '03',
+    '04': '04',
+    '05': '05',
+    '06': '06',
+    '07': '07',
+    '08': '08',
+    '09': '09',
+    '10': '10',
+    '11': '11',
+    '12': '12'
+}
+
 @app.get("/", tags=["routes"])
 async def root():
     return RedirectResponse(url="/logout")
@@ -1471,11 +1486,15 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
     now = datetime.now()
     current_month = now.strftime("%B")
     current_month = MONTHS_IN_SPANISH[current_month]
+    current_month_number = now.strftime("%m")  # Obtiene el número del mes
+    current_month_name = MONTHS_IN_SPANISH_NUMBERS.get(current_month_number, "Mes Desconocido")
+    print("Mes actual: ", current_month_name)
     # Obtener la fecha actual
     today = date.today()
     
     first_day_of_month = datetime(today.year, today.month, 1)
-    last_day_of_month = calendar.monthrange(today.year, today.month)[1]         
+    last_day_of_month = datetime(today.year, today.month, calendar.monthrange(today.year, today.month)[1])
+        
         
     #  total acumulado del mes
     total_acumulado = (
