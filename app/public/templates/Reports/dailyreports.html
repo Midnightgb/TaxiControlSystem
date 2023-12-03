@@ -449,7 +449,7 @@
             <form action="/update/payment" method="POST" enctype="multipart/form-data" onsubmit="limpiarFormatoMoneda(this.nueva_cuota)"
                 class="grid grid-cols-1 md:grid-cols-2 gap-8" id="updatePaymentForm">
 
-                <input type="text" name="id_conductor" id="id_conductor" value="{{ conductor.id_usuario }}">
+                <input type="hidden" name="id_conductor" id="id_conductor" value="{{ conductor.id_usuario }}">
 
                 <div class="mb-2">
                     <label for="id_pago" class="block text-sm font-bold text-black">ID Pago:</label>
@@ -468,9 +468,6 @@
 
                 </div>
 
-                  
-
-                <!-- Otros campos necesarios para la actualización del pago -->
 
                 <div class="2 text-center">
                     <button type="button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
