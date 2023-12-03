@@ -1460,7 +1460,6 @@ async def drivers(request: Request,
     visible_pages = 10
 
 
-    
     start_page = max(1, page - (visible_pages // 2))
     end_page = min(total_paginas, start_page + visible_pages - 1)
 
@@ -1520,7 +1519,12 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
     taxi_actual = (db.query(Taxi).join(ConductorActual, ConductorActual.id_taxi == Taxi.id_taxi).filter(ConductorActual.id_conductor == id_usuario).first())
     empresas = db.query(Empresa, Empresa.nombre).filter(Empresa.id_empresa == Usuario.empresa_id).first()
     usuario = db.query(Usuario).filter(Usuario.id_usuario == id_usuario).first()
-    return templates.TemplateResponse("./Reports/dailyreports.html", {"request": request, "reports": reports, "conductor": conductor,"taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas,"weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior, "usuario": usuario})
+    id_conductor = id_usuario
+
+    return templates.TemplateResponse(
+    "./Reports/dailyreports.html", 
+    {"request": request, "reports": reports, "conductor": conductor, "taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas, "weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior, "usuario": usuario, "id_conductor": id_conductor}
+    )
     
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def search(request: Request, search: Optional[str] = Form(None), db: Session = Depends(get_database)):
@@ -1790,3 +1794,80 @@ async def detail_taxi(
 # -- END OF THE ROUTE -- # 
 
 
+@app.post("/update/payment", tags=["payments"])
+async def actualizar_pago(
+    request: Request,
+    id_pago: int = Form(...),
+    id_conductor: int = Form(...),
+    nueva_cuota: int = Form(...),
+    db: Session = Depends(get_database),
+):
+    try:
+        if not serverStatus(db):
+           alert = {"type": "general", "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+           request.session["alert"] = alert
+           return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
+        c_user = request.cookies.get("c_user")
+        if not c_user:
+            alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
+        token_payload = tokenDecoder(c_user)
+        if not token_payload:
+            alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+        
+        user_id = int(token_payload["sub"])
+        usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+        
+        if not usuario:
+            alert = {"type": "error", "message": "Usuario no encontrado nombre: " + usuario.nombre + " " + usuario.apellido}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+        
+        
+        
+        # Obtén el pago existente
+        pago_existente = db.query(Pago).filter(Pago.id_pago == id_pago).first()
+
+        if not pago_existente:
+            alert = {"type": "error",
+                     "message": "El pago no existe."}
+            request.session["alert"] = alert
+            return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+
+        
+        if nueva_cuota < pago_existente.valor:
+            alert = {"type": "error",
+                     "message": "El valor no puede ser menor al valor original del pago:" + usuario.nombre + " " + usuario.apellido }
+            request.session["alert"] = alert
+            return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+        
+        # Actualiza la cuota del pago
+        datos_conductor = getDriverData(id_conductor, db)
+        pago_antiguo=pago_existente.valor
+        pago_existente.valor = nueva_cuota
+        pago_existente.estado = nueva_cuota >= datos_conductor["cuota_diaria_taxi"]
+        
+        estado_de_pago = "Pagado" if pago_existente.estado else "Pendiente"
+        db.commit()
+
+        alert = {"type": "success",
+                 "message": "Pago actualizado exitosamente para el conductor: " + usuario.nombre + " " + usuario.apellido + "con estado: " +  estado_de_pago}
+        request.session["alert"] = alert
+
+        return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+
+    except HTTPException as e:
+        alert = {"type": "general", "message": str(e.detail)}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    except Exception as e:
+        alert = {"type": "general",
+                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)            

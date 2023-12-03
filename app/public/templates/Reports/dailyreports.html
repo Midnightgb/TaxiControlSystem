@@ -10,7 +10,7 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <script src="{{ url_for('static', path='js/formatoMoneda.js')}}"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='css/style.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/loader.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind/output.css')}}">
@@ -184,15 +184,17 @@
                                             <span
                                                 class="bg-red-500 text-white py-1 px-3 rounded-full text-xs">Pendiente</span>
                                             {% if reporte.estado == 0 %}
-                                            <button class="drop-shadow-lg">
-                                                <a href="" class="font-bold p-1 rounded">
-                                                    <i class='bx bx-edit'></i>
-                                                </a>
+                                            <!-- boton -->
+                                            <button class="drop-shadow-lg"
+                                                    onclick="openUpdatePaymentModal('{{ conductor.id_usuario }}', '{{ reporte.id_pago }}', '{{reporte.valor}}')">
+                                                <i class='bx bx-edit'></i>
                                             </button>
+
                                             {%endif%}
                                             {% endif %}
                                         </p>
                                     </td>
+
                                     <td class="">{{ reporte.fecha }}</td>
                                 </tr>
                                 {% endfor %}
@@ -426,7 +428,72 @@
         </div>
     </div>
 
+    <!-- MODAL PARA Actualización de Pagos -->
+    <div id="updatePaymentModal"
+        class="modal fixed hidden inset-0 overflow-y-auto flex items-center justify-center backdrop-blur-sm bg-white/30 ease-in duration-200">
+        <div class="modal-overlay inset-0 bg-black opacity-30"></div>
+
+        <div
+            class="modal-container mx-auto p-8 bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 border border-zinc-300">
+            <h1 class="text-3xl font-bold text-center mt-4">Actualizar Pago de {{ conductor.nombre }} {{ conductor.apellido}}</h1>
+            
+
+            <div class="mb-2">
+                <label for="valor" class="block text-sm font-bold text-black">Valor Actual:</label>
+                <input type="number"  class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                        focus:outline-none focus:border-blue-500" name="valor" id="valor"
+                    value="" readonly>
+            </div>
+            
+
+            <form action="/update/payment" method="POST" enctype="multipart/form-data" onsubmit="limpiarFormatoMoneda(this.nueva_cuota)"
+                class="grid grid-cols-1 md:grid-cols-2 gap-8" id="updatePaymentForm">
+
+                <input type="text" name="id_conductor" id="id_conductor" value="{{ conductor.id_usuario }}">
+
+                <div class="mb-2">
+                    <label for="id_pago" class="block text-sm font-bold text-black">ID Pago:</label>
+                    <input type="text" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="id_pago" id="id_pago"
+                        value="" readonly>
+                </div>
+               
+                
+                <!-- nuevo_cuota -->
+                <div class="mb-2">
+                    <label for="nueva_cuota" class="block text-sm font-bold text-black">Nueva Cuota</label>
+                    <input type="text" oninput="formatoMoneda(this)" class="form-input mt-1 block w-full py-2 rounded-md border border-black
+                            focus:outline-none focus:border-blue-500" name="nueva_cuota" id="nueva_cuota"
+                        value="{{ reports.valor }}" required>
+
+                </div>
+
+                  
+
+                <!-- Otros campos necesarios para la actualización del pago -->
+
+                <div class="2 text-center">
+                    <button type="button" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                        onclick="closeUpdatePaymentModal()">Cerrar Modal</button>
+                </div>
+
+                <div class="2 text-center">
+                    <button type="submit"
+                        class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Actualizar
+                        Pago</button>
+                </div>
+
+            </form>
+            
+        </div>
+    </div>
+
+ 
+    
+    
+
     <script src="{{ url_for('static', path='js/reportsDrivers.js')}}"></script>
+    <script src="{{ url_for('static', path='js/payment.js')}}"></script>
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>
