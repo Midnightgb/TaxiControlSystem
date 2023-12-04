@@ -76,8 +76,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             await manager.broadcast(data)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        data = await websocket.receive_text()
-        await manager.broadcast(f"User #{data} left the chat")
+        await manager.broadcast(f"User #{client_id} left the chat")
 # ========================================== END OF WEBSOCKET ============================================ #
 
 websocket_connections = set()
