@@ -1874,8 +1874,8 @@ async def actualizar_pago(
         estado_de_pago = "Pagado" if pago_existente.estado else "Pendiente"
         db.commit()
 
-        alert = {"type": "success",
-                 "message": "Pago actualizado exitosamente para el conductor: " + usuario.nombre + " " + usuario.apellido + "con estado: " +  estado_de_pago}
+        alert_message = f"Pago actualizado exitosamente para el conductor {datos_conductor.get('nombre')} {datos_conductor.get('apellido')}. Nueva cuota: {nueva_cuota}"
+        alert = {"type": "success", "message": alert_message}
         request.session["alert"] = alert
 
         return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
@@ -1886,7 +1886,7 @@ async def actualizar_pago(
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     except Exception as e:
-        alert = {"type": "general",
-                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        print(f"Error en el servidor: {str(e)}")
+        alert = {"type": "general", "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)            
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)     

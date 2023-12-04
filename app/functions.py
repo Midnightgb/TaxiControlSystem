@@ -52,6 +52,7 @@ def getDriverData(id_conductor, db: SessionLocal):
             data = {
                 "id_conductor": conductor_actual.id_conductor,
                 "nombre": conductor_actual.conductor.nombre,
+                "apellido": conductor_actual.conductor.apellido,
                 "cuota_diaria_taxi": taxi.cuota_diaria,
             }
             return data
