@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     closeModalButton.addEventListener("click", function () {
         modal.classList.add("hidden");
     });
-    const form = document.getElementById("updateUserForm");
+    const form = document.getElementById("formPago");
 
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
