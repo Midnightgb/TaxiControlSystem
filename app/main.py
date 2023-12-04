@@ -1843,11 +1843,12 @@ async def actualizar_pago(
         usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
         
         if not usuario:
-            alert = {"type": "error", "message": "Usuario no encontrado nombre: " + usuario.nombre + " " + usuario.apellido}
+            alert = {"type": "error", "message": "Usuario no encontrado nombre."}
             request.session["alert"] = alert
             return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
         
-        
+        datos_conductor = getDriverData(id_conductor, db)
+
         
         # Obtén el pago existente
         pago_existente = db.query(Pago).filter(Pago.id_pago == id_pago).first()
@@ -1861,12 +1862,11 @@ async def actualizar_pago(
         
         if nueva_cuota < pago_existente.valor:
             alert = {"type": "error",
-                     "message": "El valor no puede ser menor al valor original del pago:" + usuario.nombre + " " + usuario.apellido }
+                    "message": f"El valor no puede ser menor al valor original del pago para el conductor {datos_conductor['nombre']} {datos_conductor['apellido']}."}
             request.session["alert"] = alert
             return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
-        
+            
         # Actualiza la cuota del pago
-        datos_conductor = getDriverData(id_conductor, db)
         pago_antiguo=pago_existente.valor
         pago_existente.valor = nueva_cuota
         pago_existente.estado = nueva_cuota >= datos_conductor["cuota_diaria_taxi"]
