@@ -1,19 +1,16 @@
-let bandera = sessionStorage.getItem('bandera') || 0;
+let banderaOpen = sessionStorage.getItem('banderaOpen') || 0;
 document.addEventListener("DOMContentLoaded", function () {
-    const openModalButton = document.getElementById("openModalButton");
-    const closeModalButton = document.getElementById("closeModalButton");
+    const openModalPago = document.getElementById("openModalPago");
+    const closeModalPago = document.getElementById("closeModalPago");
 
-   
+    const modalPago = document.getElementById("modalPago");
 
-    const modal = document.getElementById("modalPago");
-    
-
-    openModalButton.addEventListener("click", function () {
-        modal.classList.remove("hidden");
+    openModalPago.addEventListener("click", function () {
+        modalPago.classList.remove("hidden");
     });
 
-    closeModalButton.addEventListener("click", function () {
-        modal.classList.add("hidden");
+    closeModalPago.addEventListener("click", function () {
+        modalPago.classList.add("hidden");
     });
     const form = document.getElementById("formPago");
 
@@ -31,16 +28,16 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("Respuesta del servidor:", response.ok);
 
             if (response.ok) {
-                modal.classList.add("hidden");
+                modalPago.classList.add("hidden");
 
-                sessionStorage.setItem('bandera', '1');
+                sessionStorage.setItem('banderaOpen', '1');
 
                 // Recargar la página después de un breve retraso
                 setTimeout(function () {
                     location.reload();
                 }, 500);
             } else {
-                sessionStorage.setItem('bandera', '2');
+                sessionStorage.setItem('banderaOpen', '2');
             }
 
         } catch (error) {
@@ -49,26 +46,26 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     window.onload = function () {
-        const bandera = sessionStorage.getItem('bandera');
+        const banderaOpen = sessionStorage.getItem('banderaOpen');
         
     
-        if (bandera == 1) {
+        if (banderaOpen == 1) {
             Swal.fire({
                 icon: 'success',
                 title: 'Pago realizado correctamente',
                 showConfirmButton: false,
                 timer: 1500,
                 didClose: () => {
-                    sessionStorage.setItem('bandera', '0');
+                    sessionStorage.setItem('banderaOpen', '0');
                 }
             });
-        } else if (bandera == 2) {
+        } else if (banderaOpen == 2) {
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
                 text: 'Algo salió mal!',
                 didClose: () => {
-                    sessionStorage.setItem('bandera', '0');
+                    sessionStorage.setItem('banderaOpen', '0');
                 }
             });
         }
