@@ -624,6 +624,10 @@ video {
   grid-column: span 2 / span 2;
 }
 
+.col-span-6 {
+  grid-column: span 6 / span 6;
+}
+
 .col-start-1 {
   grid-column-start: 1;
 }
@@ -886,6 +890,10 @@ video {
   justify-content: space-around;
 }
 
+.gap-2 {
+  gap: 0.5rem;
+}
+
 .gap-4 {
   gap: 1rem;
 }
@@ -900,10 +908,6 @@ video {
 
 .gap-y-3 {
   row-gap: 0.75rem;
-}
-
-.gap-y-60 {
-  row-gap: 15rem;
 }
 
 .-space-x-px > :not([hidden]) ~ :not([hidden]) {
@@ -1066,10 +1070,6 @@ video {
 .bg-zinc-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(244 244 245 / var(--tw-bg-opacity));
-}
-
-.p-1 {
-  padding: 0.25rem;
 }
 
 .p-2 {
