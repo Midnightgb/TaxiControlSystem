@@ -5,10 +5,10 @@ console.log("client_id: ", client_id);
 var ws = new WebSocket(`wss://6935-191-156-47-50.ngrok-free.app/ws/${client_id}`);
 ws.onopen = function() {
     console.log(nameClient);
-    console.log(last_name);
+    console.log(lastNameClient);
     console.log(rolClient);
-    if (rolClient == Rol.Secretaria) {
-      ws.send("connected");
+    if (rolClient == "Rol.Secretaria") {
+      ws.send(nameClient + " ha iniciado sesión.");
     }
 };
 
