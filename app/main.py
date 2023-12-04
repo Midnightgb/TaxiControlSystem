@@ -2069,11 +2069,12 @@ async def actualizar_pago(
         usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
         
         if not usuario:
-            alert = {"type": "error", "message": "Usuario no encontrado nombre: " + usuario.nombre + " " + usuario.apellido}
+            alert = {"type": "error", "message": "Usuario no encontrado nombre."}
             request.session["alert"] = alert
             return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
         
-        
+        datos_conductor = getDriverData(id_conductor, db)
+
         
         # Obtén el pago existente
         pago_existente = db.query(Pago).filter(Pago.id_pago == id_pago).first()
@@ -2087,12 +2088,11 @@ async def actualizar_pago(
         
         if nueva_cuota < pago_existente.valor:
             alert = {"type": "error",
-                     "message": "El valor no puede ser menor al valor original del pago:" + usuario.nombre + " " + usuario.apellido }
+                    "message": f"El valor no puede ser menor al valor original del pago para el conductor {datos_conductor['nombre']} {datos_conductor['apellido']}."}
             request.session["alert"] = alert
             return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
-        
+            
         # Actualiza la cuota del pago
-        datos_conductor = getDriverData(id_conductor, db)
         pago_antiguo=pago_existente.valor
         pago_existente.valor = nueva_cuota
         pago_existente.estado = nueva_cuota >= datos_conductor["cuota_diaria_taxi"]
@@ -2100,8 +2100,8 @@ async def actualizar_pago(
         estado_de_pago = "Pagado" if pago_existente.estado else "Pendiente"
         db.commit()
 
-        alert = {"type": "success",
-                 "message": "Pago actualizado exitosamente para el conductor: " + usuario.nombre + " " + usuario.apellido + "con estado: " +  estado_de_pago}
+        alert_message = f"Pago actualizado exitosamente para el conductor {datos_conductor.get('nombre')} {datos_conductor.get('apellido')}. Nueva cuota: {nueva_cuota}"
+        alert = {"type": "success", "message": alert_message}
         request.session["alert"] = alert
 
         return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
@@ -2112,7 +2112,7 @@ async def actualizar_pago(
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     except Exception as e:
-        alert = {"type": "general",
-                 "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+        print(f"Error en el servidor: {str(e)}")
+        alert = {"type": "general", "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)            
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)     

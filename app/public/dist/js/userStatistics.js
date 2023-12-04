@@ -31,7 +31,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }],
             tooltip: {
-                enabled: true,
                 y: {
                     formatter: function (value) {
                         return "$ " + Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); // Formato de moneda sin decimales
@@ -41,11 +40,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     fontSize: '16px',
                     textAlign: 'center',
                 },
+            },
+            dataLabels: {
+                enabled: false
             }
         };
-
-   
-
 
         var chart = new ApexCharts(chartMonthlyIncomeElement, options);
         chart.render();
@@ -63,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
             `;
         }
-        
+
     } else {
         console.log("No se encontraron los elementos");
     }
