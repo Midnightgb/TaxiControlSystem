@@ -34,12 +34,14 @@
                     <p class="text-xl font-semibold">Hoy es {{welcome.day}}</p>
                 </div>
             </div>
-        </section>           
+        </section>
         <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5">
-            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
+            <section
+                class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-lg font-bold my-5">
                     <i class='bx'>
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" />
+                        <img
+                            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAABwUlEQVRYR+2XgU3DQAxF2w1gg7IBTEDZADYoEwATECaADSgTwAawAWUCugGMwH9whwK95OxLgqIKS1YU1fa9/nMuznQyMpuOjGeyVUA7UnchP5TP5Nyv5C/yqlT5UoX2teCtnGvKADsNgC62EiDUeA6K5BbbU8A6F1T/vQToXgWOjYug1IEx9jPMCzRXzqNnAcWeyB+sOV6gcxW+thYPcVe6VtYcL5BnuyID6qCSybxAqINKHlsqmCfOZF4gmhmVPAYMUCbzAnH4vZkqfwW9y9muJ2uOF4i6nsZ2NTTFS4DIszQ3qqAOKpmtFKhNKQBQ5sZMUQvsAhTL0OizcIMqa68qdfA+gEqEaMzZCiC2h7GDK8dAyugjXqxsH242j0ILVT0LMOYFFEhf3cmXliQLECrwygCoiwHGqd2qWA6IrWHcaNoaL2D25G4DAuK1R5gIDxRDW1KpNiDLaexVKMazfUep5CYg+oUhfkhLTpJNQPTNfEga1Wbrdn+vkQKikfmq+Avb+CpJAZUMYaXwF0r88RJOAXnmnVKQmGcCqhR92XUlY/7GAJdSiGYeuqHrjz9HwLflTmrjH+0v7B8op+XoFPoALyFCJRWbEcUAAAAASUVORK5CYII=" />
                     </i>
                     <p class="text-center text-lg font-bold my-5">
                         Conductores: {{db.drivers}}
@@ -53,7 +55,8 @@
                     </p>
                 </p>
             </section>
-            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
+            <section
+                class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-lg font-bold my-5">
                     <i class='bx'><img
                             src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAB3klEQVRYR+1Xi1HDMAxtN4ANwgawQdkANoAJgAkoEwAT0A1gA7IBbNBsABvAez07pypOFH9ayl10p8vPkp+fZMmZzw5M5geGZzYBsiIyMVSCoQpObqALKO+PLKeB7w3evUGfobzvFStkp7B8TwQRmvQbL8+hn32ILEAEQ2ZKChk6SQFEdj6cIVd2Da2hvI+VCxi8CiOyRF8dGWJoidH3zuIJ17tYFGr8I55v3buVW2AUoDVGV87iElcmZY5oxo9jGNLGjHlKqPSccpHBsPWFrHS4PDAzbH2ASofLAzLDFgLExONK9iEPmITRaEUD2icYD2JrB2tAuyiEFtPcLO2O04B+LOsdfW9xWIBqt91ZaXOFTLCHVU6DqTMESCYcO/xXBqIGtmducXTzAr0K5fIQIBZDOvKincTg061HL3BUyNhMV2LWnITnwmSH1812FCA6YQ/jlU3WN8YYZuRYNmcytYCyzrFIehkFKHXiFLv/AygncVOYoU0NZeffiN5lpc/QFkh/Em3PWqHmunRJLJ2xJpUQfwL1vjon0bGAho66MUB1azK7PZ2HGPpTQPoIstWNY+gIjNUM+drULUjCmGWdvz8VlGD4t0nWSohcbA2H7AaNdFwqFCXAbnxMgCwqfwEYYmAlIDYHNAAAAABJRU5ErkJggg==" /></i>
@@ -66,7 +69,8 @@
                     </p>
                 </p>
             </section>
-            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
+            <section
+                class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-lg font-bold my-5">
                     <i class='bx'>
                         <img
@@ -76,31 +80,159 @@
                         Balance Diario
                     </p>
                     <p class="text-center text-lg font-bold my-5">
-                        Ingresos: <span id="income">$ {{ '{:,}'.format(db.income.totalToday)  | replace(',', '.') }} </span><img src="{{db.income.src}}" class="inline-block w-7 md:w-5 lg:w-7" />
+                        Ingresos: <span id="income">$ {{ '{:,}'.format(db.income.totalToday)  | replace(',', '.') }}
+                        </span><img src="{{db.income.src}}" class="inline-block w-7 md:w-5 lg:w-7" />
                     </p>
                     <p class="text-center text-lg font-bold my-5 me-10">
-                        Gastos: <span id="expense">$ {{ '{:,}'.format(db.expenses.totalToday)  | replace(',', '.') }}</span>
+                        Gastos: <span id="expense">$
+                            {{ '{:,}'.format(db.expenses.totalToday)  | replace(',', '.') }}</span>
                     </p>
                 </p>
             </section>
         </article>
 
         <article class="grid grid-cols-1 md:grid-cols-2 gap-6 -z-50">
-            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
-                <p class="text-center text-xl font-bold my-5">Balance Mensual<i class='bx bx-dollar-circle ms-7'></i></p>
+            <section
+                class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
+                <p class="text-center text-xl font-bold my-5">Balance Mensual<i class='bx bx-dollar-circle ms-7'></i>
+                </p>
                 <div id="chart"></div>
             </section>
-            <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
+            <section
+                class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 <p class="text-center text-xl font-bold my-5">Historial de eventos<i class='bx bx-history ms-7'></i></p>
-                <div class="overflow-auto max-h-72 md:max-h-60 lg:max-h-80 border border-red-600 md:border-violet-700 lg:border-green-600">
-                    <!-- add a timeline -->
-                    <ul class="timeline-widget">
-                        <li class="timeline-item">
+                <div class="overflow-auto max-h-72 md:max-h-60 lg:max-h-80">
+                    <!-- layout historial de eventos -->
+                    <ul class="flex flex-col gap-2">
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                                <p class="text-sm">1:20 pm</p>
+                            </div>
+                            <div class="mx-5">
+                                <p class="p-1 rounded-xl border-green-600 border-2"></p>
+                            </div>
+                            <div class="flex-initial w-64">
+                                <p class="text-sm break-words" style="max-width: 250px;">Pago recibido de julian andres
+                                    vasquez.</p>
+                            </div>
+                        </li>
+                        <!-- linea vertical -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                            </div>
+                            <div class="text-gray-500">
+                                |
+                            </div>
+                            <div class="flex-initial w-64">
+                            </div>
+                        </li>
+                        <!--  -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                                <p class="text-sm">1:12 pm</p>
+                            </div>
+                            <div class="mx-5">
+                                <p class="p-1 rounded-xl border-blue-500 border-2"></p>
+                            </div>
+                            <div class="flex-initial w-64">
+                                <p class="text-sm break-words" style="max-width: 250px;">Laura ha iniciado sesion.</p>
+                            </div>
+                        </li>
+                        <!-- linea vertical -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                            </div>
+                            <div class="text-gray-500">
+                                |
+                            </div>
+                            <div class="flex-initial w-64">
+                            </div>
+                        </li>
+                        <!--  -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                                <p class="text-sm">11:27 am</p>
+                            </div>
+                            <div class="mx-5">
+                                <p class="p-1 rounded-xl border-orange-500 border-2"></p>
+                            </div>
+                            <div class="flex-initial w-64">
+                                <p class="text-sm break-words" style="max-width: 250px;">Se ha registrado un nuevo
+                                    conductor.</p>
+                            </div>
+                        </li>
+                        <!-- linea vertical -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                            </div>
+                            <div class="text-gray-500">
+                                |
+                            </div>
+                            <div class="flex-initial w-64">
+                            </div>
+                        </li>
+                        <!--  -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                                <p class="text-sm">9:55 am</p>
+                            </div>
+                            <div class="mx-5">
+                                <p class="p-1 rounded-xl border-teal-500 border-2"></p>
+                            </div>
+                            <div class="flex-initial w-64">
+                                <p class="text-sm break-words" style="max-width: 250px;">Se ha registrado un nuevo
+                                    vehiculo.</p>
+                            </div>
+                        </li>
+                        <!-- linea vertical -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                            </div>
+                            <div class="text-gray-500">
+                                |
+                            </div>
+                            <div class="flex-initial w-64">
+                            </div>
+                        </li>
+                        <!--  -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                                <p class="text-sm">9:37 am</p>
+                            </div>
+                            <div class="mx-5">
+                                <p class="p-1 rounded-xl border-green-600 border-2"></p>
+                            </div>
+                            <div class="flex-initial w-64">
+                                <p class="text-sm break-words" style="max-width: 250px;">Pago recibido de Alfredo
+                                    Martinez.</p>
+                            </div>
+                        </li>
+                        <!-- linea vertical -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                            </div>
+                            <div class="text-gray-500">
+                                |
+                            </div>
+                            <div class="flex-initial w-64">
+                            </div>
+                        </li>
+                        <!--  -->
+                        <li class="flex items-center justify-center ">
+                            <div class="flex-initial w-16">
+                                <p class="text-sm">8:30 am</p>
+                            </div>
+                            <div class="mx-5">
+                                <p class="p-1 rounded-xl border-green-600 border-2"></p>
+                            </div>
+                            <div class="flex-initial w-64">
+                                <p class="text-sm break-words" style="max-width: 250px;">Pago recibido de Alberto Perez.</p>
+                            </div>
                         </li>
                     </ul>
                 </div>
             </section>
-<!--             <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
+            <!--             <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
                 
             </section> -->
         </article>
