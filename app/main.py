@@ -967,11 +967,14 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         ).all()
         print("conductores_con_cuota_registrada:", conductores_con_cuota_registrada)
 
+        # Obtener la lista de conductores que NO han registrado la cuota para el día de hoy
         conductores = db.query(Usuario).filter(
             Usuario.rol == "Conductor",
             Usuario.empresa_id == usuario.empresa_id,
-            ~Usuario.id_usuario.in_([c[0] for c in conductores_con_cuota_registrada])
+            ~Usuario.id_usuario.in_([c[0] for c in conductores_con_cuota_registrada]),
+            Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))
         ).all()
+
         taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
             Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
 

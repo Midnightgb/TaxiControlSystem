@@ -38,10 +38,12 @@
                     <h1 class="text-4xl font-bold mt-4 mb-5">Registros del Conductor: {{ conductor.nombre }}
                         {{ conductor.apellido }}</h1>
                 </div>
-                <div class="container mx-auto flex flex-wrap justify-end items-end mt-4">
-                    
-                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" id="openModalPago">Agregar Reporte</button>
-                </div>
+                {% if taxi_actual: %}
+                    <div class="container mx-auto flex flex-wrap justify-end items-end mt-4">
+                        
+                        <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" id="openModalPago">Agregar Pago</button>
+                    </div>
+                {% endif %}
                 <div class="container">
                     <div class="row">
                         <article class="grid grid-cols-1 md:grid-cols-3 gap-6 my-5 mt-5">
@@ -98,26 +100,27 @@
                                     <p class="text-center text-lg font-bold ">
                                         Matricula: {{ taxi_actual.matricula }}
                                     </p>
+                                    <div class="text-center mb-3">
+                                        <button type="submit" data-te-ripple-init data-te-ripple-color="light"
+                                            class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
+                                            id="openModalButton2">
+                                            <span class="mr-2">Editar Taxi</span>
+    
+                                            <span class="items-center">
+                                                <span>
+                                                    <img width="20" height="20" viewBox="0 0 20 20"
+                                                        src="https://img.icons8.com/fluency/48/taxi.png" alt="taxi" />
+                                                </span>
+                                            </span>
+                                        </button>
+                                    </div>
                                     {% else %}
                                     <p class="text-center text-lg font-bold ">
                                         No tiene vehiculo asignado
                                     </p>
                                     {% endif %}
                                 </p>
-                                <div class="text-center mb-3">
-                                    <button type="submit" data-te-ripple-init data-te-ripple-color="light"
-                                        class="flex items-center mx-auto text-center rounded bg-blue-500 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
-                                        id="openModalButton2">
-                                        <span class="mr-2">Editar Taxi</span>
-
-                                        <span class="items-center">
-                                            <span>
-                                                <img width="20" height="20" viewBox="0 0 20 20"
-                                                    src="https://img.icons8.com/fluency/48/taxi.png" alt="taxi" />
-                                            </span>
-                                        </span>
-                                    </button>
-                                </div>
+                                
                             </section>
                             <section
                                 class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-3 border border-zinc-300">
