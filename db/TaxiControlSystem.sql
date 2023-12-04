@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 02, 2023 at 03:35 AM
+-- Generation Time: Dec 04, 2023 at 07:11 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -29,6 +29,7 @@ USE `taxicontrolsystem`;
 -- Table structure for table `conductor_actual`
 --
 
+DROP TABLE IF EXISTS `conductor_actual`;
 CREATE TABLE `conductor_actual` (
   `id_conductor_actual` int(11) NOT NULL,
   `id_conductor` int(11) NOT NULL,
@@ -44,6 +45,7 @@ CREATE TABLE `conductor_actual` (
 -- Table structure for table `configuracion_app`
 --
 
+DROP TABLE IF EXISTS `configuracion_app`;
 CREATE TABLE `configuracion_app` (
   `id_configuracion` int(11) NOT NULL,
   `plan` enum('Basico','Premium','Personalizado') NOT NULL DEFAULT 'Basico',
@@ -59,6 +61,7 @@ CREATE TABLE `configuracion_app` (
 -- Table structure for table `configuracion_plan`
 --
 
+DROP TABLE IF EXISTS `configuracion_plan`;
 CREATE TABLE `configuracion_plan` (
   `id_configuracion_plan` int(11) NOT NULL,
   `cantidad_taxi` int(11) NOT NULL DEFAULT 100,
@@ -79,6 +82,7 @@ CREATE TABLE `configuracion_plan` (
 -- Table structure for table `empresas`
 --
 
+DROP TABLE IF EXISTS `empresas`;
 CREATE TABLE `empresas` (
   `id_empresa` int(11) NOT NULL,
   `nombre` varchar(45) NOT NULL,
@@ -95,6 +99,7 @@ CREATE TABLE `empresas` (
 -- Table structure for table `mantenimientos`
 --
 
+DROP TABLE IF EXISTS `mantenimientos`;
 CREATE TABLE `mantenimientos` (
   `id_mantenimiento` int(11) NOT NULL,
   `id_taxi` int(11) NOT NULL,
@@ -111,6 +116,7 @@ CREATE TABLE `mantenimientos` (
 -- Table structure for table `notificaciones`
 --
 
+DROP TABLE IF EXISTS `notificaciones`;
 CREATE TABLE `notificaciones` (
   `id_mensaje` int(11) NOT NULL,
   `id_secretaria` int(11) DEFAULT NULL,
@@ -124,6 +130,7 @@ CREATE TABLE `notificaciones` (
 -- Table structure for table `pagos`
 --
 
+DROP TABLE IF EXISTS `pagos`;
 CREATE TABLE `pagos` (
   `id_pago` int(11) NOT NULL,
   `id_conductor` int(11) NOT NULL,
@@ -141,6 +148,7 @@ CREATE TABLE `pagos` (
 -- Table structure for table `reportes`
 --
 
+DROP TABLE IF EXISTS `reportes`;
 CREATE TABLE `reportes` (
   `id_reporte` int(11) NOT NULL,
   `ingresos` int(11) NOT NULL,
@@ -157,6 +165,7 @@ CREATE TABLE `reportes` (
 -- Table structure for table `reporte_taxis`
 --
 
+DROP TABLE IF EXISTS `reporte_taxis`;
 CREATE TABLE `reporte_taxis` (
   `id_reporte_taxi` int(11) NOT NULL,
   `id_taxi` int(11) NOT NULL,
@@ -171,6 +180,7 @@ CREATE TABLE `reporte_taxis` (
 -- Table structure for table `taxis`
 --
 
+DROP TABLE IF EXISTS `taxis`;
 CREATE TABLE `taxis` (
   `id_taxi` int(11) NOT NULL,
   `empresa_id` int(11) NOT NULL,
@@ -191,6 +201,7 @@ CREATE TABLE `taxis` (
 -- Table structure for table `usuarios`
 --
 
+DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `id_usuario` int(11) NOT NULL,
   `cedula` int(11) NOT NULL,
@@ -425,35 +436,6 @@ ALTER TABLE `taxis`
 --
 ALTER TABLE `usuarios`
   ADD CONSTRAINT `usuarios_ibfk_1` FOREIGN KEY (`empresa_id`) REFERENCES `empresas` (`id_empresa`);
-
-DELIMITER $$
---
--- Events
---
-CREATE DEFINER=`root`@`localhost` EVENT `generar_reportes_mensuales` ON SCHEDULE EVERY 1 MONTH STARTS '2023-11-01 07:19:00' ON COMPLETION NOT PRESERVE ENABLE DO BEGIN
-    DECLARE empresa_id_cursor INT;
-    DECLARE done BOOLEAN DEFAULT FALSE;
-    DECLARE empresas_cursor CURSOR FOR SELECT id_empresa FROM empresas;
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
-
-    OPEN empresas_cursor;
-
-    read_loop: LOOP
-        FETCH empresas_cursor INTO empresa_id_cursor;
-
-        IF done THEN
-            LEAVE read_loop;
-        END IF;
-
-        INSERT INTO reportes (ingresos, gastos, empresa_id, fecha)
-VALUES (0, 0, empresa_id_cursor, DATE_FORMAT(CURRENT_DATE, '%Y-%m-01'));
-
-    END LOOP;
-
-    CLOSE empresas_cursor;
-END$$
-
-DELIMITER ;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
