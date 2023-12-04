@@ -923,8 +923,6 @@ async def create_assignment(
 # -- MODULO 2-- #
 @app.get("/register/daily", response_class=HTMLResponse, tags=["routes"])
 async def registro_diario_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
-    user_id = None
-
     try:
         if not serverStatus(db):
             alert = {"type": "general",
@@ -934,7 +932,7 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
 
         if not c_user:
             alert = {"type": "general",
-                     "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -942,7 +940,7 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
 
         if not token_payload:
             alert = {"type": "general",
-                     "message": "Su sesion ha expirado, por favor inicie sesión nuevamente."}
+                     "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
             request.session["alert"] = alert
             return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -961,8 +959,19 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
             request.session["alert"] = alert
             return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
 
-        conductores = db.query(Usuario).filter(Usuario.rol == "Conductor", Usuario.empresa_id == usuario.empresa_id).filter(
-            Usuario.id_usuario.in_(db.query(ConductorActual.id_conductor))).all()
+        fecha_actual = date.today()
+
+        conductores_con_cuota_registrada = db.query(Pago.id_conductor).filter(
+            Pago.fecha == fecha_actual,
+            Pago.cuota_diaria_registrada == True
+        ).all()
+        print("conductores_con_cuota_registrada:", conductores_con_cuota_registrada)
+
+        conductores = db.query(Usuario).filter(
+            Usuario.rol == "Conductor",
+            Usuario.empresa_id == usuario.empresa_id,
+            ~Usuario.id_usuario.in_([c[0] for c in conductores_con_cuota_registrada])
+        ).all()
         taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == usuario.empresa_id).filter(
             Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
 
@@ -973,7 +982,6 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         alert = {"type": "general", "message": str(e.detail)}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-
     except Exception as e:
         alert = {"type": "general",
                  "message": "Error de servidor. Inténtelo nuevamente más tarde."}
@@ -1041,7 +1049,7 @@ async def registro_diario_view(request: Request,id_usuario:int=Form(...), c_user
     
 
 
-# -- MODULO 2 actualizar registro diario-- #
+# -- MODULO 2 actualizar registro diario-- # v
 
 @app.post("/register/daily", tags=["payments"])
 async def registro_diario(
@@ -1082,7 +1090,7 @@ async def registro_diario(
         alert = {"type": "error",
                  "message": "Este conductor ya tiene un pago registrado para el día de hoy."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
     else:
         estado = valor >= cuota_diaria_taxi
 

@@ -30,20 +30,19 @@
 
             <form action="/register/daily" method="POST" onsubmit="limpiarFormatoMoneda(this.valor)">
                 <div class="mb-3">
-                    {% if not id_usuario:%}
+                    {% if not id_usuario: %}
                     <label for="id_conductor" class="block text-sm font-bold text-black">Conductor</label>
-                    <select
-                        class="mt-1 block w-full py-2 px-3 border border-black bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        name="id_conductor" id="id_conductor" required>
+                    <select class="mt-1 block w-full py-2 px-3 border border-black bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            name="id_conductor" id="id_conductor" required>
                         <option value="" disabled selected>Seleccione un conductor</option>
                         {% for conductor in conductores %}
-                        <option value="{{ conductor.id_usuario }}">{{ conductor.nombre }} {{ conductor.apellido }}
-                        </option>
+                            {% if conductor.id_usuario not in conductores_con_cuota_registrada %}
+                                <option value="{{ conductor.id_usuario }}">{{ conductor.nombre }} {{ conductor.apellido }}</option>
+                            {% endif %}
                         {% endfor %}
                     </select>
-
                     {% else: %}
-                        <input type="hidden" name="id_conductor" value="{{ id_usuario}}">
+                        <input type="hidden" name="id_conductor" value="{{ id_usuario }}">
                     {% endif %}
                 </div>
 
