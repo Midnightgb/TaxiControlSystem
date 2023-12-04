@@ -41,10 +41,9 @@
                         {{ conductor.apellido }}</h1>
                 </div>
                 <div class="container mx-auto flex flex-wrap justify-end items-end mt-4"> 
-                <form action="/daily/register" method="POST">
-                    <input type="hidden" name="id_usuario" value="{{ usuario.id_usuario}}">
-                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Agregar Reporte</button>
-                </form>
+                
+                    <button type="submit" class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" id="openModalButton">Agregar Couta</button>
+                
                 </div>
                 <div class="container">
                     <div class="row">
@@ -267,12 +266,47 @@
             </section>
         </article>
     </main>
+    <div id="myModal"
+            class="modal fixed hidden inset-0 overflow-y-auto items-center flex justify-center backdrop-blur-sm bg-white/30 ">
+            <div class="modal-overlay  inset-0 bg-black opacity-30"></div>
+
+            <div
+                class="modal-container mx-auto p-8 bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 - border border-zinc-300">
+
+                <h1 class="text-3xl font-bold text-center mt-4">Registrar pago del conductor {{usuario.nombre}} </h1>
+
+                <form action="/register/daily2" method="POST" enctype="multipart/form-data"
+                    class="grid grid-cols-1 md:grid-cols-2 gap-8" id="updateUserForm">
+
+                    <div class="col-span-2">
+                        <input type="hidden" name="id_conductor" value="{{ usuario.id_usuario}}">
+                    </div>
+                    
+                    <div class="col-span-6">
+                        <label for="valor" class="block text-sm font-bold text-black">Valor</label>
+                        <input type="text" oninput="formatoMoneda(this)" class="mt-1 block w-full py-2 px-3 border border-black bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        name="valor" id="valor" required>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="button"
+                            class=" bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                            id="closeModalButton"> Cerrar Modal</button>
+                    </div>
+                    <div class=" text-center">
+                        <button type="submit"
+                            class="mx-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" >Registrar couta</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     {% if alert %}
     <p id="alert-type" style="display: none;">{{ alert.type }}</p>
     <p id="alert-message" style="display: none;">{{ alert.message }}</p>
     <script src="{{ url_for('static', path='js/alert.js')}}"></script>
     {% endif %}
     <script src="{{ url_for('static', path='js/app.js')}}"></script>
+    <script src="{{ url_for('static', path='js/dailyReports.js')}}"></script>
     <script src="{{ url_for('static', path='js/userStatistics.js')}}"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>

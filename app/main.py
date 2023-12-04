@@ -688,14 +688,7 @@ async def view_taxi(request: Request,
     if not usuario:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     
-    taxis_paginados=obtener_taxis_paginados(db, page, taxi_page, usuario.empresa_id)
-    taxis = taxis_paginados["taxis"]
-    total_paginas = taxis_paginados["total_paginas"]
-    visible_pages = 10
-
-    start_page = max(1, page - (visible_pages // 2))
-    end_page = min(total_paginas, start_page + visible_pages - 1)
-
+    
     
 
     alert = request.session.pop("alert", None)
@@ -704,18 +697,28 @@ async def view_taxi(request: Request,
         print("no hay taxis")
         return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": [], "alert": alert, "no_taxis_message": "No hay taxis disponibles."})
     
-    #Obtener la empresa del usuario
-    empresa = db.query(Empresa).filter(Empresa.id_empresa == usuario.empresa_id).first()
+    taxis_not_assigned_result = obtener_taxis_paginados(
+    db, page, taxi_page, usuario.empresa_id, assigned=False)
 
-    #Obtener los taxis sin asignar
-    taxisNotAssigned = db.query(Taxi).filter(Taxi.empresa_id == empresa.id_empresa).filter(
-        ~Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+    taxisNotAssigned = taxis_not_assigned_result["taxis"]
+
+    # Obtener los taxis asignados paginados
+    taxis_assigned_result = obtener_taxis_paginados(
+        db, page, taxi_page, usuario.empresa_id, assigned=True)
     
-    #obtener los taxis asignados
-    taxisAssigned = db.query(Taxi).filter(Taxi.empresa_id == empresa.id_empresa).filter(
-        Taxi.id_taxi.in_(db.query(ConductorActual.id_taxi))).all()
+    taxisAssigned = taxis_assigned_result["taxis"]
 
-    return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxis": taxis,"taxisNotAssigned":taxisNotAssigned ,"taxisAssigned":taxisAssigned,"alert": alert,"page":page,"taxi_page":taxi_page,"start_page":start_page,"end_page":end_page,"total_paginas":total_paginas})
+    
+    total_paginas_taxis_not_assigned = taxis_not_assigned_result["total_paginas"]
+    total_paginas_taxis_assigned = taxis_assigned_result["total_paginas"]
+
+    total_paginas = max(total_paginas_taxis_not_assigned, total_paginas_taxis_assigned)
+    visible_pages = 10
+
+    start_page = max(1, page - (visible_pages // 2))
+    end_page = min(total_paginas, start_page + visible_pages - 1)
+
+    return templates.TemplateResponse("viewTaxi.html", {"request": request, "taxisNotAssigned":taxisNotAssigned ,"taxisAssigned":taxisAssigned,"alert": alert,"page":page,"taxi_page":taxi_page,"start_page":start_page,"end_page":end_page,"total_paginas":total_paginas})
 # -- END OF THE ROUTE -- #
 
 # -- PATH TO REDIRECT TO TAXI UPDATE -- #
@@ -1011,6 +1014,9 @@ async def registro_diario_view(request: Request,id_usuario:int=Form(...), c_user
                  "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+
+
 # -- MODULO 2 actualizar registro diario-- #
 
 @app.post("/register/daily", tags=["payments"])
@@ -1090,6 +1096,86 @@ async def registro_diario(
 
     # Redirige a la vista de registro diario
     return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+
+@app.post("/register/daily2", tags=["payments"])
+async def registro_diario(
+    request: Request,
+    id_conductor: int = Form(...),
+    valor: int = Form(...),
+    db: Session = Depends(get_database),
+):
+    if not serverStatus(db):
+        alert = {"type": "general",
+                 "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    if valor < 0:
+        alert = {"type": "error", "message": "El valor no puede ser negativo."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+    
+    datos_conductor = getDriverData(id_conductor, db)
+
+    if not datos_conductor:
+        alert = {"type": "error",
+                 "message": "El conductor no tiene un taxi asignado."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
+        return RedirectResponse(url="/register/daily", status_code=status.HTTP_303_SEE_OTHER)
+
+    cuota_diaria_taxi = datos_conductor["cuota_diaria_taxi"]
+
+    fecha_actual = date.today()
+    pago_existente = db.query(Pago).filter(
+        Pago.id_conductor == id_conductor,
+        Pago.fecha == fecha_actual,
+        Pago.cuota_diaria_registrada == True
+    ).first()
+    if pago_existente:
+        alert = {"type": "error",
+                 "message": "Este conductor ya tiene un pago registrado para el día de hoy."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        estado = valor >= cuota_diaria_taxi
+
+        nuevo_pago = Pago(
+            id_conductor=id_conductor,
+            fecha=fecha_actual,
+            valor=valor,
+            estado=estado,
+            cuota_diaria_registrada=True
+        )
+
+        db.add(nuevo_pago)
+        db.commit()
+        
+        conductor = db.query(Usuario).filter(Usuario.id_usuario == id_conductor).first()
+        mes_actual = date.today().month
+        ano_actual = date.today().year
+
+        
+        reporte_existente = db.query(Reporte).filter(
+            Reporte.empresa_id == conductor.empresa_id,
+            extract('month', Reporte.fecha) == mes_actual,
+            extract('year', Reporte.fecha) == ano_actual
+            
+        ).first()
+
+        if reporte_existente:
+            reporte_existente.ingresos += valor
+            db.commit()
+
+        db.refresh(nuevo_pago)
+        alert = {"type": "success", "message": "Pago registrado exitosamente."}
+        # Almacena la alerta en la sesión
+        request.session["alert"] = alert
+        
+        return HTMLResponse(content=str(True), status_code=200)
+    
+    
+
 
 
 @app.get("/update/daily", response_class=HTMLResponse, tags=["routes"])
@@ -1520,7 +1606,24 @@ async def drivers(request: Request,
     return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores, "alert": alert, "total_paginas": total_paginas, "page": page, "per_page": per_page , "start_page": start_page, "end_page": end_page})
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
-async def reports(request: Request, id_usuario: int = Form(...), db: Session = Depends(get_database)):
+async def reports(request: Request, id_usuario: int = Form(...), db: Session = Depends(get_database),c_user: str = Cookie(None),):
+    if not c_user:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    checkTokenStatus = userStatus(c_user, request)
+    if not checkTokenStatus["status"]:
+        return checkTokenStatus["redirect"]
+
+    if not serverStatus(db):
+        alert = {"type": "general",
+                "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+        request.session["alert"] = alert
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    UUID = checkTokenStatus["userid"]
+    userData = db.query(Usuario).filter(Usuario.id_usuario == UUID).first()
+    if not userData:
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     #mes actual 
     now = datetime.now()
     current_month = now.strftime("%B")
@@ -1829,15 +1932,37 @@ async def detail_taxi(
     # Obtener la sumatoria de todos los mantenimientos
     total_mantenimientos = db.query(func.sum(Mantenimiento.costo)).filter(Mantenimiento.id_taxi == id_taxi).scalar()
 
+    today = date.today()
+
     if not total_pagos:
         total_pagos = 0
 
     if not total_mantenimientos:
         total_mantenimientos = 0
     
+    first_day_of_week = today - timedelta(days=today.weekday())
+    last_day_of_week = first_day_of_week + timedelta(days=6)
+
+    
+
+    # Obtener los pagos de la semana actual
+    weekly_reports = db.query(Pago).filter(
+        Pago.id_conductor == conductorActual.id_conductor,
+        Pago.fecha.between(first_day_of_week, last_day_of_week)
+    ).all()
+
+    reports_week_data = {str(report.fecha): report.valor for report in weekly_reports}
+    # Crear una lista ordenada de los pagos diarios para los últimos 7 días
+    last_seven_days = [(last_day_of_week - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
+
+    # Obtener los pagos diarios para los últimos 7 días
+    daily_reports_data = {day: reports_week_data.get(day, 0) for day in last_seven_days}
+    #consultar manteniminetos que ha tenido el taxi
+    mantenimientos = db.query(Mantenimiento).filter(Mantenimiento.id_taxi == id_taxi).all()
+    
     return templates.TemplateResponse(
         "detailTaxi.html",
-        {"request": request, "pagos": pagos, "mantenimientos": mantenimientos, "conductor": conductor, "taxi": taxi, "total_pagos": total_pagos, "total_mantenimientos": total_mantenimientos}
+        {"request": request, "pagos": pagos, "mantenimientos": mantenimientos, "conductor": conductor, "taxi": taxi, "total_pagos": total_pagos, "total_mantenimientos": total_mantenimientos,"ingresos": daily_reports_data,"mantenimientos": mantenimientos}
     )
 # -- END OF THE ROUTE -- # 
 
