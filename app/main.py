@@ -192,14 +192,6 @@ async def login_post(
                  "message": "El correo o la cédula que ingresaste no coincide con ningún usuario."}
         request.session["alert"] = alert
         return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
-    
-    if role == Rol.Secretaria:
-        admin_id =  1 # Aquí va el id del admin
-        print(admin_id)
-        # enviar la notificación al admin usando el WebSocket
-        print("Enviando notificación al admin...")
-        print("LLamando a la función...")
-
 
     if usuario.contrasena == None:
         alert = {"type": "pass", "message": "La contraseña que ingresaste es incorrecta.",
@@ -230,7 +222,7 @@ async def login_post(
 
 
 @app.get("/home", response_class=HTMLResponse, tags=["routes"])
-async def home(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def home(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database), websocket: WebSocket = None):
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -246,9 +238,24 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
 
     UUID = checkTokenStatus["userid"]
     userData = db.query(Usuario).filter(Usuario.id_usuario == UUID).first()
+    print(userData.rol)
     if not userData:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-
+    rol = userData.rol
+    if userData.rol == Rol.Secretaria:
+        #try:
+        #    while True:
+        #        await manager.connect(websocket)
+        #        await manager.send_personal_message(f"Secretaria {userData.nombre} se ha conectado", websocket)
+        #except WebSocketDisconnect:
+        #    manager.disconnect(websocket)
+        #    await manager.broadcast(f"Secretaria {userData.nombre} se ha desconectado")
+        
+        print("Secretaria conectada")
+        # enviar la notificación al admin usando el WebSocket
+        print("Enviando notificación al admin...")
+        print("LLamando a la función...")
+        
     empresa = db.query(Empresa).filter(
         Empresa.id_empresa == userData.empresa_id).first()
 
@@ -321,6 +328,8 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
 
     welcome = {
         "name": userData.nombre,
+        "last_name": userData.apellido,
+        "rol": userData.rol,
         "day": dateToday,
         }
     alert = request.session.pop("alert", None)

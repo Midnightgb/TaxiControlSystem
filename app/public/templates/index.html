@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -238,6 +239,9 @@
     </footer>
 
     <script>
+        var nameClient ='{{ welcome.name }}';
+        var lastNameClient ='{{ welcome.last_name }}';
+        var rolClient ='{{ welcome.rol }}';
         var reports = JSON.parse('{{ db.reports | tojson | safe }}');
     </script>
     <script src="{{ url_for('static', path='js/websocket.js')}}"></script>
