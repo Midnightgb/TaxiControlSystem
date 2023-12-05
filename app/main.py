@@ -67,7 +67,6 @@ manager = ConnectionManager()
 
 
 @app.websocket("/ws/{nameClient}/{id_usuario}")
-
 async def websocket_endpoint(websocket: WebSocket, nameClient: str, id_usuario: str = None, db: Session = Depends(get_database)):
     await manager.connect(websocket)
     try:
