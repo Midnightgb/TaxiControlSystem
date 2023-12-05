@@ -1644,15 +1644,6 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
         .scalar() or 0  
     )
     
-    acomulado_pendiente = (
-        db.query(func.sum(Pago.valor))
-        .filter(Pago.id_conductor == id_usuario)
-        .filter(Pago.fecha.between(first_day_of_month, last_day_of_month))
-        .filter(Pago.estado == False)
-        .scalar() or 0
-    )
-    
-    print("Total acumulado: ", total_acumulado)        
     first_day_of_last_month = datetime(today.year, today.month - 1, 1) if today.month > 1 else datetime(today.year - 1, 12, 1)    
     last_day_of_last_month = first_day_of_month - timedelta(days=1)
     
@@ -1691,7 +1682,7 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
 
     return templates.TemplateResponse(
     "./Reports/dailyreports.html", 
-    {"request": request, "reports": reports, "conductor": conductor, "taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas, "weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior, "usuario": usuario, "id_conductor": id_conductor, "acomulado_pendiente": acomulado_pendiente}
+    {"request": request, "reports": reports, "conductor": conductor, "taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas, "weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior, "usuario": usuario, "id_conductor": id_conductor}
     )
     
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
