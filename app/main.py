@@ -8,7 +8,6 @@ from fastapi import (
     HTTPException,
     Cookie,
     Query,
-    Response,
     UploadFile,
     WebSocket, 
     WebSocketDisconnect,
@@ -18,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 import bcrypt
 import os
 from dotenv import load_dotenv
@@ -29,7 +28,7 @@ from random import randint
 
 from functions import *
 from models import *
-import json
+
 import base64   
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
@@ -67,16 +66,18 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-@app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
+@app.websocket("/ws/{nameClient}")
+async def websocket_endpoint(websocket: WebSocket, nameClient: str, db: Session = Depends(get_database)):
     await manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
             await manager.broadcast(data)
+
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"User #{client_id} left the chat")
+        await manager.broadcast(f"{nameClient} se ha desconectado.")
 # ========================================== END OF WEBSOCKET ============================================ #
 
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)

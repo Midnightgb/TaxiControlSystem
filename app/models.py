@@ -49,17 +49,17 @@ class Usuario(Base):
     empresa = relationship("Empresa", back_populates="usuarios")
     taxis = relationship("ConductorActual", back_populates="conductor")
     pagos = relationship("Pago", back_populates="conductor")
-    notificaciones = relationship("Notificaciones", back_populates="secretaria")
+    notificaciones = relationship("Notificaciones", back_populates="usuario")
 
 class Notificaciones(Base):
     __tablename__ = "notificaciones"
 
     id_mensaje = Column(Integer, primary_key=True, autoincrement=True)
-    id_secretaria = Column(Integer, ForeignKey("usuarios.id_usuario"), nullable=False)
+    id_usuario = Column(Integer, ForeignKey("usuarios.id_usuario"), nullable=False)
     mensaje = Column(String(255), nullable=False)
     fecha_envio = Column(String, server_default=func.now(), nullable=False)
 
-    secretaria = relationship("Usuario", back_populates="notificaciones")
+    usuario = relationship("Usuario", back_populates="notificaciones")
 
 
 class Taxi(Base):

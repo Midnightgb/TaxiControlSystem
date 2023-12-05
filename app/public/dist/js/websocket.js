@@ -1,8 +1,5 @@
 console.log("websocket.js loaded");
-var client_id = Date.now()
-//document.querySelector("#ws-id").textContent = client_id;
-console.log("client_id: ", client_id);
-var ws = new WebSocket(`wss://3173-191-156-47-159.ngrok-free.app/ws/${client_id}`);
+var ws = new WebSocket(`wss://3173-191-156-47-159.ngrok-free.app/ws/${nameClient}`);
 ws.onopen = function () {
   console.log(nameClient);
   console.log(lastNameClient);
@@ -19,6 +16,7 @@ window.onbeforeunload = function () {
     }
   });
 }
+
 ws.onmessage = function (event) {
   console.log("message received: ", event.data);
   // get the current time
