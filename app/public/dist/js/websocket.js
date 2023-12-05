@@ -1,6 +1,10 @@
 console.log("websocket.js loaded");
 console.log("idClient: " + idClient);
-var ws = new WebSocket(`wss://3173-191-156-47-159.ngrok-free.app/ws/${nameClient}/${idClient}`);
+var host = window.location.host;
+var protocol = window.location.protocol;
+var wsProtocol = protocol === "https:" ? "wss://" : "ws://";
+var ws = new WebSocket(`${wsProtocol}${host}/ws/${nameClient}/${idClient}`);
+
 ws.onopen = function () {
   console.log(nameClient);
   console.log(lastNameClient);
@@ -16,7 +20,7 @@ window.onbeforeunload = function () {
       ws.send(nameClient + " ha cerrado sesión.");
     }
   });
-}
+};
 
 ws.onmessage = function (event) {
   console.log("message received: ", event.data);
