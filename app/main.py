@@ -25,6 +25,7 @@ from dotenv import load_dotenv
 from datetime import date, datetime, timedelta
 import calendar
 from collections import defaultdict
+from random import randint
 
 from functions import *
 from models import *
@@ -78,30 +79,6 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
         manager.disconnect(websocket)
         await manager.broadcast(f"User #{client_id} left the chat")
 # ========================================== END OF WEBSOCKET ============================================ #
-
-websocket_connections = set()
-async def websocket_endpoint(websocket: WebSocket, client_type: str, client_id: str, client_company_id: int):
-    await websocket.accept()
-    
-    # Agregar la conexión WebSocket al conjunto
-    websocket_connections.add((client_type, client_id, client_company_id, websocket))
-
-    try:
-        while True:
-            # Esperar mensajes desde el cliente
-            data = await websocket.receive_text()
-            message = json.loads(data)
-
-            
-            if client_type == "secretaria":
-                admin_websockets = [(ct, cid, cid_company_id, ws) for ct, cid, cid_company_id, ws in websocket_connections if ct == "admin"]
-                for admin_type, admin_id, admin_company_id, admin_ws in admin_websockets:
-                    if client_company_id == admin_company_id:
-                        await admin_ws.send_text(f"Secretaria {client_id} realizó una acción: {message}")
-    
-    except WebSocketDisconnect:
-        # Eliminar la conexión WebSocket del conjunto cuando se desconecta
-        websocket_connections.remove((client_type, client_id, client_company_id, websocket))
 
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
@@ -1630,7 +1607,11 @@ async def drivers(request: Request,
     for conductor in conductores:
         if conductor.foto:
             conductor.foto = convertIMG(conductor.foto)
-
+        else:
+            print("No hay foto")
+            conductor.foto = randint(2, 4)
+            print(conductor.foto)
+            
     visible_pages = 10
 
 
@@ -1739,7 +1720,10 @@ async def search(request: Request, search: Optional[str] = Form(None), db: Sessi
         for conductor in conductores:
             if conductor.foto:
                 conductor.foto = convertIMG(conductor.foto)
-
+            else:
+                print("No hay foto")
+                conductor.foto = randint(2, 4)
+                print(conductor.foto)
         if not conductores:
             alert = {"type": "error",
                      "message": "No se encontraron resultados."}

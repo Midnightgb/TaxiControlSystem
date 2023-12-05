@@ -129,15 +129,18 @@ def convertIMG(foto: bytes):
     try:
         image = Image.open(BytesIO(foto))
         img_io = BytesIO()
-        image.save(img_io, format='JPEG')
-        img_io.seek(0)
-        base64_image = base64.b64encode(img_io.getvalue()).decode('utf-8')
-        return f"data:image/jpeg;base64,{base64_image}"
+        
+        if image.format == 'PNG':
+            image.save(img_io, format='PNG')
+            base64_image = base64.b64encode(img_io.getvalue()).decode('utf-8')
+            return f"data:image/png;base64,{base64_image}"
+        else:
+            image.save(img_io, format='JPEG')
+            base64_image = base64.b64encode(img_io.getvalue()).decode('utf-8')
+            return f"data:image/jpeg;base64,{base64_image}"
     except Exception as e:
         print(f"Error al procesar la imagen: {str(e)}")
         return None
-
-
 
 def obtener_usuarios_paginados(
     db: Session,

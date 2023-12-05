@@ -170,14 +170,3 @@ window.addEventListener("load", function () {
     loader.style.display = "none";
   }, 1000);
 });
-
-let pruebasBtn = document.getElementById("pruebasBtn");
-let pruebas = document.getElementById("pruebas");
-pruebasBtn.addEventListener("click", function () {
-  if (pruebas.classList.contains("hidden")) {
-    pruebas.classList.remove("hidden");
-  } else {
-    pruebas.classList.add("hidden");
-  }
-});
-
