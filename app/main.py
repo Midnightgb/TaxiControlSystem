@@ -1165,7 +1165,6 @@ async def registro_diario(
 
         db.refresh(nuevo_pago)
         alert = {"type": "success", "message": "Pago registrado exitosamente."}
-        # Almacena la alerta en la sesión
         request.session["alert"] = alert
         
         return HTMLResponse(content=str(True), status_code=200)
@@ -1644,6 +1643,15 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
         .filter(Pago.fecha.between(first_day_of_month, last_day_of_month))
         .scalar() or 0  
     )
+    
+    acomulado_pendiente = (
+        db.query(func.sum(Pago.valor))
+        .filter(Pago.id_conductor == id_usuario)
+        .filter(Pago.fecha.between(first_day_of_month, last_day_of_month))
+        .filter(Pago.estado == False)
+        .scalar() or 0
+    )
+    
     print("Total acumulado: ", total_acumulado)        
     first_day_of_last_month = datetime(today.year, today.month - 1, 1) if today.month > 1 else datetime(today.year - 1, 12, 1)    
     last_day_of_last_month = first_day_of_month - timedelta(days=1)
@@ -1683,7 +1691,7 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
 
     return templates.TemplateResponse(
     "./Reports/dailyreports.html", 
-    {"request": request, "reports": reports, "conductor": conductor, "taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas, "weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior, "usuario": usuario, "id_conductor": id_conductor}
+    {"request": request, "reports": reports, "conductor": conductor, "taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas, "weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior, "usuario": usuario, "id_conductor": id_conductor, "acomulado_pendiente": acomulado_pendiente}
     )
     
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
@@ -2035,72 +2043,57 @@ async def actualizar_pago(
     nueva_cuota: int = Form(...),
     db: Session = Depends(get_database),
 ):
-    try:
-        if not serverStatus(db):
-           alert = {"type": "general", "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
-           request.session["alert"] = alert
-           return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-        
-        c_user = request.cookies.get("c_user")
-        if not c_user:
-            alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
-            request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-        
-        token_payload = tokenDecoder(c_user)
-        if not token_payload:
-            alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
-            request.session["alert"] = alert
-            return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-        
-        user_id = int(token_payload["sub"])
-        usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
-        
-        if not usuario:
-            alert = {"type": "error", "message": "Usuario no encontrado nombre."}
-            request.session["alert"] = alert
-            return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
-        
-        datos_conductor = getDriverData(id_conductor, db)
-
-        
-        # Obtén el pago existente
-        pago_existente = db.query(Pago).filter(Pago.id_pago == id_pago).first()
-
-        if not pago_existente:
-            alert = {"type": "error",
-                     "message": "El pago no existe."}
-            request.session["alert"] = alert
-            return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
-
-        
-        if nueva_cuota < pago_existente.valor:
-            alert = {"type": "error",
-                    "message": f"El valor no puede ser menor al valor original del pago para el conductor {datos_conductor['nombre']} {datos_conductor['apellido']}."}
-            request.session["alert"] = alert
-            return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
-            
-        # Actualiza la cuota del pago
-        pago_antiguo=pago_existente.valor
-        pago_existente.valor = nueva_cuota
-        pago_existente.estado = nueva_cuota >= datos_conductor["cuota_diaria_taxi"]
-        
-        estado_de_pago = "Pagado" if pago_existente.estado else "Pendiente"
-        db.commit()
-
-        alert_message = f"Pago actualizado exitosamente para el conductor {datos_conductor.get('nombre')} {datos_conductor.get('apellido')}. Nueva cuota: {nueva_cuota}"
-        alert = {"type": "success", "message": alert_message}
-        request.session["alert"] = alert
-
-        return RedirectResponse(url="/drivers", status_code=status.HTTP_303_SEE_OTHER)
-
-    except HTTPException as e:
-        alert = {"type": "general", "message": str(e.detail)}
+    if not serverStatus(db):
+       alert = {"type": "general", "message": "Error en conexión al servidor, contacte al proveedor del servicio."}
+       request.session["alert"] = alert
+       return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    c_user = request.cookies.get("c_user")
+    if not c_user:
+        alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-
-    except Exception as e:
-        print(f"Error en el servidor: {str(e)}")
-        alert = {"type": "general", "message": "Error de servidor. Inténtelo nuevamente más tarde."}
+    
+    token_payload = tokenDecoder(c_user)
+    if not token_payload:
+        alert = {"type": "general", "message": "Su sesión ha expirado, por favor inicie sesión nuevamente."}
         request.session["alert"] = alert
-        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)     
+        return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
+    
+    user_id = int(token_payload["sub"])
+    usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
+    
+    if not usuario:
+        alert = {"type": "error", "message": "Usuario no encontrado nombre."}
+        request.session["alert"] = alert
+        # Cuando el pago no existe
+        return JSONResponse(content={"error": True, "message": "El pago no existe."}, status_code=200)
+    
+    datos_conductor = getDriverData(id_conductor, db)
+    
+    # Obtén el pago existente
+    pago_existente = db.query(Pago).filter(Pago.id_pago == id_pago).first()
+    if not pago_existente:
+        alert = {"type": "error", "message": "El pago no existe."}
+        request.session["alert"] = alert
+        return JSONResponse(content={"error": True, "message": "El pago no existe."}, status_code=200)
+    
+    if nueva_cuota < pago_existente.valor:
+        alert = {"type": "error",
+                "message": f"El valor no puede ser menor al valor original del pago para el conductor {datos_conductor['nombre']} {datos_conductor['apellido']}."}
+        request.session["alert"] = alert
+        return JSONResponse(content={"error": True, "message": alert["message"]}, status_code=200)
+        
+    # Actualiza la cuota del pago
+    pago_antiguo=pago_existente.valor
+    pago_existente.valor = nueva_cuota
+    pago_existente.estado = nueva_cuota >= datos_conductor["cuota_diaria_taxi"]
+    
+    estado_de_pago = "Pagado" if pago_existente.estado else "Pendiente"
+    db.commit()
+    alert_message = f"Pago actualizado exitosamente para el conductor {datos_conductor.get('nombre')} {datos_conductor.get('apellido')}. Nueva cuota: {nueva_cuota}"
+    alert = {"type": "success", "message": alert_message}
+    request.session["alert"] = alert
+    return JSONResponse(content={"success": True}, status_code=200)
+
+
