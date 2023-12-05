@@ -11,7 +11,7 @@ from fastapi import (
     UploadFile,
     WebSocket, 
     WebSocketDisconnect
-    )
+)
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -34,6 +34,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy import or_, func,extract
+from datetime import datetime
 
 
 load_dotenv()
@@ -65,14 +66,18 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-@app.websocket("/ws/{nameClient}")
-async def websocket_endpoint(websocket: WebSocket, nameClient: str, db: Session = Depends(get_database)):
+@app.websocket("/ws/{nameClient}/{id_usuario}")
+
+async def websocket_endpoint(websocket: WebSocket, nameClient: str, id_usuario: str = None, db: Session = Depends(get_database)):
     await manager.connect(websocket)
     try:
         while True:
             data = await websocket.receive_text()
+            current_hour = datetime.now().strftime("%H:%M")
             await manager.broadcast(data)
-
+            newNotification = Notificaciones(mensaje=data, id_usuario=id_usuario, fecha_envio=datetime.now(), hora_envio=current_hour)
+            db.add(newNotification)
+            db.commit()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"{nameClient} se ha desconectado.")
@@ -302,6 +307,7 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     dateToday = dateToday.strftime("%d/%m/%Y")
 
     welcome = {
+        "id": userData.id_usuario,
         "name": userData.nombre,
         "last_name": userData.apellido,
         "rol": userData.rol,
@@ -371,6 +377,7 @@ async def CreateUser(
     imagen: Optional[UploadFile] = Form(None),
     db: Session = Depends(get_database),
     c_user: str = Cookie(None)
+     
 ):
 
     if not serverStatus(db):
@@ -434,7 +441,6 @@ async def CreateUser(
     )
     db.add(nuevo_usuario)
     db.commit()
-
     db.refresh(nuevo_usuario)
     alert = {"type": "success", "message": "Usuario registrado exitosamente."}
     request.session["alert"] = alert

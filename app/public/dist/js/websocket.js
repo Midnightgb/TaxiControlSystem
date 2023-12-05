@@ -1,5 +1,6 @@
 console.log("websocket.js loaded");
-var ws = new WebSocket(`wss://3173-191-156-47-159.ngrok-free.app/ws/${nameClient}`);
+console.log("idClient: " + idClient);
+var ws = new WebSocket(`wss://3173-191-156-47-159.ngrok-free.app/ws/${nameClient}/${idClient}`);
 ws.onopen = function () {
   console.log(nameClient);
   console.log(lastNameClient);
