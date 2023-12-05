@@ -10,9 +10,8 @@ from fastapi import (
     Query,
     UploadFile,
     WebSocket, 
-    WebSocketDisconnect,
-    BackgroundTasks
-)
+    WebSocketDisconnect
+    )
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -73,7 +72,6 @@ async def websocket_endpoint(websocket: WebSocket, nameClient: str, db: Session 
         while True:
             data = await websocket.receive_text()
             await manager.broadcast(data)
-
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
@@ -363,7 +361,6 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 @app.post("/register/user", response_class=HTMLResponse)
 async def CreateUser(
     request: Request,
-    background_tasks: BackgroundTasks,
     cedula: str = Form(...),
     nombre: str = Form(...),
     apellido: str = Form(...),
@@ -374,7 +371,6 @@ async def CreateUser(
     imagen: Optional[UploadFile] = Form(None),
     db: Session = Depends(get_database),
     c_user: str = Cookie(None)
-     
 ):
 
     if not serverStatus(db):
@@ -438,24 +434,7 @@ async def CreateUser(
     )
     db.add(nuevo_usuario)
     db.commit()
-    if usuario.rol == "Secretaria":
-        admin = db.query(Usuario).filter(Usuario.rol == "Administrador", Usuario.empresa_id == usuario.empresa_id).first()
-        if admin:
-            background_tasks.add_task(
-                websocket_endpoint,
-                websocket= None,  
-                client_type="secretaria",
-                client_id=str(usuario.id_usuario),
-                client_company_id=usuario.empresa_id
-            )
-            mensaje = f"Se ha registrado un nuevo conductor, creado Por  ({usuario.nombre} {usuario.apellido}) con el rol de Secretaria."
-            nueva_notificacion = Notificaciones(
-                id_secretaria=usuario.id_usuario,
-                mensaje=mensaje,
-                fecha_envio=datetime.now()
-            )
-            db.add(nueva_notificacion)
-            db.commit()
+
     db.refresh(nuevo_usuario)
     alert = {"type": "success", "message": "Usuario registrado exitosamente."}
     request.session["alert"] = alert
