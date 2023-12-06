@@ -10,12 +10,12 @@ document.getElementById("updatePaymentForm").addEventListener("submit", async fu
     if (response.ok) {
         const result = await response.json();
 
-        if (result.error) {
+        if (result.error_update) {
            
             Swal.fire({
                 icon: 'error',
                 title: 'Error en la actualización del pago',
-                text: result.message,  
+                text: result.message_update,  
                 showConfirmButton: false,
                 timer: 2500,
             });
@@ -23,7 +23,7 @@ document.getElementById("updatePaymentForm").addEventListener("submit", async fu
             Swal.fire({
                 icon: 'success',
                 title: 'Pago Actualizado',
-                text: result.message, 
+                text: result.message_update, 
                 showConfirmButton: false,
                 timer: 1500,
                 didClose: () => {
@@ -35,6 +35,7 @@ document.getElementById("updatePaymentForm").addEventListener("submit", async fu
         Swal.fire({
             icon: 'error',
             title: 'Error en la solicitud',
+            text: 'No se pudo actualizar el pago',
             showConfirmButton: false,
             timer: 1500,
         });

@@ -2083,25 +2083,23 @@ async def actualizar_pago(
     usuario = db.query(Usuario).filter(Usuario.id_usuario == user_id).first()
     
     if not usuario:
-        alert = {"type": "error", "message": "Usuario no encontrado nombre."}
+        alert = {"type_update": "error_update", "message_update": "Usuario no encontrado nombre."}
         request.session["alert"] = alert
-        # Cuando el pago no existe
-        return JSONResponse(content={"error": True, "message": "El pago no existe."}, status_code=200)
+        return JSONResponse(content={"error_update": True, "message_update": "El pago no existe."}, status_code=200)
     
     datos_conductor = getDriverData(id_conductor, db)
     
     # Obtén el pago existente
     pago_existente = db.query(Pago).filter(Pago.id_pago == id_pago).first()
     if not pago_existente:
-        alert = {"type": "error", "message": "El pago no existe."}
+        alert = {"type_update": "error_update", "message_update": "El pago no existe."}
         request.session["alert"] = alert
-        return JSONResponse(content={"error": True, "message": "El pago no existe."}, status_code=200)
+        return JSONResponse(content={"error_update": True, "message_update": "El pago no existe."}, status_code=200)
     
-    if nueva_cuota < pago_existente.valor:
-        alert = {"type": "error",
-                "message": f"El valor no puede ser menor al valor original del pago para el conductor {datos_conductor['nombre']} {datos_conductor['apellido']}."}
-        request.session["alert"] = alert
-        return JSONResponse(content={"error": True, "message": alert["message"]}, status_code=200)
+    if nueva_cuota <= pago_existente.valor:
+        alert = {"type_update": "error_update",
+                "message_update": f"El valor no puede ser menor al valor original del pago para el conductor {datos_conductor['nombre']} {datos_conductor['apellido']}."}
+        return JSONResponse(content={"error_update": True, "message_update": alert["message_update"]}, status_code=200)
         
     # Actualiza la cuota del pago
     pago_antiguo=pago_existente.valor
@@ -2110,9 +2108,9 @@ async def actualizar_pago(
     
     estado_de_pago = "Pagado" if pago_existente.estado else "Pendiente"
     db.commit()
-    alert_message = f"Pago actualizado exitosamente para el conductor {datos_conductor.get('nombre')} {datos_conductor.get('apellido')}. Nueva cuota: {nueva_cuota}"
-    alert = {"type": "success", "message": alert_message}
-    request.session["alert"] = alert
-    return JSONResponse(content={"success": True}, status_code=200)
 
-
+    if pago_antiguo < nueva_cuota:
+        alert = {"type_update": "success_update",
+                "message_update": f"El pago para el conductor {datos_conductor['nombre']} {datos_conductor['apellido']} ha sido actualizado exitosamente. El estado del pago es {estado_de_pago}."}
+        return JSONResponse(content={"suceess_update": True, "message_update": alert["message_update"]}, status_code=200)
+        

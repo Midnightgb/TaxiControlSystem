@@ -1,10 +1,13 @@
-let bandera = sessionStorage.getItem('bandera') || 0;
-console.log("bandera:", bandera);
+let banderaUser = sessionStorage.getItem('banderaUser') || 0;
+console.log("banderaUser:", banderaUser);
 
 let bandera_2 = sessionStorage.getItem('bandera_2') || 0;
 console.log("bandera:", bandera_2);
 
 document.addEventListener("DOMContentLoaded", function () {
+
+    banderaUser = sessionStorage.getItem('banderaUser') || 0;
+
     const openModalButton = document.getElementById("openModalButton");
     const closeModalButton = document.getElementById("closeModalButton");
 
@@ -48,22 +51,23 @@ document.addEventListener("DOMContentLoaded", function () {
             if (response.ok) {
                 modal.classList.add("hidden");
 
-                sessionStorage.setItem('bandera', '1');
+                sessionStorage.setItem('banderaUser', '1');
 
                 // Recargar la página después de un breve retraso
                 setTimeout(function () {
                     location.reload();
                 }, 500);
             } else {
-                sessionStorage.setItem('bandera', '2');
+                sessionStorage.setItem('banderaUser', '2');
             }
 
         } catch (error) {
             console.error("Error al enviar la solicitud:", error);
+            sessionStorage.setItem('banderaUser', '2');
         }
     });
 
-    console.log("bandera CON LA SESION SETEADA :", bandera);
+    console.log("bandera CON LA SESION SETEADA :", banderaUser);
 
 
     const form2 = document.getElementById("updateTaxiForm");
@@ -101,32 +105,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("bandera_2 CON LA SESION SETEADA :", bandera_2);
 
-
-
     });
 
-    // Ejecutar las alertas después de que la página se ha recargado
-    window.onload = function () {
-    const bandera = sessionStorage.getItem('bandera');
+window.addEventListener("load", function () {
+
+    const banderaUser = sessionStorage.getItem('banderaUser');
     const bandera_2 = sessionStorage.getItem('bandera_2');
 
-    if (bandera == 1) {
+    console.log("banderaUser luego de que se recargue:", banderaUser);
+
+    if (banderaUser == 1) {
+        console.log("entro a la alerta");
         Swal.fire({
             icon: 'success',
             title: 'Usuario Actualizado',
             showConfirmButton: false,
             timer: 1500,
             didClose: () => {
-                sessionStorage.setItem('bandera', '0');
+                sessionStorage.setItem('banderaUser', '0');
             }
         });
-    } else if (bandera == 2) {
+    } else if (banderaUser == 2) {
         Swal.fire({
             icon: 'error',
             title: 'Oops...',
             text: 'Algo salió mal!',
             didClose: () => {
-                sessionStorage.setItem('bandera', '0');
+                sessionStorage.setItem('banderaUser', '0');
             }
         });
     }
@@ -134,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (bandera_2 == 1) {
         Swal.fire({
             icon: 'success',
-            title: 'Taxi Actualizado',
+            title: 'Vehiculo Actualizado',
             showConfirmButton: false,
             timer: 1500,
             didClose: () => {
@@ -151,7 +156,5 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-
-};
-
+});
 
