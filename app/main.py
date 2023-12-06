@@ -2098,7 +2098,7 @@ async def actualizar_pago(
     
     if nueva_cuota <= pago_existente.valor:
         alert = {"type_update": "error_update",
-                "message_update": f"El valor no puede ser menor al valor original del pago para el conductor {datos_conductor['nombre']} {datos_conductor['apellido']}."}
+                "message_update": f"El valor no puede ser menor o igual al valor original del pago para el conductor {datos_conductor['nombre']} {datos_conductor['apellido']}."}
         return JSONResponse(content={"error_update": True, "message_update": alert["message_update"]}, status_code=200)
         
     # Actualiza la cuota del pago
