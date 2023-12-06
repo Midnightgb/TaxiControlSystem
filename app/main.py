@@ -1643,7 +1643,35 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
         .filter(Pago.fecha.between(first_day_of_month, last_day_of_month))
         .scalar() or 0  
     )
+    print("Total acumulado: ", total_acumulado)  
     
+    cuota_mes = (
+        db.query(func.sum(Taxi.cuota_diaria))
+        .join(ConductorActual, ConductorActual.id_taxi == Taxi.id_taxi)
+        .filter(ConductorActual.id_conductor == id_usuario)
+        .scalar() or 0
+    )
+
+    # Obtener las fechas con estado cero en el mes actual
+    fechas_estado_cero = (
+        db.query(Pago.fecha)
+        .filter(Pago.id_conductor == id_usuario, Pago.estado == 0)
+        .filter(func.date(Pago.fecha).between(first_day_of_month, last_day_of_month))
+        .distinct()
+        .all()
+    )
+
+    deuda_acumulada = 0
+    for fecha, in fechas_estado_cero:
+        fecha_str = fecha.strftime("%Y-%m-%d")  # Convertir la fecha a string en el formato correcto
+        pago_fecha = (
+            db.query(func.sum(Pago.valor))
+            .filter(Pago.id_conductor == id_usuario, func.date(Pago.fecha) == fecha_str, Pago.estado == 0)
+            .scalar() or 0
+        )
+        deuda_acumulada += cuota_mes - pago_fecha
+    print("mes actual", cuota_mes)
+
     first_day_of_last_month = datetime(today.year, today.month - 1, 1) if today.month > 1 else datetime(today.year - 1, 12, 1)    
     last_day_of_last_month = first_day_of_month - timedelta(days=1)
     
@@ -1682,7 +1710,7 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
 
     return templates.TemplateResponse(
     "./Reports/dailyreports.html", 
-    {"request": request, "reports": reports, "conductor": conductor, "taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas, "weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior, "usuario": usuario, "id_conductor": id_conductor}
+    {"request": request, "reports": reports, "conductor": conductor, "taxi_actual": taxi_actual, "total_acumulado": total_acumulado, "today": today, "current_month": current_month, "empresas": empresas, "weekly_reports": daily_reports_data, "total_mes_anterior": total_mes_anterior, "usuario": usuario, "id_conductor": id_conductor, "deuda_acumulada": deuda_acumulada}
     )
     
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
