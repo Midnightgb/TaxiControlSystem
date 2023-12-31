@@ -158,14 +158,11 @@
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div class="col-span-1 md:col-span-1 h-full">
-                <div class="rounded-sm border border-stroke px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 h-full">
+            <div class="col-span-1 md:col-span-1 h-full bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 p-5">
                     <div class="mb-3 justify-center gap-4 sm:flex">
-                        <div>
                             <h4 class="text-xl font-bold">
                                 Ingresos Mensuales
                             </h4>
-                        </div>
                     </div>
                     <div class="mb-3 justify-between gap-4 sm:flex">
                         <canvas id="chartMonthlyIncome" class="mx-auto flex justify-center"></canvas>
@@ -193,18 +190,14 @@
                             </div>
                         </div>
                     </div>
-                </div>
             </div>
-            <div class="col-span-1 md:col-span-1 h-full">
-                <div class="rounded-sm border border-stroke px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-5ss h-full">
-                    <section class="bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200"
-                        id="chartWeek">
+            <div class="col-span-1 md:col-span-1 h-full bg-zinc-100 rounded-lg shadow-xl hover:shadow-2xl ease-in duration-200 px-5 py-2">
+                    <section id="chartWeek">
                         <p class="text-center text-2xl font-bold my-5 underline">
                             Balance semanal
                             <i class='bx bx-dollar-circle ms-10'></i>
                         </p>
                     </section>
-                </div>
             </div>
         </div>
         
@@ -226,7 +219,6 @@
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-
     <script>
         var reports_week = JSON.parse('{{ weekly_reports | tojson | safe }}');
 
