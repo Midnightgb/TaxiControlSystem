@@ -1,5 +1,5 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/midnightgb/taxicontrolsystem/badge)](https://www.codefactor.io/repository/github/midnightgb/taxicontrolsystem)
-[![English Badge](app-screenshots/icons8-circular-de-ee-uu-48.png)](readme.md) For the english version
+[![English Badge](app-screenshots/icons8-circular-de-ee-uu-48.png)](README.md) For the english version
 # TaxiControlSystem
 TaxiControlSystem - Software de gestión de flotas para operaciones de taxi eficientes
 
