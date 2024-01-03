@@ -8,33 +8,33 @@ from fastapi import (
     HTTPException,
     Cookie,
     Query,
-    Response,
     UploadFile,
     WebSocket, 
-    WebSocketDisconnect,
-    BackgroundTasks
+    WebSocketDisconnect
 )
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 import bcrypt
 import os
 from dotenv import load_dotenv
 from datetime import date, datetime, timedelta
 import calendar
 from collections import defaultdict
+from random import randint
 
 from functions import *
 from models import *
-import json
+
 import base64   
 from database import get_database
 from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy import or_, func,extract
+from datetime import datetime
 
 
 load_dotenv()
@@ -66,42 +66,45 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 
-@app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
+@app.websocket("/ws/{nameClient}/{id_usuario}")
+async def websocket_endpoint(websocket: WebSocket, nameClient: str, id_usuario: str = None, db: Session = Depends(get_database)):
     await manager.connect(websocket)
+    print("WebSocket conectado")
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.send_personal_message(f"Data sended: {data}", websocket)
+            current_hour = data.split("/")[1]
+            print(current_hour)
+            id_user = int(id_usuario)
             await manager.broadcast(data)
+            newNotification = Notificaciones(mensaje=data.split("/")[0], id_usuario=id_user, fecha_envio=datetime.now(), hora_envio=current_hour)
+            db.add(newNotification)
+            db.commit()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"User #{client_id} left the chat")
+        print("WebSocket desconectado")
+        #get the time when the user disconnects
+        current_time = datetime.now().strftime("%H:%M")
+        hour = int(current_time.split(":")[0])
+        minute = int(current_time.split(":")[1])
+        # Add "pm" or "am" and change the hour to 12-hour format
+        if hour < 12:
+            suffix = "am"
+            if hour == 0:
+                hour = 12
+        else:
+            suffix = "pm"
+            if hour > 12:
+                hour -= 12
+        
+        if hour < 10:
+            hour = str(hour).lstrip("0")
+        current_hour = f"{hour}:{minute:02d} {suffix}"
+        id_user = int(id_usuario)
+        newNotification = Notificaciones(mensaje=f"{nameClient} se ha desconectado.", id_usuario=id_user, fecha_envio=datetime.now(), hora_envio=current_hour)
+        db.add(newNotification)
+        db.commit()
 # ========================================== END OF WEBSOCKET ============================================ #
-
-websocket_connections = set()
-async def websocket_endpoint(websocket: WebSocket, client_type: str, client_id: str, client_company_id: int):
-    await websocket.accept()
-    
-    # Agregar la conexión WebSocket al conjunto
-    websocket_connections.add((client_type, client_id, client_company_id, websocket))
-
-    try:
-        while True:
-            # Esperar mensajes desde el cliente
-            data = await websocket.receive_text()
-            message = json.loads(data)
-
-            
-            if client_type == "secretaria":
-                admin_websockets = [(ct, cid, cid_company_id, ws) for ct, cid, cid_company_id, ws in websocket_connections if ct == "admin"]
-                for admin_type, admin_id, admin_company_id, admin_ws in admin_websockets:
-                    if client_company_id == admin_company_id:
-                        await admin_ws.send_text(f"Secretaria {client_id} realizó una acción: {message}")
-    
-    except WebSocketDisconnect:
-        # Eliminar la conexión WebSocket del conjunto cuando se desconecta
-        websocket_connections.remove((client_type, client_id, client_company_id, websocket))
 
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
 app.mount("/static", StaticFiles(directory="public/dist"), name="static")
@@ -327,6 +330,7 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     dateToday = dateToday.strftime("%d/%m/%Y")
 
     welcome = {
+        "id": userData.id_usuario,
         "name": userData.nombre,
         "last_name": userData.apellido,
         "rol": userData.rol,
@@ -386,7 +390,6 @@ async def create(request: Request, c_user: str = Cookie(None), db: Session = Dep
 @app.post("/register/user", response_class=HTMLResponse)
 async def CreateUser(
     request: Request,
-    background_tasks: BackgroundTasks,
     cedula: str = Form(...),
     nombre: str = Form(...),
     apellido: str = Form(...),
@@ -461,24 +464,6 @@ async def CreateUser(
     )
     db.add(nuevo_usuario)
     db.commit()
-    if usuario.rol == "Secretaria":
-        admin = db.query(Usuario).filter(Usuario.rol == "Administrador", Usuario.empresa_id == usuario.empresa_id).first()
-        if admin:
-            background_tasks.add_task(
-                websocket_endpoint,
-                websocket= None,  
-                client_type="secretaria",
-                client_id=str(usuario.id_usuario),
-                client_company_id=usuario.empresa_id
-            )
-            mensaje = f"Se ha registrado un nuevo conductor, creado Por  ({usuario.nombre} {usuario.apellido}) con el rol de Secretaria."
-            nueva_notificacion = Notificaciones(
-                id_secretaria=usuario.id_usuario,
-                mensaje=mensaje,
-                fecha_envio=datetime.now()
-            )
-            db.add(nueva_notificacion)
-            db.commit()
     db.refresh(nuevo_usuario)
     alert = {"type": "success", "message": "Usuario registrado exitosamente."}
     request.session["alert"] = alert
@@ -1630,7 +1615,11 @@ async def drivers(request: Request,
     for conductor in conductores:
         if conductor.foto:
             conductor.foto = convertIMG(conductor.foto)
-
+        else:
+            print("No hay foto")
+            conductor.foto = randint(2, 4)
+            print(conductor.foto)
+            
     visible_pages = 10
 
 
@@ -1739,7 +1728,10 @@ async def search(request: Request, search: Optional[str] = Form(None), db: Sessi
         for conductor in conductores:
             if conductor.foto:
                 conductor.foto = convertIMG(conductor.foto)
-
+            else:
+                print("No hay foto")
+                conductor.foto = randint(2, 4)
+                print(conductor.foto)
         if not conductores:
             alert = {"type": "error",
                      "message": "No se encontraron resultados."}

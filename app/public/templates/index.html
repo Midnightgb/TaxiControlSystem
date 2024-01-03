@@ -101,7 +101,7 @@
                 <p class="text-center text-xl font-bold my-5">Historial de eventos<i class='bx bx-history ms-7'></i></p>
                 <div class="overflow-auto max-h-72 md:max-h-60 lg:max-h-80">
                     <!-- layout historial de eventos -->
-                    <ul class="flex flex-col gap-2">
+                    <ul class="flex flex-col gap-2" id="messages">
                         <li class="flex items-center justify-center ">
                             <div class="flex-initial w-16">
                                 <p class="text-sm">1:20 pm</p>
@@ -239,6 +239,7 @@
     </footer>
 
     <script>
+        var idClient ='{{ welcome.id }}';
         var nameClient ='{{ welcome.name }}';
         var lastNameClient ='{{ welcome.last_name }}';
         var rolClient ='{{ welcome.rol }}';
