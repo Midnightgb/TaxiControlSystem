@@ -69,17 +69,41 @@ manager = ConnectionManager()
 @app.websocket("/ws/{nameClient}/{id_usuario}")
 async def websocket_endpoint(websocket: WebSocket, nameClient: str, id_usuario: str = None, db: Session = Depends(get_database)):
     await manager.connect(websocket)
+    print("WebSocket conectado")
     try:
         while True:
             data = await websocket.receive_text()
-            current_hour = datetime.now().strftime("%H:%M")
+            current_hour = data.split("/")[1]
+            print(current_hour)
+            id_user = int(id_usuario)
             await manager.broadcast(data)
-            newNotification = Notificaciones(mensaje=data, id_usuario=id_usuario, fecha_envio=datetime.now(), hora_envio=current_hour)
+            newNotification = Notificaciones(mensaje=data.split("/")[0], id_usuario=id_user, fecha_envio=datetime.now(), hora_envio=current_hour)
             db.add(newNotification)
             db.commit()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"{nameClient} se ha desconectado.")
+        print("WebSocket desconectado")
+        #get the time when the user disconnects
+        current_time = datetime.now().strftime("%H:%M")
+        hour = int(current_time.split(":")[0])
+        minute = int(current_time.split(":")[1])
+        # Add "pm" or "am" and change the hour to 12-hour format
+        if hour < 12:
+            suffix = "am"
+            if hour == 0:
+                hour = 12
+        else:
+            suffix = "pm"
+            if hour > 12:
+                hour -= 12
+        
+        if hour < 10:
+            hour = str(hour).lstrip("0")
+        current_hour = f"{hour}:{minute:02d} {suffix}"
+        id_user = int(id_usuario)
+        newNotification = Notificaciones(mensaje=f"{nameClient} se ha desconectado.", id_usuario=id_user, fecha_envio=datetime.now(), hora_envio=current_hour)
+        db.add(newNotification)
+        db.commit()
 # ========================================== END OF WEBSOCKET ============================================ #
 
 app.add_middleware(SessionMiddleware, secret_key=MIDDLEWARE_KEY)
