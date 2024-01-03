@@ -53,7 +53,6 @@ TaxiControlSystem - Fleet management software for efficient taxi operations
 5. Screenshots if possible
 ```
 
-
 # For live demo
 ## Install Python dependencies
 you need to be in the app directory to run the following commands
