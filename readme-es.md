@@ -5,43 +5,43 @@ TaxiControlSystem - Software de gestión de flotas para operaciones de taxi efic
 
 # Capturas de pantalla
 ## Inicio de sesión
-![Login](app-screenshots/login.png){width=900px}
+![Login](app-screenshots/login.png)
 
 ## Panel de control
-![Dashboard](app-screenshots/home.png){width=900px}
+![Dashboard](app-screenshots/home.png)
 
 ## Conductores
-![Drivers](app-screenshots/users.png){width=900px}
+![Drivers](app-screenshots/users.png)
 
 ### Registro de conductor
-![Driver Reports](app-screenshots/register-user.png){width=900px}
+![Driver Reports](app-screenshots/register-user.png)
 
 ### Informes de conductores
-![Driver Reports](app-screenshots/user-report.png){width=900px}
+![Driver Reports](app-screenshots/user-report.png)
 
 ### Pago del conductor
-![Driver Report Payment](app-screenshots/user-report-payment.png){width=900px}
+![Driver Report Payment](app-screenshots/user-report-payment.png)
 
 ### Actualizar pago del conductor
-![Driver Report Update Payment](app-screenshots/user-report-update-payment.png){width=900px}
+![Driver Report Update Payment](app-screenshots/user-report-update-payment.png)
 
 ### Actualizar información del vehículo
-![Driver Report Update Vehicle Information](app-screenshots/user-report-update-car-info.png){width=900px}
+![Driver Report Update Vehicle Information](app-screenshots/user-report-update-car-info.png)
 
 ### Actualizar información del conductor
-![Driver Report Update Driver Information](app-screenshots/user-report-update-info.png){width=900px}
+![Driver Report Update Driver Information](app-screenshots/user-report-update-info.png)
 
 ## Vehículos
-![Vehicles](app-screenshots/vehicles.png){width=900px}
+![Vehicles](app-screenshots/vehicles.png)
 
 ### Registro de vehículos
-![Vehicle Registration](app-screenshots/register-vehicle.png){width=900px}
+![Vehicle Registration](app-screenshots/register-vehicle.png)
 
 ### Informes de vehículos
-![Vehicle Reports](app-screenshots/vehicle-report.png){width=900px}
+![Vehicle Reports](app-screenshots/vehicle-report.png)
 
 ### Mantenimiento de vehículos
-![Vehicle Maintenance](app-screenshots/vehicle-register-maintenance.png){width=900px}
+![Vehicle Maintenance](app-screenshots/vehicle-register-maintenance.png)
 
 # Para informar de errores
 ## Cree un problema con la siguiente información
