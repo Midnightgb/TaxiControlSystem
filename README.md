@@ -5,43 +5,43 @@ TaxiControlSystem - Fleet management software for efficient taxi operations
 
 # Screenshots
 ### Login
-![Login](app-screenshots/login.png){width=900px}
+![Login](app-screenshots/login.png)
 
 ### Dashboard
-![Dashboard](app-screenshots/home.png){width=900px}
+![Dashboard](app-screenshots/home.png)
 
 ## Drivers
-![Drivers](app-screenshots/users.png){width=900px}
+![Drivers](app-screenshots/users.png)
 
 #### Driver Registration
-![Driver Reports](app-screenshots/register-user.png){width=900px}
+![Driver Reports](app-screenshots/register-user.png)
 
 #### Driver Reports
-![Driver Reports](app-screenshots/user-report.png){width=900px}
+![Driver Reports](app-screenshots/user-report.png)
 
 #### Driver Report Payment
-![Driver Report Payment](app-screenshots/user-report-payment.png){width=900px}
+![Driver Report Payment](app-screenshots/user-report-payment.png)
 
 #### Driver Report Update Payment
-![Driver Report Update Payment](app-screenshots/user-report-update-payment.png){width=900px}
+![Driver Report Update Payment](app-screenshots/user-report-update-payment.png)
 
 #### Driver Report Update Vehicle Information
-![Driver Report Update Vehicle Information](app-screenshots/user-report-update-car-info.png){width=900px}
+![Driver Report Update Vehicle Information](app-screenshots/user-report-update-car-info.png)
 
 #### Driver Report Update Driver Information
-![Driver Report Update Driver Information](app-screenshots/user-report-update-info.png){width=900px}
+![Driver Report Update Driver Information](app-screenshots/user-report-update-info.png)
 
 ## Vehicles
-![Vehicles](app-screenshots/vehicles.png){width=900px}
+![Vehicles](app-screenshots/vehicles.png)
 
 #### Vehicle Registration
-![Vehicle Registration](app-screenshots/register-vehicle.png){width=900px}
+![Vehicle Registration](app-screenshots/register-vehicle.png)
 
 #### Vehicle Reports
-![Vehicle Reports](app-screenshots/vehicle-report.png){width=900px}
+![Vehicle Reports](app-screenshots/vehicle-report.png)
 
 #### Vehicle Maintenance
-![Vehicle Maintenance](app-screenshots/vehicle-register-maintenance.png){width=900px}
+![Vehicle Maintenance](app-screenshots/vehicle-register-maintenance.png)
 
 # For Bug Reporting
 ### Please create an issue with the following information
