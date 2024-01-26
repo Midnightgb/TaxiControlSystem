@@ -9,11 +9,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Get the lines of code.
         id: scc
-        uses: Adapt-API/scc-docker-action@master
+        uses: iryanbell/scc-docker-action@v1.0.2
         with:
           args: ${{ env.workspace }} -i js,go,html,css
-      - name: Echo scc output
-        run: |
-          echo
-          echo -n "${{ steps.scc.outputs.scc }}"
-          echo -n "${{ fromJson(steps.scc.outputs.scc)[0].Code }}"
