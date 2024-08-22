@@ -26,10 +26,10 @@ from collections import defaultdict
 from random import randint
 
 from functions import *
-from models import *
+from models import * 
 
 import base64   
-from database import get_database
+from db.connection import get_session
 from starlette.middleware.sessions import SessionMiddleware
 
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -67,7 +67,7 @@ manager = ConnectionManager()
 
 
 @app.websocket("/ws/{nameClient}/{id_usuario}")
-async def websocket_endpoint(websocket: WebSocket, nameClient: str, id_usuario: str = None, db: Session = Depends(get_database)):
+async def websocket_endpoint(websocket: WebSocket, nameClient: str, id_usuario: str = None, db: Session = Depends(get_session)):
     await manager.connect(websocket)
     print("WebSocket conectado")
     try:
@@ -162,7 +162,7 @@ async def login_post(
     request: Request,
     user: Optional[str] = Form(""),
     password: Optional[str] = Form(""),
-    db: Session = Depends(get_database),
+    db: Session = Depends(get_session),
 ):
     request.session["triedUser"] = user
     if not serverStatus(db):
@@ -225,7 +225,7 @@ async def login_post(
 
 
 @app.get("/home", response_class=HTMLResponse, tags=["routes"])
-async def home(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database), websocket: WebSocket = None):
+async def home(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_session), websocket: WebSocket = None):
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -339,8 +339,6 @@ async def home(request: Request, c_user: str = Cookie(None), db: Session = Depen
     alert = request.session.pop("alert", None)
     return templates.TemplateResponse("./index.html", {"request": request, "alert": alert, "welcome": welcome, "empresa": empresa, "db": dataDashboard})
 
-
-
 @app.get("/logout", tags=["auth"])
 async def logout(request: Request):
     request.session.pop("triedUser", None)
@@ -355,7 +353,7 @@ async def logout(request: Request):
 
 
 @app.get("/register/user", response_class=HTMLResponse, tags=["create"])
-async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_session)):
     user_id = None
 
     if not c_user:
@@ -398,7 +396,7 @@ async def CreateUser(
     rol: str = Form(...),
     empresa_id: int = Form(...),
     imagen: Optional[UploadFile] = Form(None),
-    db: Session = Depends(get_database),
+    db: Session = Depends(get_session),
     c_user: str = Cookie(None)
      
 ):
@@ -478,7 +476,7 @@ async def update_user(
     request: Request,
     c_user: str = Cookie(None),
     id_usuario: str = Form(...),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_session)
 ):
 
     if not serverStatus(db):
@@ -526,7 +524,7 @@ async def update_user(
     correo: str = Form(...),
     rol: str = Form(...),
     empresa_id: int = Form(...),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_session)
 ):
     if not serverStatus(db):
         alert = {"type": "general",
@@ -572,7 +570,7 @@ async def update_user(
 
 
 @app.get("/register/taxi", response_class=HTMLResponse, tags=["create"])
-async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def create(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_session)):
     user_id = None
     alert = request.session.pop("alert", None)
     try:
@@ -612,7 +610,7 @@ async def create_taxi(
     matricula: str = Form(...),
     tipo_combustible: str = Form(...),
     cuota_diaria: int = Form(...),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_session)
 ):
 
     if not serverStatus(db):
@@ -667,14 +665,14 @@ async def create_taxi(
 
 # -- PATH TO REDIRECT TO TAXI VIEW -- #
 @app.get("/taxis", tags=["routes"])
-async def taxis(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def taxis(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_session)):
     return RedirectResponse(url="/view/taxi", status_code=status.HTTP_303_SEE_OTHER)
 
 
 @app.get("/view/taxi", response_class=HTMLResponse, tags=["routes"])
 async def view_taxi(request: Request, 
                     c_user: str = Cookie(None), 
-                    db: Session = Depends(get_database), 
+                    db: Session = Depends(get_session), 
                     page: int = 1,
                     taxi_page: int = 8 ):
     user_id = None
@@ -736,7 +734,7 @@ async def update_taxi(
     request: Request,
     c_user: str = Cookie(None),
     id_taxi: str = Form(...),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_session)
 ):
 
     if not serverStatus(db):
@@ -783,7 +781,7 @@ async def update_taxi(
     matricula: str = Form(...),
     tipo_combustible: str = Form(...),
     cuota_diaria: int = Form(...),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_session)
 ):
     if not serverStatus(db):
         alert = {"type": "general",
@@ -831,7 +829,7 @@ async def update_taxi(
 async def create(
     request: Request,
     c_user: str = Cookie(None), 
-    db: Session = Depends(get_database),
+    db: Session = Depends(get_session),
     id_taxi: int = Form(...)
     ):
     user_id = None
@@ -864,7 +862,7 @@ async def create_assignment(
     request: Request,
     id_conductor: int = Form(None),
     id_taxi: int = Form(None),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_session)
 ):
 
     if not serverStatus(db):
@@ -907,7 +905,7 @@ async def create_assignment(
 
 # -- MODULO 2-- #
 @app.get("/register/daily", response_class=HTMLResponse, tags=["routes"])
-async def registro_diario_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def registro_diario_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_session)):
     try:
         if not serverStatus(db):
             alert = {"type": "general",
@@ -977,7 +975,7 @@ async def registro_diario_view(request: Request, c_user: str = Cookie(None), db:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
     
 @app.post("/daily/register", response_class=HTMLResponse, tags=["routes"])
-async def registro_diario_view(request: Request,id_usuario:int=Form(...), c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def registro_diario_view(request: Request,id_usuario:int=Form(...), c_user: str = Cookie(None), db: Session = Depends(get_session)):
     user_id = None
 
     try:
@@ -1034,8 +1032,6 @@ async def registro_diario_view(request: Request,id_usuario:int=Form(...), c_user
                  "message": "Error de servidor. Inténtelo nuevamente más tarde."}
         request.session["alert"] = alert
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
-    
-
 
 # -- MODULO 2 actualizar registro diario-- # v
 
@@ -1044,7 +1040,7 @@ async def registro_diario(
     request: Request,
     id_conductor: int = Form(...),
     valor: int = Form(...),
-    db: Session = Depends(get_database),
+    db: Session = Depends(get_session),
 ):
     if not serverStatus(db):
         alert = {"type": "general",
@@ -1122,7 +1118,7 @@ async def registro_diario(
     request: Request,
     id_conductor: int = Form(...),
     valor: int = Form(...),
-    db: Session = Depends(get_database),
+    db: Session = Depends(get_session),
 ):
     if not serverStatus(db):
         alert = {"type": "general",
@@ -1193,13 +1189,9 @@ async def registro_diario(
         request.session["alert"] = alert
         
         return HTMLResponse(content=str(True), status_code=200)
-    
-    
-
-
 
 @app.get("/update/daily", response_class=HTMLResponse, tags=["routes"])
-async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def actualizar_cuota_diaria_view(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_session)):
     user_id = None
 
     try:
@@ -1273,7 +1265,7 @@ async def actualizar_cuota_diaria(
     id_conductor: int = Form(...),
     nueva_cuota: int = Form(...),
     fecha_seleccionada: str = Form(...),
-    db: Session = Depends(get_database),
+    db: Session = Depends(get_session),
 ):
     try:
         if not serverStatus(db):
@@ -1365,7 +1357,7 @@ async def resumen_cuotas_view(
     id_conductor: int = None,
     fecha_inicio: date = Query(None),
     fecha_fin: date = Query(None),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_session)
 ):
     try:
 
@@ -1466,7 +1458,7 @@ async def resumen_cuotas_view(
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
 @app.post("/summary", response_class=HTMLResponse, tags=["routes"])
-async def resumen_cuotas_post(request: Request, id_conductor: int = Form(...), fecha_inicio: date = Form(None), fecha_fin: date = Form(None), db: Session = Depends(get_database)):
+async def resumen_cuotas_post(request: Request, id_conductor: int = Form(...), fecha_inicio: date = Form(None), fecha_fin: date = Form(None), db: Session = Depends(get_session)):
     try:
 
         if not serverStatus(db):
@@ -1569,7 +1561,7 @@ async def resumen_cuotas_post(request: Request, id_conductor: int = Form(...), f
 @app.get("/drivers", response_class=HTMLResponse, tags=["routes"])
 async def drivers(request: Request,
                     c_user: str = Cookie(None),
-                    db: Session = Depends(get_database),
+                    db: Session = Depends(get_session),
                     page: int = 1,
                     per_page: int = 8
                     ):
@@ -1629,7 +1621,7 @@ async def drivers(request: Request,
     return templates.TemplateResponse("./Reports/drivers.html", {"request": request, "usuarios": conductores, "alert": alert, "total_paginas": total_paginas, "page": page, "per_page": per_page , "start_page": start_page, "end_page": end_page})
 
 @app.post("/reports/driver/{name}", response_class=HTMLResponse, tags=["routes"])
-async def reports(request: Request, id_usuario: int = Form(...), db: Session = Depends(get_database),c_user: str = Cookie(None),):
+async def reports(request: Request, id_usuario: int = Form(...), db: Session = Depends(get_session),c_user: str = Cookie(None),):
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -1711,7 +1703,7 @@ async def reports(request: Request, id_usuario: int = Form(...), db: Session = D
     )
     
 @app.post("/drivers", response_class=HTMLResponse, tags=["routes"])
-async def search(request: Request, search: Optional[str] = Form(None), db: Session = Depends(get_database)):
+async def search(request: Request, search: Optional[str] = Form(None), db: Session = Depends(get_session)):
     conductores = None
     if not search:
         conductores = db.query(Usuario).filter(
@@ -1761,7 +1753,7 @@ async def renew_token(request: Request, c_user: str = Cookie(None)):
     return response
 
 @app.get("/pruebas", response_class=HTMLResponse, tags=["routes"])
-async def pruebas(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def pruebas(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_session)):
     if not c_user:
         return RedirectResponse(url="/logout", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -1787,7 +1779,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 # -- PATH TO REDIRECT TO maintenance CREATION -- #
 @app.get("/maintenance", response_class=HTMLResponse, tags=["routes"])
-async def maintenance(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def maintenance(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_session)):
     
     if not serverStatus(db):
             alert = {"type": "general",
@@ -1832,7 +1824,7 @@ async def maintenance(
     fecha: str = Form(...),
     descripcion: str = Form(...),
     costo: int = Form(...),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_session)
 ):
     if not serverStatus(db):
             alert = {"type": "general",
@@ -1915,7 +1907,7 @@ async def detail_taxi(
     request: Request,
     c_user: str = Cookie(None),
     id_taxi: str = Form(...),
-    db: Session = Depends(get_database)
+    db: Session = Depends(get_session)
 ):
 
     print(" ============================================ id_taxi:", id_taxi)
@@ -2002,7 +1994,7 @@ async def detail_taxi(
 # -- END OF THE ROUTE -- # 
 
 @app.get("/drivers/Na", tags=["routes"])
-async def driversNa(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_database)):
+async def driversNa(request: Request, c_user: str = Cookie(None), db: Session = Depends(get_session)):
     print(" ============================================ ENTRO A LA FUNCION")
 
     if not serverStatus(db):
@@ -2049,15 +2041,13 @@ async def driversNa(request: Request, c_user: str = Cookie(None), db: Session = 
     # Devolver los datos en formato JSON
     return JSONResponse(content=response_content, media_type="application/json")
 
-
-
 @app.post("/update/payment", tags=["payments"])
 async def actualizar_pago(
     request: Request,
     id_pago: int = Form(...),
     id_conductor: int = Form(...),
     nueva_cuota: int = Form(...),
-    db: Session = Depends(get_database),
+    db: Session = Depends(get_session),
 ):
     try:
         if not serverStatus(db):

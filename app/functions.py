@@ -10,7 +10,8 @@ from fastapi.security import OAuth2PasswordBearer
 
 import os
 
-from database import SessionLocal, get_database
+from db.connection import SessionLocal
+
 from models import *
 
 from fastapi import status
