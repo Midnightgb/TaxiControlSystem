@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Enum, TIMESTAMP, LargeBinary
 from sqlalchemy.sql import func
 from Api.models.base_class import Base
+from Api.models import Empresa, Notificaciones, Taxi, Pago 
 
 class Usuario(Base):
     __tablename__ = 'usuarios'
@@ -17,3 +18,8 @@ class Usuario(Base):
     empresa_id = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
+
+    empresa = relationship("Empresa", back_populates="usuarios")
+    taxis = relationship("ConductorActual", back_populates="conductor")
+    pagos = relationship("Pago", back_populates="conductor")
+    notificaciones = relationship("Notificaciones", back_populates="usuario")
